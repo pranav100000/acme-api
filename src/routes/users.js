@@ -14,7 +14,10 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const user = await db.findUser(req.params.id);
 
-  // BUG: No null check - crashes if user doesn't exist
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
   res.json({
     id: user.id,
     email: user.email,
@@ -27,7 +30,10 @@ router.get('/:id', async (req, res) => {
 router.get('/:id/profile', async (req, res) => {
   const user = await db.findUser(req.params.id);
 
-  // BUG: Same issue - no null check
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
   res.json({
     displayName: user.name,
     email: user.email,

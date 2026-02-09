@@ -59,13 +59,18 @@ describe('User Routes', () => {
     assert.strictEqual(profile.initials, 'AC');
   });
 
-  test('GET /api/users/:id with non-existent user has known bug (no null check)', async () => {
-    // This documents the known bug: the route handler does not check if the user
-    // exists before accessing properties. When a non-existent ID is requested,
-    // user is null and accessing user.id throws TypeError.
-    // We verify the db layer correctly returns null.
-    const user = await db.findUser('999');
-    assert.strictEqual(user, null);
+  test('GET /api/users/:id returns 404 for non-existent user', async () => {
+    const res = await fetch(`${baseUrl}/api/users/999`);
+    assert.strictEqual(res.status, 404);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'User not found');
+  });
+
+  test('GET /api/users/:id/profile returns 404 for non-existent user', async () => {
+    const res = await fetch(`${baseUrl}/api/users/999/profile`);
+    assert.strictEqual(res.status, 404);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'User not found');
   });
 
   test('POST /api/users creates a new user', async () => {
