@@ -59,9 +59,36 @@ describe('User Routes', () => {
     assert.strictEqual(profile.initials, 'AC');
   });
 
-  test('GET /api/users/:id handles non-existent user', async () => {
-    const user = await db.findUser('999');
-    assert.strictEqual(user, null);
+  test('GET /api/users/:id returns 404 for non-existent user', async () => {
+    const res = await fetch(`${baseUrl}/api/users/999`);
+    assert.strictEqual(res.status, 404);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'User not found');
+  });
+
+  test('GET /api/users/:id/profile returns 404 for non-existent user', async () => {
+    const res = await fetch(`${baseUrl}/api/users/999/profile`);
+    assert.strictEqual(res.status, 404);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'User not found');
+  });
+
+  test('PATCH /api/users/:id returns 404 for non-existent user', async () => {
+    const res = await fetch(`${baseUrl}/api/users/999`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Ghost' })
+    });
+    assert.strictEqual(res.status, 404);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'User not found');
+  });
+
+  test('DELETE /api/users/:id returns 404 for non-existent user', async () => {
+    const res = await fetch(`${baseUrl}/api/users/999`, { method: 'DELETE' });
+    assert.strictEqual(res.status, 404);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'User not found');
   });
 
   test('POST /api/users creates a new user', async () => {
