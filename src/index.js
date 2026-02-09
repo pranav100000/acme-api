@@ -1,5 +1,9 @@
+// IMPORTANT: Import instrument.js before all other imports
+require("./instrument.js");
+
+const Sentry = require("@sentry/node");
 const express = require('express');
-const Sentry = require('@sentry/node');
+require('express-async-errors');
 const config = require('./config');
 const logger = require('./middleware/logger');
 const userRoutes = require('./routes/users');
@@ -8,13 +12,6 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 
-// Initialize Sentry
-Sentry.init({
-  dsn: config.sentryDsn,
-  tracesSampleRate: 1.0,
-});
-
-app.use(Sentry.Handlers.requestHandler());
 app.use(express.json());
 app.use(logger);
 
@@ -27,10 +24,15 @@ app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/auth', authRoutes);
 
-// Sentry error handler
-app.use(Sentry.Handlers.errorHandler());
+// Sentry test route
+app.get("/debug-sentry", function mainHandler(req, res) {
+  throw new Error("My first Sentry error!");
+});
 
-// Generic error handler
+// The error handler must be registered before any other error middleware and after all controllers
+Sentry.setupExpressErrorHandler(app);
+
+// Fallthrough error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const status = err.statusCode || 500;

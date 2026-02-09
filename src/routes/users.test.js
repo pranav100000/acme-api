@@ -59,11 +59,7 @@ describe('User Routes', () => {
     assert.strictEqual(profile.initials, 'AC');
   });
 
-  test('GET /api/users/:id with non-existent user has known bug (no null check)', async () => {
-    // This documents the known bug: the route handler does not check if the user
-    // exists before accessing properties. When a non-existent ID is requested,
-    // user is null and accessing user.id throws TypeError.
-    // We verify the db layer correctly returns null.
+  test('GET /api/users/:id handles non-existent user', async () => {
     const user = await db.findUser('999');
     assert.strictEqual(user, null);
   });
