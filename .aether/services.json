@@ -1,0 +1,14 @@
+[
+  {
+    "name": "dev-server",
+    "command": "npm run dev"
+  },
+  {
+    "name": "dev-server",
+    "command": "npm run dev"
+  },
+  {
+    "name": "dev-server",
+    "command": "npm run dev"
+  }
+]

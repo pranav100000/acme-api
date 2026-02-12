@@ -10,6 +10,15 @@ npm install
 npm run dev
 ```
 
+## Web Dashboard
+
+The app includes a built-in web dashboard at `http://localhost:3000` with:
+
+- **Dashboard** — Overview with user/team stats and recent activity
+- **Users** — List, search, filter, create, edit, and deactivate users
+- **Teams** — View teams with members, create teams, add/remove members
+- **Auth** — Test login/logout functionality
+
 ## Endpoints
 
 ### Health
@@ -24,6 +33,7 @@ npm run dev
 - `DELETE /api/users/:id` - Deactivate user
 
 ### Teams
+- `GET /api/teams` - List all teams
 - `GET /api/teams/:id` - Get team by ID
 - `GET /api/teams/:id/members` - Get team members
 - `POST /api/teams` - Create team

@@ -2,6 +2,7 @@
 require("./instrument.js");
 
 const Sentry = require("@sentry/node");
+const path = require('path');
 const express = require('express');
 require('express-async-errors');
 const config = require('./config');
@@ -14,6 +15,9 @@ const app = express();
 
 app.use(express.json());
 app.use(logger);
+
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes
 app.get('/health', (req, res) => {
