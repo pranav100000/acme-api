@@ -1,0 +1,10 @@
+[
+  {
+    "name": "acme-api-dev",
+    "command": "npm run dev"
+  },
+  {
+    "name": "acme-api-dev",
+    "command": "npm run dev"
+  }
+]
