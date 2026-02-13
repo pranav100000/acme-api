@@ -1,0 +1,6 @@
+[
+  {
+    "name": "acme-api",
+    "command": "npm start"
+  }
+]
