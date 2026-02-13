@@ -12,6 +12,7 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 
+// Parse incoming JSON request bodies and log all requests
 app.use(express.json());
 app.use(logger);
 
