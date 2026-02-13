@@ -10,6 +10,7 @@ const userRoutes = require('./routes/users');
 const teamRoutes = require('./routes/teams');
 const authRoutes = require('./routes/auth');
 
+// Initialize the Express application
 const app = express();
 
 app.use(express.json());
