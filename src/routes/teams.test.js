@@ -32,6 +32,16 @@ describe('Team Routes', () => {
     db._reset();
   });
 
+  test('GET /api/teams returns all teams', async () => {
+    const res = await fetch(`${baseUrl}/api/teams`);
+    assert.strictEqual(res.status, 200);
+    const teams = await res.json();
+    assert.ok(Array.isArray(teams));
+    assert.ok(teams.length >= 4);
+    assert.ok(teams[0].name);
+    assert.ok(teams[0].id);
+  });
+
   test('GET /api/teams/:id returns team when found', async () => {
     const res = await fetch(`${baseUrl}/api/teams/1`);
     assert.strictEqual(res.status, 200);
