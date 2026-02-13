@@ -4,6 +4,12 @@ const { validateRequired } = require('../middleware/validate');
 
 const router = express.Router();
 
+// GET /api/teams - List all teams
+router.get('/', async (req, res) => {
+  const teams = await db.getAllTeams();
+  res.json(teams);
+});
+
 // GET /api/teams/:id - Get team by ID
 router.get('/:id', async (req, res) => {
   const team = await db.findTeam(req.params.id);

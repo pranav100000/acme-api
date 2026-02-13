@@ -1,0 +1,6 @@
+[
+  {
+    "name": "api-server",
+    "command": "node src/index.js"
+  }
+]
