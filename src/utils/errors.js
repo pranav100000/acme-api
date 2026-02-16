@@ -1,3 +1,10 @@
+/**
+ * Custom error classes for consistent API error responses.
+ * Each error carries a `statusCode` property so the global error handler
+ * can translate it into the correct HTTP status.
+ */
+
+/** Thrown when a requested resource (user, team, etc.) does not exist. */
 class NotFoundError extends Error {
   constructor(message = 'Not found') {
     super(message);
@@ -6,6 +13,7 @@ class NotFoundError extends Error {
   }
 }
 
+/** Thrown when request data fails validation (missing fields, bad format, etc.). */
 class ValidationError extends Error {
   constructor(message = 'Validation failed') {
     super(message);

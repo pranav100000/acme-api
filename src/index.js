@@ -1,9 +1,10 @@
-// IMPORTANT: Import instrument.js before all other imports
+// IMPORTANT: Import instrument.js before all other imports so Sentry can
+// monkey-patch modules (http, express, etc.) before they are loaded.
 require("./instrument.js");
 
 const Sentry = require("@sentry/node");
 const express = require('express');
-require('express-async-errors');
+require('express-async-errors'); // Lets Express catch rejected promises in async route handlers
 const config = require('./config');
 const logger = require('./middleware/logger');
 const userRoutes = require('./routes/users');
@@ -15,30 +16,33 @@ const fs = require('fs');
 
 const app = express();
 
-app.use(express.json());
-app.use(logger);
+// --- Global middleware ---
+app.use(express.json());  // Parse JSON request bodies
+app.use(logger);          // Log every incoming request
 
-// Serve static frontend files in production
+// Serve the pre-built frontend assets (created by `npm run build`)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Routes
+// --- API Routes ---
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.use('/api/users', userRoutes);
-app.use('/api/teams', teamRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);  // CRUD operations for users
+app.use('/api/teams', teamRoutes);  // CRUD operations for teams
+app.use('/api/auth', authRoutes);   // Login / logout
 
 // Sentry test route
 app.get("/debug-sentry", function mainHandler(req, res) {
   throw new Error("My first Sentry error!");
 });
 
-// SPA fallback - serve index.html for non-API routes (only when build exists)
+// SPA fallback — for any non-API GET request, serve the React app's index.html
+// so that client-side routing (react-router) can handle the path.
 const indexPath = path.join(__dirname, '..', 'public', 'index.html');
 if (fs.existsSync(indexPath)) {
   app.get('*', (req, res, next) => {
+    // Skip API, health-check, and debug routes — let them 404 normally
     if (req.path.startsWith('/api') || req.path.startsWith('/health') || req.path.startsWith('/debug-sentry')) {
       return next();
     }
@@ -46,10 +50,11 @@ if (fs.existsSync(indexPath)) {
   });
 }
 
-// The error handler must be registered before any other error middleware and after all controllers
+// Sentry's error handler must be registered after all controllers but
+// *before* our own error middleware so it can capture exceptions first.
 Sentry.setupExpressErrorHandler(app);
 
-// Fallthrough error handler
+// Global fallthrough error handler — formats errors as JSON responses
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const status = err.statusCode || 500;
