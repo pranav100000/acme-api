@@ -5,4 +5,5 @@ const config = {
   env: process.env.NODE_ENV || 'development'
 };
 
+// Export config for use across all server modules
 module.exports = config;
