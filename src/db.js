@@ -1,3 +1,12 @@
+/**
+ * In-memory database module.
+ *
+ * Provides an async API that mirrors a real database interface, with a small
+ * artificial delay (10ms) on each operation to simulate network latency.
+ * Data is stored in plain arrays and is lost when the process restarts.
+ */
+
+// Seed data — pre-populated users for development and testing
 const users = [
   { id: '1', email: 'alice@acme.com', name: 'Alice Chen', role: 'admin', status: 'active', createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-01-15T08:00:00Z' },
   { id: '2', email: 'bob@acme.com', name: 'Bob Smith', role: 'developer', status: 'active', createdAt: '2024-01-16T09:30:00Z', updatedAt: '2024-02-01T14:00:00Z' },
@@ -9,6 +18,7 @@ const users = [
   { id: '8', email: 'henry@acme.com', name: 'Henry Taylor', role: 'developer', status: 'pending', createdAt: '2024-03-20T12:00:00Z', updatedAt: '2024-03-20T12:00:00Z' },
 ];
 
+// Seed data — pre-populated teams with member references (user IDs)
 const teams = [
   { id: '1', name: 'Engineering', members: ['1', '2', '3', '5'], createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-02-05T13:00:00Z' },
   { id: '2', name: 'Product', members: ['6'], createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-02-10T08:30:00Z' },
@@ -16,6 +26,7 @@ const teams = [
   { id: '4', name: 'Infrastructure', members: ['1', '2'], createdAt: '2024-02-01T10:00:00Z', updatedAt: '2024-02-01T14:00:00Z' },
 ];
 
+// Deep-copy the seed data so _reset() can restore the original state after tests
 const initialUsers = users.map(u => ({ ...u }));
 const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
 
@@ -37,6 +48,7 @@ const db = {
 
   async createUser({ email, name, role }) {
     await new Promise(resolve => setTimeout(resolve, 10));
+    // Auto-increment ID by finding the current max and adding 1
     const id = String(Math.max(...users.map(u => parseInt(u.id))) + 1);
     const now = new Date().toISOString();
     const user = { id, email, name, role: role || 'developer', status: 'active', createdAt: now, updatedAt: now };
@@ -48,6 +60,7 @@ const db = {
     await new Promise(resolve => setTimeout(resolve, 10));
     const user = users.find(u => u.id === id);
     if (!user) return null;
+    // Only allow whitelisted fields to be updated (prevents overwriting id, createdAt, etc.)
     const allowed = ['email', 'name', 'role', 'status'];
     for (const key of allowed) {
       if (updates[key] !== undefined) {
@@ -58,6 +71,7 @@ const db = {
     return user;
   },
 
+  // Soft delete — marks the user as inactive rather than removing them from the array
   async deleteUser(id) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const user = users.find(u => u.id === id);
@@ -98,6 +112,7 @@ const db = {
     const team = teams.find(t => t.id === teamId);
     const user = users.find(u => u.id === userId);
     if (!team || !user) return null;
+    // Prevent duplicate memberships
     if (!team.members.includes(userId)) {
       team.members.push(userId);
       team.updatedAt = new Date().toISOString();

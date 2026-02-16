@@ -1,3 +1,11 @@
+/**
+ * Custom error classes for the application.
+ *
+ * Each error carries a `statusCode` property so the global error handler in
+ * index.js can automatically send the correct HTTP status without a switch/case.
+ */
+
+/** Throw when a requested resource (user, team, etc.) does not exist. */
 class NotFoundError extends Error {
   constructor(message = 'Not found') {
     super(message);
@@ -6,6 +14,7 @@ class NotFoundError extends Error {
   }
 }
 
+/** Throw when user-supplied input fails validation rules. */
 class ValidationError extends Error {
   constructor(message = 'Validation failed') {
     super(message);
