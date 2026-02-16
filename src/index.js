@@ -1,9 +1,10 @@
-// IMPORTANT: Import instrument.js before all other imports
+// IMPORTANT: Import instrument.js before all other imports so Sentry can
+// monkey-patch modules (e.g. http, express) before they are loaded.
 require("./instrument.js");
 
 const Sentry = require("@sentry/node");
 const express = require('express');
-require('express-async-errors');
+require('express-async-errors'); // Automatically catches async errors in route handlers
 const config = require('./config');
 const logger = require('./middleware/logger');
 const userRoutes = require('./routes/users');
@@ -15,10 +16,10 @@ const fs = require('fs');
 
 const app = express();
 
-app.use(express.json());
-app.use(logger);
+app.use(express.json()); // Parse JSON request bodies
+app.use(logger); // Log every incoming request (method, path, timestamp)
 
-// Serve static frontend files in production
+// Serve the built frontend assets (CSS, JS, images) from the /public directory
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes
@@ -35,10 +36,13 @@ app.get("/debug-sentry", function mainHandler(req, res) {
   throw new Error("My first Sentry error!");
 });
 
-// SPA fallback - serve index.html for non-API routes (only when build exists)
+// SPA fallback — for any non-API GET request, serve index.html so that
+// client-side routing (React Router) can handle the path. Only enabled
+// when a production build exists in /public.
 const indexPath = path.join(__dirname, '..', 'public', 'index.html');
 if (fs.existsSync(indexPath)) {
   app.get('*', (req, res, next) => {
+    // Skip API, health-check, and debug routes so they hit their own handlers
     if (req.path.startsWith('/api') || req.path.startsWith('/health') || req.path.startsWith('/debug-sentry')) {
       return next();
     }
@@ -46,10 +50,13 @@ if (fs.existsSync(indexPath)) {
   });
 }
 
-// The error handler must be registered before any other error middleware and after all controllers
+// Sentry's error handler must be registered after all controllers but before
+// our own error middleware so it can capture exceptions first.
 Sentry.setupExpressErrorHandler(app);
 
-// Fallthrough error handler
+// Global fallthrough error handler — returns a JSON error response.
+// Custom errors (e.g. NotFoundError) carry their own statusCode; everything
+// else defaults to 500.
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const status = err.statusCode || 500;
