@@ -1,3 +1,8 @@
+/**
+ * Application shell layout.
+ * Renders a fixed sidebar with navigation links and a user profile footer,
+ * alongside the main content area where child routes are rendered.
+ */
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../App';
@@ -34,6 +39,7 @@ export default function Layout({ children }) {
               alignItems: 'center', justifyContent: 'center',
               fontSize: '13px', fontWeight: '600'
             }}>
+              {/* Generate initials from the user's full name (e.g. "Alice Chen" → "AC") */}
               {user?.name?.split(' ').map(n => n[0]).join('') || '?'}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
