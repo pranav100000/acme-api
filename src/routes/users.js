@@ -1,3 +1,9 @@
+/**
+ * User management routes.
+ *
+ * Mounted at /api/users — provides CRUD operations for user accounts.
+ * Uses the in-memory database (db.js) and validation middleware.
+ */
 const express = require('express');
 const db = require('../db');
 const { validateEmail, validateRequired } = require('../middleware/validate');
@@ -26,7 +32,7 @@ router.get('/:id', async (req, res) => {
   });
 });
 
-// GET /api/users/:id/profile - Get user profile
+// GET /api/users/:id/profile - Get user profile (display-friendly subset)
 router.get('/:id/profile', async (req, res) => {
   const user = await db.findUser(req.params.id);
 
@@ -34,6 +40,7 @@ router.get('/:id/profile', async (req, res) => {
     return res.status(404).json({ error: 'User not found' });
   }
 
+  // Return a lightweight profile object with computed initials for avatar display
   res.json({
     displayName: user.name,
     email: user.email,
@@ -42,12 +49,16 @@ router.get('/:id/profile', async (req, res) => {
 });
 
 // POST /api/users - Create user
+// Validates required fields and email format before checking for duplicates
 router.post('/', validateRequired(['email', 'name']), validateEmail, async (req, res) => {
   const { email, name, role } = req.body;
+
+  // Prevent duplicate email addresses (409 Conflict)
   const existing = await db.findUserByEmail(email);
   if (existing) {
     return res.status(409).json({ error: 'Email already exists' });
   }
+
   const user = await db.createUser({ email, name, role });
   res.status(201).json(user);
 });
@@ -61,7 +72,7 @@ router.patch('/:id', async (req, res) => {
   res.json(user);
 });
 
-// DELETE /api/users/:id - Soft delete (set status to inactive)
+// DELETE /api/users/:id - Soft delete (sets status to 'inactive' rather than removing the record)
 router.delete('/:id', async (req, res) => {
   const user = await db.deleteUser(req.params.id);
   if (!user) {

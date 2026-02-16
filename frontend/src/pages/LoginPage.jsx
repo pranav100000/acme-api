@@ -1,3 +1,10 @@
+/**
+ * Login page — shown when no user is authenticated.
+ *
+ * Provides a simple email-only login form. On submit it calls the /api/auth/login
+ * endpoint; on success the returned user object is stored via the AuthContext.
+ * A list of demo accounts is displayed below the form for convenience.
+ */
 import React, { useState } from 'react';
 import { useAuth } from '../App';
 import * as api from '../api';
@@ -8,6 +15,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  /** Attempt login via the API; on success, store user in AuthContext. */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

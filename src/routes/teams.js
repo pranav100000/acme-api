@@ -1,3 +1,9 @@
+/**
+ * Team management routes.
+ *
+ * Mounted at /api/teams — provides CRUD for teams and endpoints for
+ * managing team membership (add / remove members).
+ */
 const express = require('express');
 const db = require('../db');
 const { validateRequired } = require('../middleware/validate');
@@ -22,6 +28,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // GET /api/teams/:id/members - Get team members
+// Resolves member IDs into full user objects for display
 router.get('/:id/members', async (req, res) => {
   const members = await db.getTeamMembers(req.params.id);
 
@@ -39,6 +46,7 @@ router.post('/', validateRequired(['name']), async (req, res) => {
 });
 
 // POST /api/teams/:id/members - Add member to team
+// Adding a user who is already a member is a no-op (idempotent)
 router.post('/:id/members', validateRequired(['userId']), async (req, res) => {
   const team = await db.addTeamMember(req.params.id, req.body.userId);
   if (!team) {

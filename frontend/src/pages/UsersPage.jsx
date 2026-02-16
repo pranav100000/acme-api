@@ -1,3 +1,10 @@
+/**
+ * Users management page.
+ *
+ * Displays a filterable table of all users with actions to create, edit, and
+ * deactivate (soft-delete) accounts. User data is fetched from /api/users and
+ * mutations optimistically reload the list.
+ */
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
@@ -11,6 +18,7 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState(null);
   const [filter, setFilter] = useState('all');
 
+  /** Fetch the full user list from the API and update local state. */
   const loadUsers = async () => {
     try {
       const data = await api.getUsers();
@@ -22,8 +30,10 @@ export default function UsersPage() {
     }
   };
 
+  // Load users once on mount
   useEffect(() => { loadUsers(); }, []);
 
+  /** Soft-delete a user (sets status to 'inactive') after confirmation. */
   const handleDelete = async (user) => {
     if (!window.confirm(`Deactivate ${user.name}? This will set their status to inactive.`)) return;
     try {
@@ -37,6 +47,7 @@ export default function UsersPage() {
     }
   };
 
+  // Apply the active status filter ('all' shows everything)
   const filteredUsers = filter === 'all' ? users : users.filter(u => u.status === filter);
 
   if (loading) {
@@ -157,6 +168,7 @@ export default function UsersPage() {
   );
 }
 
+/** Modal form for creating a new user account. */
 function CreateUserModal({ onClose, onCreated }) {
   const [form, setForm] = useState({ name: '', email: '', role: 'developer' });
   const [error, setError] = useState('');
@@ -208,6 +220,7 @@ function CreateUserModal({ onClose, onCreated }) {
   );
 }
 
+/** Modal form for editing an existing user's name, email, role, and status. */
 function EditUserModal({ user, onClose, onUpdated }) {
   const [form, setForm] = useState({ name: user.name, email: user.email, role: user.role, status: user.status });
   const [error, setError] = useState('');

@@ -2,6 +2,16 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../App';
 
+/**
+ * Main application layout with a fixed sidebar and scrollable content area.
+ *
+ * The sidebar contains:
+ * - Brand header (Acme Corp)
+ * - Navigation links (Dashboard, Users, Teams) using NavLink for active styling
+ * - Logged-in user info with initials avatar and a logout button
+ *
+ * @param {React.ReactNode} children - Page content rendered in the main area.
+ */
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
 
@@ -12,6 +22,7 @@ export default function Layout({ children }) {
           <h1>🏢 Acme Corp</h1>
           <span>Admin Dashboard</span>
         </div>
+        {/* NavLink automatically adds an 'active' class to the current route */}
         <nav className="sidebar-nav">
           <NavLink to="/" end>
             <span className="nav-icon">📊</span>
@@ -26,6 +37,7 @@ export default function Layout({ children }) {
             Teams
           </NavLink>
         </nav>
+        {/* User info footer — displays initials avatar, name, email, and logout */}
         <div style={{ padding: '16px 12px', borderTop: '1px solid #374151' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px' }}>
             <div style={{
