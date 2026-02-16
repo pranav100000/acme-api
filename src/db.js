@@ -1,3 +1,10 @@
+/**
+ * In-memory database module.
+ * Simulates async database operations with small delays to mimic real DB latency.
+ * Data is stored in plain arrays and reset on server restart.
+ */
+
+// Seed data — pre-populated users for development and testing
 const users = [
   { id: '1', email: 'alice@acme.com', name: 'Alice Chen', role: 'admin', status: 'active', createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-01-15T08:00:00Z' },
   { id: '2', email: 'bob@acme.com', name: 'Bob Smith', role: 'developer', status: 'active', createdAt: '2024-01-16T09:30:00Z', updatedAt: '2024-02-01T14:00:00Z' },
@@ -9,6 +16,7 @@ const users = [
   { id: '8', email: 'henry@acme.com', name: 'Henry Taylor', role: 'developer', status: 'pending', createdAt: '2024-03-20T12:00:00Z', updatedAt: '2024-03-20T12:00:00Z' },
 ];
 
+// Seed data — pre-populated teams with member references (user IDs)
 const teams = [
   { id: '1', name: 'Engineering', members: ['1', '2', '3', '5'], createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-02-05T13:00:00Z' },
   { id: '2', name: 'Product', members: ['6'], createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-02-10T08:30:00Z' },
@@ -16,25 +24,30 @@ const teams = [
   { id: '4', name: 'Infrastructure', members: ['1', '2'], createdAt: '2024-02-01T10:00:00Z', updatedAt: '2024-02-01T14:00:00Z' },
 ];
 
+// Deep-copy snapshots of the seed data so we can restore them in _reset()
 const initialUsers = users.map(u => ({ ...u }));
 const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
 
 const db = {
+  /** Look up a single user by their unique ID. Returns null if not found. */
   async findUser(id) {
     await new Promise(resolve => setTimeout(resolve, 10));
     return users.find(u => u.id === id) || null;
   },
 
+  /** Look up a single user by email address. Used during login and duplicate checks. */
   async findUserByEmail(email) {
     await new Promise(resolve => setTimeout(resolve, 10));
     return users.find(u => u.email === email) || null;
   },
 
+  /** Return every user in the database (no pagination). */
   async getAllUsers() {
     await new Promise(resolve => setTimeout(resolve, 10));
     return users;
   },
 
+  /** Create a new user with an auto-incremented ID and default status of 'active'. */
   async createUser({ email, name, role }) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const id = String(Math.max(...users.map(u => parseInt(u.id))) + 1);
@@ -44,6 +57,7 @@ const db = {
     return user;
   },
 
+  /** Partially update a user. Only whitelisted fields (email, name, role, status) are applied. */
   async updateUser(id, updates) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const user = users.find(u => u.id === id);
@@ -58,6 +72,7 @@ const db = {
     return user;
   },
 
+  /** Soft-delete a user by setting their status to 'inactive' rather than removing the record. */
   async deleteUser(id) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const user = users.find(u => u.id === id);
@@ -67,16 +82,19 @@ const db = {
     return user;
   },
 
+  /** Find a team by its unique ID. Returns null if not found. */
   async findTeam(id) {
     await new Promise(resolve => setTimeout(resolve, 10));
     return teams.find(t => t.id === id) || null;
   },
 
+  /** Return all teams. */
   async getAllTeams() {
     await new Promise(resolve => setTimeout(resolve, 10));
     return teams;
   },
 
+  /** Resolve a team's member IDs into full user objects. Returns null if the team doesn't exist. */
   async getTeamMembers(teamId) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const team = teams.find(t => t.id === teamId);
@@ -84,6 +102,7 @@ const db = {
     return team.members.map(memberId => users.find(u => u.id === memberId));
   },
 
+  /** Create a new team with an empty members list. */
   async createTeam({ name }) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const id = String(Math.max(...teams.map(t => parseInt(t.id))) + 1);
@@ -93,6 +112,7 @@ const db = {
     return team;
   },
 
+  /** Add a user to a team (idempotent — won't duplicate if already a member). */
   async addTeamMember(teamId, userId) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const team = teams.find(t => t.id === teamId);
@@ -105,6 +125,7 @@ const db = {
     return team;
   },
 
+  /** Remove a user from a team's member list. */
   async removeTeamMember(teamId, userId) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const team = teams.find(t => t.id === teamId);
