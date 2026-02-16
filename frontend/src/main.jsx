@@ -1,3 +1,10 @@
+/**
+ * Application bootstrap.
+ *
+ * Mounts the React component tree into the DOM. Wraps the app in:
+ * - React.StrictMode  — enables additional dev-time warnings
+ * - BrowserRouter     — provides client-side routing via React Router
+ */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
