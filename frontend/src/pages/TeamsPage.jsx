@@ -1,7 +1,20 @@
+/**
+ * @module TeamsPage
+ * @description Teams management page. Allows viewing, creating, and managing
+ * teams and their member assignments.
+ */
+
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
 
+/**
+ * Teams management page component.
+ * Displays a grid of team cards with member lists and provides modals
+ * for creating new teams and adding/removing members.
+ *
+ * @returns {JSX.Element} The teams page
+ */
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
   const [users, setUsers] = useState([]);
@@ -12,6 +25,10 @@ export default function TeamsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [addMemberTeam, setAddMemberTeam] = useState(null);
 
+  /**
+   * Loads all teams, users, and team membership data from the API.
+   * Populates the teams, users, and teamMembers state.
+   */
   const loadData = async () => {
     try {
       const [teamsData, usersData] = await Promise.all([
@@ -43,6 +60,12 @@ export default function TeamsPage() {
 
   useEffect(() => { loadData(); }, []);
 
+  /**
+   * Removes a member from a team after user confirmation.
+   * @param {string} teamId - The team's unique identifier
+   * @param {string} userId - The user's unique identifier
+   * @param {string} userName - The user's display name (used in confirmation dialog)
+   */
   const handleRemoveMember = async (teamId, userId, userName) => {
     if (!window.confirm(`Remove ${userName} from this team?`)) return;
     try {
@@ -166,6 +189,14 @@ export default function TeamsPage() {
   );
 }
 
+/**
+ * Modal form for creating a new team.
+ *
+ * @param {Object} props
+ * @param {Function} props.onClose - Callback to close the modal
+ * @param {Function} props.onCreated - Callback invoked after successful team creation
+ * @returns {JSX.Element} The create team modal
+ */
 function CreateTeamModal({ onClose, onCreated }) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
@@ -211,6 +242,18 @@ function CreateTeamModal({ onClose, onCreated }) {
   );
 }
 
+/**
+ * Modal form for adding a member to a team.
+ * Filters out users who are already members or inactive.
+ *
+ * @param {Object} props
+ * @param {Object} props.team - The team to add a member to
+ * @param {Object[]} props.users - All available users
+ * @param {Object[]} props.currentMembers - Users currently in the team
+ * @param {Function} props.onClose - Callback to close the modal
+ * @param {Function} props.onAdded - Callback invoked after successfully adding a member
+ * @returns {JSX.Element} The add member modal
+ */
 function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [error, setError] = useState('');

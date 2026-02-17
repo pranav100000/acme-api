@@ -1,7 +1,20 @@
+/**
+ * @module UsersPage
+ * @description Users management page. Provides a filterable user table
+ * with the ability to create, edit, and deactivate users.
+ */
+
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
 
+/**
+ * Users management page component.
+ * Displays a filterable table of users and provides modals for
+ * creating new users and editing existing ones.
+ *
+ * @returns {JSX.Element} The users page
+ */
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,6 +24,9 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState(null);
   const [filter, setFilter] = useState('all');
 
+  /**
+   * Fetches all users from the API and updates local state.
+   */
   const loadUsers = async () => {
     try {
       const data = await api.getUsers();
@@ -24,6 +40,12 @@ export default function UsersPage() {
 
   useEffect(() => { loadUsers(); }, []);
 
+  /**
+   * Deactivates a user after confirmation.
+   * @param {Object} user - The user object to deactivate
+   * @param {string} user.id - The user's unique identifier
+   * @param {string} user.name - The user's display name
+   */
   const handleDelete = async (user) => {
     if (!window.confirm(`Deactivate ${user.name}? This will set their status to inactive.`)) return;
     try {
@@ -157,6 +179,14 @@ export default function UsersPage() {
   );
 }
 
+/**
+ * Modal form for creating a new user.
+ *
+ * @param {Object} props
+ * @param {Function} props.onClose - Callback to close the modal
+ * @param {Function} props.onCreated - Callback invoked after successful user creation
+ * @returns {JSX.Element} The create user modal
+ */
 function CreateUserModal({ onClose, onCreated }) {
   const [form, setForm] = useState({ name: '', email: '', role: 'developer' });
   const [error, setError] = useState('');
@@ -208,6 +238,15 @@ function CreateUserModal({ onClose, onCreated }) {
   );
 }
 
+/**
+ * Modal form for editing an existing user's details.
+ *
+ * @param {Object} props
+ * @param {Object} props.user - The user object being edited
+ * @param {Function} props.onClose - Callback to close the modal
+ * @param {Function} props.onUpdated - Callback invoked after successful user update
+ * @returns {JSX.Element} The edit user modal
+ */
 function EditUserModal({ user, onClose, onUpdated }) {
   const [form, setForm] = useState({ name: user.name, email: user.email, role: user.role, status: user.status });
   const [error, setError] = useState('');

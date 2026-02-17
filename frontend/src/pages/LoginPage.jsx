@@ -1,13 +1,31 @@
+/**
+ * @module LoginPage
+ * @description Login page for the Acme Corp admin dashboard.
+ * Provides a passwordless email-based authentication form.
+ */
+
 import React, { useState } from 'react';
 import { useAuth } from '../App';
 import * as api from '../api';
 
+/**
+ * Login page component.
+ * Renders an email-based login form with demo account hints.
+ * On successful authentication, stores the user in auth context.
+ *
+ * @returns {JSX.Element} The login page
+ */
 export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Handles form submission for login.
+   * Calls the login API and updates auth context on success.
+   * @param {React.FormEvent<HTMLFormElement>} e - The form submit event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
