@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import UsersPage from './pages/UsersPage';
 import TeamsPage from './pages/TeamsPage';
+import DocsPage from './pages/DocsPage';
 import LoginPage from './pages/LoginPage';
 
 export const AuthContext = createContext(null);
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/teams" element={<TeamsPage />} />
+          <Route path="/docs" element={<DocsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
