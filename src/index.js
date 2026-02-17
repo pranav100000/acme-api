@@ -1,9 +1,15 @@
+/**
+ * Express server entry point.
+ * Wires up middleware, API routes, static file serving, and error handling.
+ */
+
 // IMPORTANT: Import instrument.js before all other imports
+// Sentry must patch modules before they are required elsewhere
 require("./instrument.js");
 
 const Sentry = require("@sentry/node");
 const express = require('express');
-require('express-async-errors');
+require('express-async-errors'); // Automatically catches async errors in route handlers
 const config = require('./config');
 const logger = require('./middleware/logger');
 const userRoutes = require('./routes/users');
@@ -18,7 +24,7 @@ const app = express();
 app.use(express.json());
 app.use(logger);
 
-// Serve static frontend files in production
+// Serve the built frontend assets from /public (created by `vite build`)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes
@@ -35,7 +41,8 @@ app.get("/debug-sentry", function mainHandler(req, res) {
   throw new Error("My first Sentry error!");
 });
 
-// SPA fallback - serve index.html for non-API routes (only when build exists)
+// SPA fallback — return index.html for any non-API GET request so
+// client-side routing (React Router) works on hard refresh / direct navigation
 const indexPath = path.join(__dirname, '..', 'public', 'index.html');
 if (fs.existsSync(indexPath)) {
   app.get('*', (req, res, next) => {
@@ -46,10 +53,10 @@ if (fs.existsSync(indexPath)) {
   });
 }
 
-// The error handler must be registered before any other error middleware and after all controllers
+// Sentry’s error handler must come after all controllers but before our own error middleware
 Sentry.setupExpressErrorHandler(app);
 
-// Fallthrough error handler
+// Final catch-all error handler — formats errors as JSON with appropriate status codes
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const status = err.statusCode || 500;

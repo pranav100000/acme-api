@@ -1,5 +1,16 @@
+/**
+ * Frontend API client.
+ * All functions return promises that resolve to parsed JSON responses.
+ * Errors are thrown as plain Error objects with a user-friendly message.
+ */
+
+/** Base path for all API requests — proxied to the Express backend by Vite in dev */
 const API_BASE = '/api';
 
+/**
+ * Core request helper. Handles JSON serialization, error normalization,
+ * and provides a consistent interface for all API calls.
+ */
 async function request(path, options = {}) {
   let res;
   try {
@@ -22,7 +33,7 @@ async function request(path, options = {}) {
   return data;
 }
 
-// Users
+// ── User endpoints ──────────────────────────────────────────────────────────
 export const getUsers = () => request('/users');
 export const getUser = (id) => request(`/users/${id}`);
 export const getUserProfile = (id) => request(`/users/${id}/profile`);
@@ -30,7 +41,7 @@ export const createUser = (data) => request('/users', { method: 'POST', body: JS
 export const updateUser = (id, data) => request(`/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteUser = (id) => request(`/users/${id}`, { method: 'DELETE' });
 
-// Teams
+// ── Team endpoints ──────────────────────────────────────────────────────────
 export const getTeams = () => request('/teams');
 export const getTeam = (id) => request(`/teams/${id}`);
 export const getTeamMembers = (id) => request(`/teams/${id}/members`);
@@ -38,9 +49,9 @@ export const createTeam = (data) => request('/teams', { method: 'POST', body: JS
 export const addTeamMember = (teamId, userId) => request(`/teams/${teamId}/members`, { method: 'POST', body: JSON.stringify({ userId }) });
 export const removeTeamMember = (teamId, userId) => request(`/teams/${teamId}/members/${userId}`, { method: 'DELETE' });
 
-// Auth
+// ── Auth endpoints ──────────────────────────────────────────────────────────
 export const login = (email) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email }) });
 export const logout = () => request('/auth/logout', { method: 'POST' });
 
-// Health
+// ── Health check (bypasses the /api prefix) ────────────────────────────────
 export const healthCheck = () => fetch('/health').then(r => r.json());
