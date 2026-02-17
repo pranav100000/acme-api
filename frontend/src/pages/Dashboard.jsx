@@ -46,7 +46,6 @@ export default function Dashboard() {
   // Derive summary stats from the raw user list.
   const activeUsers = users.filter(u => u.status === 'active').length;
   const pendingUsers = users.filter(u => u.status === 'pending').length;
-  // Show the 5 most recently created users in the "Recent Users" table.
   const recentUsers = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
 
   return (
