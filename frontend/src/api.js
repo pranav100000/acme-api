@@ -36,7 +36,7 @@ export const createUser = (data) => request('/users', { method: 'POST', body: JS
 export const updateUser = (id, data) => request(`/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteUser = (id) => request(`/users/${id}`, { method: 'DELETE' });
 
-// ── Team endpoints ──────────────────────────────────────────────────────────
+// Teams
 export const getTeams = () => request('/teams');
 export const getTeam = (id) => request(`/teams/${id}`);
 export const getTeamMembers = (id) => request(`/teams/${id}/members`);
@@ -48,5 +48,5 @@ export const removeTeamMember = (teamId, userId) => request(`/teams/${teamId}/me
 export const login = (email) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email }) });
 export const logout = () => request('/auth/logout', { method: 'POST' });
 
-// ── Health check (bypasses the request() wrapper since it returns plain JSON) ─
+// Health
 export const healthCheck = () => fetch('/health').then(r => r.json());

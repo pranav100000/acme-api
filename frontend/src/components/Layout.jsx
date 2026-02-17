@@ -1,3 +1,8 @@
+/**
+ * App shell layout — renders the sidebar navigation and main content area.
+ * The sidebar includes nav links, the current user's avatar/info, and a logout button.
+ * Only rendered when the user is authenticated (see App.jsx).
+ */
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../App';
@@ -12,6 +17,7 @@ export default function Layout({ children }) {
           <h1>🏢 Acme Corp</h1>
           <span>Admin Dashboard</span>
         </div>
+        {/* NavLink automatically adds an "active" class to the current route */}
         <nav className="sidebar-nav">
           <NavLink to="/" end>
             <span className="nav-icon">📊</span>
@@ -26,6 +32,7 @@ export default function Layout({ children }) {
             Teams
           </NavLink>
         </nav>
+        {/* User info footer — shows avatar initials, name, email, and logout */}
         <div style={{ padding: '16px 12px', borderTop: '1px solid #374151' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px' }}>
             <div style={{

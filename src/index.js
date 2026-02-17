@@ -1,4 +1,11 @@
-// IMPORTANT: Import instrument.js before all other imports
+/**
+ * Express server entrypoint.
+ * Sets up middleware, mounts API routes, serves the SPA frontend,
+ * and configures Sentry error tracking.
+ */
+
+// IMPORTANT: Import instrument.js before all other imports so Sentry
+// can monkey-patch modules and capture performance data.
 require("./instrument.js");
 
 const Sentry = require("@sentry/node");
@@ -21,7 +28,8 @@ app.use(logger);
 // Serve static frontend files in production
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Routes
+// ── Routes ───────────────────────────────────────────────────────────────────
+// Simple health-check endpoint used by monitoring and the frontend Dashboard.
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
@@ -49,7 +57,8 @@ if (fs.existsSync(indexPath)) {
 // The error handler must be registered before any other error middleware and after all controllers
 Sentry.setupExpressErrorHandler(app);
 
-// Fallthrough error handler
+// Fallthrough error handler — catches anything not handled by Sentry and
+// returns a JSON error response. Custom errors can set `statusCode`.
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const status = err.statusCode || 500;

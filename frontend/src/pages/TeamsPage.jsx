@@ -1,3 +1,7 @@
+/**
+ * Teams management page — lists all teams as cards, each showing its members.
+ * Supports creating new teams, adding members, and removing members.
+ */
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
@@ -12,6 +16,7 @@ export default function TeamsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [addMemberTeam, setAddMemberTeam] = useState(null);
 
+  /** Fetch teams, users, and each team's resolved member list from the API. */
   const loadData = async () => {
     try {
       const [teamsData, usersData] = await Promise.all([
@@ -21,7 +26,7 @@ export default function TeamsPage() {
       setTeams(teamsData);
       setUsers(usersData);
 
-      // Load members for each team
+      // Resolve member IDs to full user objects for every team.
       const membersMap = {};
       await Promise.all(
         teamsData.map(async (team) => {
@@ -43,6 +48,7 @@ export default function TeamsPage() {
 
   useEffect(() => { loadData(); }, []);
 
+  /** Remove a member after a confirmation dialog. Shows a temporary success/error banner. */
   const handleRemoveMember = async (teamId, userId, userName) => {
     if (!window.confirm(`Remove ${userName} from this team?`)) return;
     try {
@@ -166,6 +172,7 @@ export default function TeamsPage() {
   );
 }
 
+/** Modal form for creating a new team (name only). */
 function CreateTeamModal({ onClose, onCreated }) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
@@ -211,11 +218,13 @@ function CreateTeamModal({ onClose, onCreated }) {
   );
 }
 
+/** Modal for adding an existing active user to a team via a dropdown. */
 function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Only show active users who aren't already members of this team.
   const currentMemberIds = currentMembers.filter(Boolean).map(m => m.id);
   const availableUsers = users.filter(u => !currentMemberIds.includes(u.id) && u.status === 'active');
 

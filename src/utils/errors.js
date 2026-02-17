@@ -1,7 +1,3 @@
-/**
- * Custom error for resources that cannot be found (e.g. user or team by ID).
- * Automatically maps to HTTP 404 in the global error handler.
- */
 class NotFoundError extends Error {
   constructor(message = 'Not found') {
     super(message);
@@ -10,10 +6,6 @@ class NotFoundError extends Error {
   }
 }
 
-/**
- * Custom error for invalid or malformed input data.
- * Automatically maps to HTTP 400 in the global error handler.
- */
 class ValidationError extends Error {
   constructor(message = 'Validation failed') {
     super(message);

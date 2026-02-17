@@ -5,7 +5,7 @@ import React from 'react';
  * Clicking the overlay closes the modal; clicking inside the modal does not
  * (thanks to stopPropagation).
  *
- * @param {string}   title    - Heading displayed at the top of the modal.
+ * @param {string}   title eee   - Heading displayed at the top of the modal.
  * @param {function} onClose  - Callback invoked when the user dismisses the modal.
  * @param {React.ReactNode} children - Body content rendered inside the modal.
  */

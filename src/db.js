@@ -1,5 +1,3 @@
-// In-memory data store for users. Each user has an id, email, name, role, status,
-// and timestamp fields. This acts as a mock database for development and testing.
 const users = [
   { id: '1', email: 'alice@acme.com', name: 'Alice Chen', role: 'admin', status: 'active', createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-01-15T08:00:00Z' },
   { id: '2', email: 'bob@acme.com', name: 'Bob Smith', role: 'developer', status: 'active', createdAt: '2024-01-16T09:30:00Z', updatedAt: '2024-02-01T14:00:00Z' },
@@ -11,8 +9,6 @@ const users = [
   { id: '8', email: 'henry@acme.com', name: 'Henry Taylor', role: 'developer', status: 'pending', createdAt: '2024-03-20T12:00:00Z', updatedAt: '2024-03-20T12:00:00Z' },
 ];
 
-// In-memory data store for teams. Each team has an id, name, a list of member
-// user IDs, and timestamp fields.
 const teams = [
   { id: '1', name: 'Engineering', members: ['1', '2', '3', '5'], createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-02-05T13:00:00Z' },
   { id: '2', name: 'Product', members: ['6'], createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-02-10T08:30:00Z' },
@@ -33,7 +29,6 @@ const db = {
     return users.find(u => u.id === id) || null;
   },
 
-  /** Look up a single user by email address. Returns null if not found. */
   async findUserByEmail(email) {
     await new Promise(resolve => setTimeout(resolve, 10));
     return users.find(u => u.email === email) || null;
