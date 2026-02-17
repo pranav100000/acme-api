@@ -1,7 +1,21 @@
+/**
+ * @module Dashboard
+ * @description Dashboard page displaying an overview of users, teams,
+ * and API health status with summary statistics and recent activity tables.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as api from '../api';
 
+/**
+ * Dashboard page component.
+ * Fetches users, teams, and health data on mount and displays summary
+ * statistics (total users, teams, roles, API status) along with tables
+ * of recent users and a teams overview.
+ *
+ * @returns {JSX.Element} The dashboard page
+ */
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
   const [teams, setTeams] = useState([]);
@@ -9,6 +23,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    /**
+     * Fetches users, teams, and health data in parallel on mount.
+     * @async
+     */
     async function fetchData() {
       try {
         const [usersData, teamsData, healthData] = await Promise.all([

@@ -1,3 +1,9 @@
+/**
+ * @module main
+ * @description Application entry point. Mounts the React app into the DOM
+ * with StrictMode and BrowserRouter for client-side routing.
+ */
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
