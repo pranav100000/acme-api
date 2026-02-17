@@ -16,10 +16,14 @@ const teams = [
   { id: '4', name: 'Infrastructure', members: ['1', '2'], createdAt: '2024-02-01T10:00:00Z', updatedAt: '2024-02-01T14:00:00Z' },
 ];
 
+// Deep-copy the initial seed data so we can restore it later during test resets.
 const initialUsers = users.map(u => ({ ...u }));
 const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
 
+// Database access object. Every method is async and includes a small artificial
+// delay (10ms) to simulate real database latency.
 const db = {
+  /** Look up a single user by their unique ID. Returns null if not found. */
   async findUser(id) {
     await new Promise(resolve => setTimeout(resolve, 10));
     return users.find(u => u.id === id) || null;
@@ -30,11 +34,13 @@ const db = {
     return users.find(u => u.email === email) || null;
   },
 
+  /** Return the full list of users (no pagination). */
   async getAllUsers() {
     await new Promise(resolve => setTimeout(resolve, 10));
     return users;
   },
 
+  /** Create a new user with an auto-incremented ID and default status of 'active'. */
   async createUser({ email, name, role }) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const id = String(Math.max(...users.map(u => parseInt(u.id))) + 1);
@@ -44,6 +50,7 @@ const db = {
     return user;
   },
 
+  /** Partially update a user. Only email, name, role, and status fields are allowed. */
   async updateUser(id, updates) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const user = users.find(u => u.id === id);
@@ -58,6 +65,7 @@ const db = {
     return user;
   },
 
+  /** Soft-delete a user by setting their status to 'inactive' rather than removing them. */
   async deleteUser(id) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const user = users.find(u => u.id === id);
@@ -67,16 +75,19 @@ const db = {
     return user;
   },
 
+  /** Look up a single team by its unique ID. Returns null if not found. */
   async findTeam(id) {
     await new Promise(resolve => setTimeout(resolve, 10));
     return teams.find(t => t.id === id) || null;
   },
 
+  /** Return the full list of teams. */
   async getAllTeams() {
     await new Promise(resolve => setTimeout(resolve, 10));
     return teams;
   },
 
+  /** Resolve a team's member IDs into full user objects. Returns null if team not found. */
   async getTeamMembers(teamId) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const team = teams.find(t => t.id === teamId);
@@ -84,6 +95,7 @@ const db = {
     return team.members.map(memberId => users.find(u => u.id === memberId));
   },
 
+  /** Create a new team with an auto-incremented ID and an empty members list. */
   async createTeam({ name }) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const id = String(Math.max(...teams.map(t => parseInt(t.id))) + 1);
@@ -93,6 +105,7 @@ const db = {
     return team;
   },
 
+  /** Add a user to a team. Silently skips if the user is already a member. */
   async addTeamMember(teamId, userId) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const team = teams.find(t => t.id === teamId);
@@ -105,6 +118,7 @@ const db = {
     return team;
   },
 
+  /** Remove a user from a team's member list. */
   async removeTeamMember(teamId, userId) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const team = teams.find(t => t.id === teamId);

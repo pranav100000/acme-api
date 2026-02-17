@@ -1,3 +1,7 @@
+/**
+ * Dashboard page — overview of key metrics (user counts, teams, API health).
+ * Fetches users, teams, and the health-check endpoint in parallel on mount.
+ */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as api from '../api';
@@ -8,9 +12,11 @@ export default function Dashboard() {
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch all dashboard data once on initial render.
   useEffect(() => {
     async function fetchData() {
       try {
+        // Fire all three requests concurrently for faster page loads.
         const [usersData, teamsData, healthData] = await Promise.all([
           api.getUsers(),
           api.getTeams(),
@@ -37,6 +43,7 @@ export default function Dashboard() {
     );
   }
 
+  // Derive summary stats from the raw user list.
   const activeUsers = users.filter(u => u.status === 'active').length;
   const pendingUsers = users.filter(u => u.status === 'pending').length;
   const recentUsers = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);

@@ -25,6 +25,10 @@ export default function Layout({ children }) {
             <span className="nav-icon">🏷️</span>
             Teams
           </NavLink>
+          <NavLink to="/docs">
+            <span className="nav-icon">📖</span>
+            Docs
+          </NavLink>
         </nav>
         <div style={{ padding: '16px 12px', borderTop: '1px solid #374151' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px' }}>

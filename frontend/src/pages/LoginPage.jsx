@@ -1,3 +1,8 @@
+/**
+ * Login page — simple email-only authentication form.
+ * On success the user object is stored in AuthContext (and localStorage)
+ * which causes App.jsx to render the authenticated layout.
+ */
 import React, { useState } from 'react';
 import { useAuth } from '../App';
 import * as api from '../api';
@@ -8,13 +13,14 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  /** Submit the login form — calls the API and stores the returned user. */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
       const data = await api.login(email);
-      login(data.user);
+      login(data.user); // persists user in context + localStorage
     } catch (err) {
       setError(err.message || 'Login failed');
     } finally {

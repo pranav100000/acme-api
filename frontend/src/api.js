@@ -1,5 +1,11 @@
+// Base URL prefix for all API requests. Uses a relative path so the browser
+// sends requests to the same origin, which is proxied to the backend in dev.
 const API_BASE = '/api';
 
+/**
+ * Generic fetch wrapper that handles JSON serialization, error extraction,
+ * and network failure reporting. All API helper functions below delegate to this.
+ */
 async function request(path, options = {}) {
   let res;
   try {
@@ -22,7 +28,7 @@ async function request(path, options = {}) {
   return data;
 }
 
-// Users
+// ── User endpoints ──────────────────────────────────────────────────────────
 export const getUsers = () => request('/users');
 export const getUser = (id) => request(`/users/${id}`);
 export const getUserProfile = (id) => request(`/users/${id}/profile`);
@@ -38,7 +44,7 @@ export const createTeam = (data) => request('/teams', { method: 'POST', body: JS
 export const addTeamMember = (teamId, userId) => request(`/teams/${teamId}/members`, { method: 'POST', body: JSON.stringify({ userId }) });
 export const removeTeamMember = (teamId, userId) => request(`/teams/${teamId}/members/${userId}`, { method: 'DELETE' });
 
-// Auth
+// ── Authentication endpoints ────────────────────────────────────────────────
 export const login = (email) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email }) });
 export const logout = () => request('/auth/logout', { method: 'POST' });
 
