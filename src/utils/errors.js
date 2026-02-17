@@ -1,3 +1,13 @@
+/**
+ * Custom error classes for consistent HTTP error responses.
+ * Each error carries a `statusCode` so the global error handler can
+ * set the correct HTTP status without switch/case logic.
+ */
+
+/**
+ * Thrown when a requested resource (user, team, etc.) does not exist.
+ * Maps to HTTP 404.
+ */
 class NotFoundError extends Error {
   constructor(message = 'Not found') {
     super(message);
@@ -6,6 +16,10 @@ class NotFoundError extends Error {
   }
 }
 
+/**
+ * Thrown when request data fails validation (missing fields, bad format, etc.).
+ * Maps to HTTP 400.
+ */
 class ValidationError extends Error {
   constructor(message = 'Validation failed') {
     super(message);

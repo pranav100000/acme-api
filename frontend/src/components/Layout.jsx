@@ -1,3 +1,8 @@
+/**
+ * Application shell layout.
+ * Renders a sidebar with navigation links, the current user's avatar/info,
+ * a logout button, and the main content area for child pages.
+ */
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../App';

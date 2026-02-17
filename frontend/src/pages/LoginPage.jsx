@@ -1,3 +1,9 @@
+/**
+ * Login page.
+ * Presents an email-only sign-in form (no password for this demo app).
+ * On success, stores the user in AuthContext and redirects to the dashboard.
+ * Includes a helper panel listing available demo accounts.
+ */
 import React, { useState } from 'react';
 import { useAuth } from '../App';
 import * as api from '../api';

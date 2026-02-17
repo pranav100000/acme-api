@@ -1,3 +1,8 @@
+/**
+ * Teams management page.
+ * Displays all teams as cards with their members. Supports creating teams,
+ * adding members (from a filtered dropdown of active users), and removing members.
+ */
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
@@ -12,6 +17,7 @@ export default function TeamsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [addMemberTeam, setAddMemberTeam] = useState(null);
 
+  /** Fetch teams, users, and resolve each team's members in parallel. */
   const loadData = async () => {
     try {
       const [teamsData, usersData] = await Promise.all([
@@ -21,7 +27,7 @@ export default function TeamsPage() {
       setTeams(teamsData);
       setUsers(usersData);
 
-      // Load members for each team
+      // Resolve member IDs to full user objects for each team
       const membersMap = {};
       await Promise.all(
         teamsData.map(async (team) => {
@@ -166,6 +172,7 @@ export default function TeamsPage() {
   );
 }
 
+/** Modal form for creating a new team with a name field. */
 function CreateTeamModal({ onClose, onCreated }) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
@@ -211,11 +218,13 @@ function CreateTeamModal({ onClose, onCreated }) {
   );
 }
 
+/** Modal for adding an existing active user to a team via a dropdown selector. */
 function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Filter out users who are already team members or inactive/pending
   const currentMemberIds = currentMembers.filter(Boolean).map(m => m.id);
   const availableUsers = users.filter(u => !currentMemberIds.includes(u.id) && u.status === 'active');
 
