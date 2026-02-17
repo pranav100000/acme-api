@@ -1,3 +1,8 @@
+/**
+ * Users management page.
+ * Displays a filterable table of all users with support for creating,
+ * editing, and soft-deleting (deactivating) user accounts.
+ */
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
@@ -37,6 +42,7 @@ export default function UsersPage() {
     }
   };
 
+  // Apply the active status filter (all | active | inactive | pending)
   const filteredUsers = filter === 'all' ? users : users.filter(u => u.status === filter);
 
   if (loading) {
@@ -157,6 +163,7 @@ export default function UsersPage() {
   );
 }
 
+/** Modal form for creating a new user with name, email, and role fields. */
 function CreateUserModal({ onClose, onCreated }) {
   const [form, setForm] = useState({ name: '', email: '', role: 'developer' });
   const [error, setError] = useState('');
@@ -208,6 +215,7 @@ function CreateUserModal({ onClose, onCreated }) {
   );
 }
 
+/** Modal form for editing an existing user's name, email, role, and status. */
 function EditUserModal({ user, onClose, onUpdated }) {
   const [form, setForm] = useState({ name: user.name, email: user.email, role: user.role, status: user.status });
   const [error, setError] = useState('');
