@@ -1,3 +1,10 @@
+/**
+ * Application shell layout.
+ *
+ * Renders the persistent sidebar (brand, navigation links, user profile)
+ * alongside the main content area. The sidebar highlights the active
+ * route via React Router's <NavLink>.
+ */
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../App';
