@@ -32,6 +32,15 @@ router.get('/:id/members', async (req, res) => {
   res.json(members);
 });
 
+// PATCH /api/teams/:id - Update team
+router.patch('/:id', async (req, res) => {
+  const team = await db.updateTeam(req.params.id, req.body);
+  if (!team) {
+    return res.status(404).json({ error: 'Team not found' });
+  }
+  res.json(team);
+});
+
 // POST /api/teams - Create team
 router.post('/', validateRequired(['name']), async (req, res) => {
   const team = await db.createTeam({ name: req.body.name });

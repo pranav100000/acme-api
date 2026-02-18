@@ -84,6 +84,20 @@ const db = {
     return team.members.map(memberId => users.find(u => u.id === memberId));
   },
 
+  async updateTeam(id, updates) {
+    await new Promise(resolve => setTimeout(resolve, 10));
+    const team = teams.find(t => t.id === id);
+    if (!team) return null;
+    const allowed = ['name'];
+    for (const key of allowed) {
+      if (updates[key] !== undefined) {
+        team[key] = updates[key];
+      }
+    }
+    team.updatedAt = new Date().toISOString();
+    return team;
+  },
+
   async createTeam({ name }) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const id = String(Math.max(...teams.map(t => parseInt(t.id))) + 1);
