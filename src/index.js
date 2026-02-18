@@ -1,17 +1,21 @@
 // IMPORTANT: Import instrument.js before all other imports
 require("./instrument.js");
 
+// Node built-ins
+const path = require('path');
+const fs = require('fs');
+
+// Third-party
 const Sentry = require("@sentry/node");
 const express = require('express');
 require('express-async-errors');
+
+// Local modules
 const config = require('./config');
 const logger = require('./middleware/logger');
 const userRoutes = require('./routes/users');
 const teamRoutes = require('./routes/teams');
 const authRoutes = require('./routes/auth');
-
-const path = require('path');
-const fs = require('fs');
 
 const app = express();
 
