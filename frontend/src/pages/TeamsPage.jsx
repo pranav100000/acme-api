@@ -1,3 +1,11 @@
+/**
+ * Teams management page.
+ *
+ * Lists all teams as cards, each showing its members with the ability
+ * to add or remove members. Also supports creating new teams via a
+ * modal dialog. Team and member data are loaded in parallel on mount
+ * and refreshed after every mutation.
+ */
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
@@ -12,6 +20,7 @@ export default function TeamsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [addMemberTeam, setAddMemberTeam] = useState(null);
 
+  /** Fetch teams, users, and resolved member lists from the API. */
   const loadData = async () => {
     try {
       const [teamsData, usersData] = await Promise.all([
@@ -21,7 +30,7 @@ export default function TeamsPage() {
       setTeams(teamsData);
       setUsers(usersData);
 
-      // Load members for each team
+      // Resolve member IDs to full user objects for each team
       const membersMap = {};
       await Promise.all(
         teamsData.map(async (team) => {
@@ -43,6 +52,7 @@ export default function TeamsPage() {
 
   useEffect(() => { loadData(); }, []);
 
+  /** Remove a member from a team after user confirmation. */
   const handleRemoveMember = async (teamId, userId, userName) => {
     if (!window.confirm(`Remove ${userName} from this team?`)) return;
     try {
@@ -166,6 +176,7 @@ export default function TeamsPage() {
   );
 }
 
+/** Modal form to create a new team with a given name. */
 function CreateTeamModal({ onClose, onCreated }) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
@@ -211,11 +222,13 @@ function CreateTeamModal({ onClose, onCreated }) {
   );
 }
 
+/** Modal form to add an existing user to a team via a dropdown selector. */
 function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Filter out users who are already members or inactive
   const currentMemberIds = currentMembers.filter(Boolean).map(m => m.id);
   const availableUsers = users.filter(u => !currentMemberIds.includes(u.id) && u.status === 'active');
 

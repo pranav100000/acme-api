@@ -1,3 +1,10 @@
+/**
+ * Dashboard page — the landing page for authenticated users.
+ *
+ * Displays summary statistics (total users, teams, roles, API health)
+ * and two preview tables: recent users and teams overview. Data is
+ * fetched in parallel on mount.
+ */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as api from '../api';
@@ -8,6 +15,7 @@ export default function Dashboard() {
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch all dashboard data in parallel on initial render
   useEffect(() => {
     async function fetchData() {
       try {
@@ -37,8 +45,10 @@ export default function Dashboard() {
     );
   }
 
+  // Derive summary statistics from raw data
   const activeUsers = users.filter(u => u.status === 'active').length;
   const pendingUsers = users.filter(u => u.status === 'pending').length;
+  // Show the 5 most recently created users in the preview table
   const recentUsers = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
 
   return (

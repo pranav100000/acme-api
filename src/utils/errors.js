@@ -1,3 +1,14 @@
+/**
+ * Custom error classes and helpers for consistent HTTP error responses.
+ *
+ * Each error class sets a `statusCode` property that the global error
+ * handler in index.js uses to determine the HTTP response status.
+ */
+
+/**
+ * Thrown when a requested resource (user, team, etc.) does not exist.
+ * Results in a 404 HTTP response.
+ */
 class NotFoundError extends Error {
   constructor(message = 'Not found') {
     super(message);
@@ -6,6 +17,10 @@ class NotFoundError extends Error {
   }
 }
 
+/**
+ * Thrown when request data fails validation (missing fields, bad format, etc.).
+ * Results in a 400 HTTP response.
+ */
 class ValidationError extends Error {
   constructor(message = 'Validation failed') {
     super(message);
@@ -15,7 +30,11 @@ class ValidationError extends Error {
 }
 
 /**
- * Wraps an async route handler to catch errors and forward to Express error handler
+ * Wraps an async route handler to catch rejected promises and forward
+ * them to the Express error-handling middleware via `next(err)`.
+ *
+ * Note: the `express-async-errors` package already does this globally,
+ * but this helper is available for explicit use where needed.
  */
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);

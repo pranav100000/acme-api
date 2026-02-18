@@ -1,3 +1,13 @@
+/**
+ * Login page — shown when no user session exists.
+ *
+ * Provides a simple email-only login form (no password for this demo).
+ * On successful login the user object is stored in AuthContext and
+ * persisted to localStorage, which triggers the App component to
+ * render the authenticated layout.
+ *
+ * A list of demo account emails is displayed for convenience.
+ */
 import React, { useState } from 'react';
 import { useAuth } from '../App';
 import * as api from '../api';
@@ -8,13 +18,14 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  /** Submit the login form — calls the backend and updates auth state on success. */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
       const data = await api.login(email);
-      login(data.user);
+      login(data.user); // Store user in context + localStorage
     } catch (err) {
       setError(err.message || 'Login failed');
     } finally {
