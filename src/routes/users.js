@@ -14,10 +14,6 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const user = await db.findUser(req.params.id);
 
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-
   res.json({
     id: user.id,
     email: user.email,
@@ -29,10 +25,6 @@ router.get('/:id', async (req, res) => {
 // GET /api/users/:id/profile - Get user profile
 router.get('/:id/profile', async (req, res) => {
   const user = await db.findUser(req.params.id);
-
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
 
   res.json({
     displayName: user.name,
