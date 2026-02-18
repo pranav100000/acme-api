@@ -67,6 +67,29 @@ describe('Team Routes', () => {
     assert.ok(members[0].name);
   });
 
+  test('PATCH /api/teams/:id updates a team', async () => {
+    const res = await fetch(`${baseUrl}/api/teams/2`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Product Management' })
+    });
+    assert.strictEqual(res.status, 200);
+    const team = await res.json();
+    assert.strictEqual(team.id, '2');
+    assert.strictEqual(team.name, 'Product Management');
+  });
+
+  test('PATCH /api/teams/:id returns 404 for non-existent team', async () => {
+    const res = await fetch(`${baseUrl}/api/teams/999`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Ghost Team' })
+    });
+    assert.strictEqual(res.status, 404);
+    const body = await res.json();
+    assert.ok(body.error);
+  });
+
   test('POST /api/teams creates a new team', async () => {
     const res = await fetch(`${baseUrl}/api/teams`, {
       method: 'POST',

@@ -40,6 +40,41 @@ describe('User Routes', () => {
     assert.ok(users.length >= 8);
   });
 
+  test('GET /api/users?role=admin filters by role', async () => {
+    const res = await fetch(`${baseUrl}/api/users?role=admin`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(Array.isArray(users));
+    assert.ok(users.length > 0);
+    assert.ok(users.every(u => u.role === 'admin'));
+  });
+
+  test('GET /api/users?status=inactive filters by status', async () => {
+    const res = await fetch(`${baseUrl}/api/users?status=inactive`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(Array.isArray(users));
+    assert.ok(users.length > 0);
+    assert.ok(users.every(u => u.status === 'inactive'));
+  });
+
+  test('GET /api/users?role=developer&status=active filters by both role and status', async () => {
+    const res = await fetch(`${baseUrl}/api/users?role=developer&status=active`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(Array.isArray(users));
+    assert.ok(users.length > 0);
+    assert.ok(users.every(u => u.role === 'developer' && u.status === 'active'));
+  });
+
+  test('GET /api/users?role=nonexistent returns empty array', async () => {
+    const res = await fetch(`${baseUrl}/api/users?role=nonexistent`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(Array.isArray(users));
+    assert.strictEqual(users.length, 0);
+  });
+
   test('GET /api/users/:id returns user when found', async () => {
     const res = await fetch(`${baseUrl}/api/users/1`);
     assert.strictEqual(res.status, 200);

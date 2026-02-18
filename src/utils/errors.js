@@ -14,6 +14,14 @@ class ValidationError extends Error {
   }
 }
 
+class ConflictError extends Error {
+  constructor(message = 'Resource already exists') {
+    super(message);
+    this.name = 'ConflictError';
+    this.statusCode = 409;
+  }
+}
+
 /**
  * Wraps an async route handler to catch errors and forward to Express error handler
  */
@@ -21,4 +29,4 @@ const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-module.exports = { NotFoundError, ValidationError, asyncHandler };
+module.exports = { NotFoundError, ValidationError, ConflictError, asyncHandler };
