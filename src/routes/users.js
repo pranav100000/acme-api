@@ -4,9 +4,16 @@ const { validateEmail, validateRequired } = require('../middleware/validate');
 
 const router = express.Router();
 
-// GET /api/users - List all users
+// GET /api/users - List all users (supports ?role=X&status=Y query filters)
 router.get('/', async (req, res) => {
-  const users = await db.getAllUsers();
+  let users = await db.getAllUsers();
+  const { role, status } = req.query;
+  if (role) {
+    users = users.filter(u => u.role === role);
+  }
+  if (status) {
+    users = users.filter(u => u.status === status);
+  }
   res.json(users);
 });
 
