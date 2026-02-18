@@ -49,6 +49,8 @@ if (fs.existsSync(indexPath)) {
 // The error handler must be registered before any other error middleware and after all controllers
 Sentry.setupExpressErrorHandler(app);
 
+// TODO: Add rate limiting middleware to prevent abuse of API endpoints
+
 // Fallthrough error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
