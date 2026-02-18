@@ -135,4 +135,43 @@ describe('User Routes', () => {
     assert.strictEqual(body.message, 'User deactivated');
     assert.strictEqual(body.user.status, 'inactive');
   });
+
+  test('GET /api/users?status=active filters by status', async () => {
+    const res = await fetch(`${baseUrl}/api/users?status=active`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(users.length > 0);
+    assert.ok(users.every(u => u.status === 'active'));
+  });
+
+  test('GET /api/users?role=admin filters by role', async () => {
+    const res = await fetch(`${baseUrl}/api/users?role=admin`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(users.length > 0);
+    assert.ok(users.every(u => u.role === 'admin'));
+  });
+
+  test('GET /api/users?search=alice searches by name or email', async () => {
+    const res = await fetch(`${baseUrl}/api/users?search=alice`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.strictEqual(users.length, 1);
+    assert.strictEqual(users[0].name, 'Alice Chen');
+  });
+
+  test('GET /api/users?search=acme.com returns all users with matching email', async () => {
+    const res = await fetch(`${baseUrl}/api/users?search=acme.com`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(users.length >= 8);
+  });
+
+  test('GET /api/users?status=active&role=developer combines filters', async () => {
+    const res = await fetch(`${baseUrl}/api/users?status=active&role=developer`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(users.length > 0);
+    assert.ok(users.every(u => u.status === 'active' && u.role === 'developer'));
+  });
 });

@@ -23,7 +23,10 @@ async function request(path, options = {}) {
 }
 
 // Users
-export const getUsers = () => request('/users');
+export const getUsers = (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return request(`/users${query ? `?${query}` : ''}`);
+};
 export const getUser = (id) => request(`/users/${id}`);
 export const getUserProfile = (id) => request(`/users/${id}/profile`);
 export const createUser = (data) => request('/users', { method: 'POST', body: JSON.stringify(data) });
@@ -41,6 +44,9 @@ export const removeTeamMember = (teamId, userId) => request(`/teams/${teamId}/me
 // Auth
 export const login = (email) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email }) });
 export const logout = () => request('/auth/logout', { method: 'POST' });
+
+// Stats
+export const getStats = () => request('/stats');
 
 // Health
 export const healthCheck = () => fetch('/health').then(r => r.json());
