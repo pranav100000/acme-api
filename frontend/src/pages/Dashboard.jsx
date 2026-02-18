@@ -20,12 +20,14 @@ export default function Dashboard() {
         setTeams(teamsData);
         setHealth(healthData);
       } catch (err) {
+        // TODO: Display a user-facing error message instead of only logging to console
         console.error('Failed to load dashboard data:', err);
       } finally {
         setLoading(false);
       }
     }
     fetchData();
+    // TODO: Add auto-refresh interval to keep dashboard data up to date
   }, []);
 
   if (loading) {

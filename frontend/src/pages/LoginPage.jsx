@@ -8,6 +8,8 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // TODO: Add a password field for proper authentication
+  // TODO: Add "Remember me" checkbox to persist session
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

@@ -13,6 +13,8 @@ export function useAuth() {
 }
 
 export default function App() {
+  // TODO: Replace localStorage with secure HTTP-only cookies for auth state
+  // TODO: Add token expiration checks and automatic refresh logic
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('acme_user');
     return saved ? JSON.parse(saved) : null;
@@ -43,6 +45,7 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/teams" element={<TeamsPage />} />
+          {/* TODO: Add a dedicated 404 Not Found page instead of redirecting */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

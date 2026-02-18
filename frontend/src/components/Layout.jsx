@@ -2,6 +2,8 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../App';
 
+// TODO: Add responsive sidebar that collapses on mobile screens
+// TODO: Add a notification bell/indicator for system alerts
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
 
