@@ -1,19 +1,8 @@
 const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
-const express = require('express');
 const db = require('../db');
+const { createTestApp } = require('../test-utils');
 const userRoutes = require('./users');
-
-function createApp() {
-  const app = express();
-  app.use(express.json());
-  app.use('/api/users', userRoutes);
-  app.use((err, req, res, next) => {
-    const status = err.statusCode || 500;
-    res.status(status).json({ error: err.message || 'Internal server error' });
-  });
-  return app;
-}
 
 describe('User Routes', () => {
   let server;
@@ -21,7 +10,7 @@ describe('User Routes', () => {
 
   before(async () => {
     db._reset();
-    const app = createApp();
+    const app = createTestApp('/api/users', userRoutes);
     server = app.listen(0);
     const { port } = server.address();
     baseUrl = `http://localhost:${port}`;
@@ -145,5 +134,44 @@ describe('User Routes', () => {
     const body = await res.json();
     assert.strictEqual(body.message, 'User deactivated');
     assert.strictEqual(body.user.status, 'inactive');
+  });
+
+  test('GET /api/users?status=active filters by status', async () => {
+    const res = await fetch(`${baseUrl}/api/users?status=active`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(users.length > 0);
+    assert.ok(users.every(u => u.status === 'active'));
+  });
+
+  test('GET /api/users?role=admin filters by role', async () => {
+    const res = await fetch(`${baseUrl}/api/users?role=admin`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(users.length > 0);
+    assert.ok(users.every(u => u.role === 'admin'));
+  });
+
+  test('GET /api/users?search=alice searches by name or email', async () => {
+    const res = await fetch(`${baseUrl}/api/users?search=alice`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.strictEqual(users.length, 1);
+    assert.strictEqual(users[0].name, 'Alice Chen');
+  });
+
+  test('GET /api/users?search=acme.com returns all users with matching email', async () => {
+    const res = await fetch(`${baseUrl}/api/users?search=acme.com`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(users.length >= 8);
+  });
+
+  test('GET /api/users?status=active&role=developer combines filters', async () => {
+    const res = await fetch(`${baseUrl}/api/users?status=active&role=developer`);
+    assert.strictEqual(res.status, 200);
+    const users = await res.json();
+    assert.ok(users.length > 0);
+    assert.ok(users.every(u => u.status === 'active' && u.role === 'developer'));
   });
 });

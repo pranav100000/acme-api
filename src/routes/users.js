@@ -4,9 +4,25 @@ const { validateEmail, validateRequired } = require('../middleware/validate');
 
 const router = express.Router();
 
-// GET /api/users - List all users
+// GET /api/users - List all users (with optional filtering)
 router.get('/', async (req, res) => {
-  const users = await db.getAllUsers();
+  let users = await db.getAllUsers();
+  const { status, role, search } = req.query;
+
+  if (status) {
+    users = users.filter(u => u.status === status);
+  }
+  if (role) {
+    users = users.filter(u => u.role === role);
+  }
+  if (search) {
+    const term = search.toLowerCase();
+    users = users.filter(u =>
+      u.name.toLowerCase().includes(term) ||
+      u.email.toLowerCase().includes(term)
+    );
+  }
+
   res.json(users);
 });
 

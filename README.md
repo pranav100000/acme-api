@@ -55,7 +55,7 @@ The frontend is a React SPA (built with Vite) located in the `frontend/` directo
 - `GET /health` - Health check
 
 ### Users
-- `GET /api/users` - List all users
+- `GET /api/users` - List all users (supports `?status=`, `?role=`, `?search=` query filters)
 - `GET /api/users/:id` - Get user by ID
 - `GET /api/users/:id/profile` - Get user profile
 - `POST /api/users` - Create user
@@ -69,6 +69,9 @@ The frontend is a React SPA (built with Vite) located in the `frontend/` directo
 - `POST /api/teams` - Create team
 - `POST /api/teams/:id/members` - Add member to team
 - `DELETE /api/teams/:id/members/:userId` - Remove member from team
+
+### Stats
+- `GET /api/stats` - Get summary statistics (user counts, team counts, role breakdown)
 
 ### Auth
 - `POST /api/auth/login` - Login with email
