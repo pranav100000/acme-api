@@ -26,6 +26,7 @@ router.get('/:id', async (req, res) => {
   });
 });
 
+// TODO: Add input sanitization for user profile fields
 // GET /api/users/:id/profile - Get user profile
 router.get('/:id/profile', async (req, res) => {
   const user = await db.findUser(req.params.id);
