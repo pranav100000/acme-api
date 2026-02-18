@@ -24,7 +24,12 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // TODO: Add rate limiting middleware to protect API endpoints
 // Routes
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({
+    status: 'ok',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+    environment: config.env
+  });
 });
 
 app.use('/api/users', userRoutes);
