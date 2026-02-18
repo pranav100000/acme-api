@@ -58,6 +58,7 @@ const db = {
     return user;
   },
 
+  // TODO: Replace soft delete with hard delete and cascade removal from teams
   async deleteUser(id) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const user = users.find(u => u.id === id);
