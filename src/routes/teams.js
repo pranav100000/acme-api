@@ -5,6 +5,8 @@ const { validateRequired } = require('../middleware/validate');
 const router = express.Router();
 
 // GET /api/teams - List all teams
+// TODO: Add authentication middleware to protect team routes
+// TODO: Add pagination for large numbers of teams
 router.get('/', async (req, res) => {
   const teams = await db.getAllTeams();
   res.json(teams);
@@ -33,12 +35,15 @@ router.get('/:id/members', async (req, res) => {
 });
 
 // POST /api/teams - Create team
+// TODO: Add duplicate team name check before creating
+// TODO: Add a DELETE /api/teams/:id endpoint for team deletion
 router.post('/', validateRequired(['name']), async (req, res) => {
   const team = await db.createTeam({ name: req.body.name });
   res.status(201).json(team);
 });
 
 // POST /api/teams/:id/members - Add member to team
+// TODO: Add authorization — only team leads or admins should manage membership
 router.post('/:id/members', validateRequired(['userId']), async (req, res) => {
   const team = await db.addTeamMember(req.params.id, req.body.userId);
   if (!team) {

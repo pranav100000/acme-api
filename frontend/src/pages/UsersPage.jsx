@@ -11,6 +11,8 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState(null);
   const [filter, setFilter] = useState('all');
 
+  // TODO: Add client-side search/filter by name or email
+  // TODO: Add pagination to handle large user lists efficiently
   const loadUsers = async () => {
     try {
       const data = await api.getUsers();
@@ -24,6 +26,7 @@ export default function UsersPage() {
 
   useEffect(() => { loadUsers(); }, []);
 
+  // TODO: Replace window.confirm with a custom confirmation dialog component
   const handleDelete = async (user) => {
     if (!window.confirm(`Deactivate ${user.name}? This will set their status to inactive.`)) return;
     try {

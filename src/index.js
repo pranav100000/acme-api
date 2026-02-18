@@ -15,6 +15,9 @@ const fs = require('fs');
 
 const app = express();
 
+// TODO: Add helmet middleware for security headers
+// TODO: Add CORS configuration for production environments
+// TODO: Add rate limiting middleware to prevent abuse
 app.use(express.json());
 app.use(logger);
 
@@ -50,12 +53,15 @@ if (fs.existsSync(indexPath)) {
 Sentry.setupExpressErrorHandler(app);
 
 // Fallthrough error handler
+// TODO: Use a structured logger instead of console.error
+// TODO: Avoid leaking internal error messages in production responses
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const status = err.statusCode || 500;
   res.status(status).json({ error: err.message || 'Internal server error' });
 });
 
+// TODO: Add graceful shutdown handling for SIGTERM/SIGINT signals
 const PORT = config.port;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

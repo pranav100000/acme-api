@@ -1,5 +1,8 @@
 const API_BASE = '/api';
 
+// TODO: Add automatic retry logic with exponential backoff for failed requests
+// TODO: Add request/response interceptors for attaching auth tokens
+// TODO: Add request cancellation support using AbortController
 async function request(path, options = {}) {
   let res;
   try {
@@ -43,4 +46,5 @@ export const login = (email) => request('/auth/login', { method: 'POST', body: J
 export const logout = () => request('/auth/logout', { method: 'POST' });
 
 // Health
+// TODO: Add a periodic health check with automatic reconnection notifications
 export const healthCheck = () => fetch('/health').then(r => r.json());

@@ -1,3 +1,6 @@
+// TODO: Replace in-memory storage with a real database (e.g., PostgreSQL, MongoDB)
+// TODO: Add input sanitization to all database operations
+// TODO: Add indexing for frequently queried fields (email, status)
 const users = [
   { id: '1', email: 'alice@acme.com', name: 'Alice Chen', role: 'admin', status: 'active', createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-01-15T08:00:00Z' },
   { id: '2', email: 'bob@acme.com', name: 'Bob Smith', role: 'developer', status: 'active', createdAt: '2024-01-16T09:30:00Z', updatedAt: '2024-02-01T14:00:00Z' },
@@ -21,6 +24,7 @@ const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
 
 const db = {
   async findUser(id) {
+    // TODO: Validate that id is a valid format before querying
     await new Promise(resolve => setTimeout(resolve, 10));
     return users.find(u => u.id === id) || null;
   },
@@ -36,6 +40,8 @@ const db = {
   },
 
   async createUser({ email, name, role }) {
+    // TODO: Use UUIDs instead of auto-incrementing integer IDs
+    // TODO: Add unique constraint check on email at the database level
     await new Promise(resolve => setTimeout(resolve, 10));
     const id = String(Math.max(...users.map(u => parseInt(u.id))) + 1);
     const now = new Date().toISOString();
@@ -59,6 +65,7 @@ const db = {
   },
 
   async deleteUser(id) {
+    // TODO: Add support for hard delete with cascading removal from teams
     await new Promise(resolve => setTimeout(resolve, 10));
     const user = users.find(u => u.id === id);
     if (!user) return null;
@@ -114,6 +121,7 @@ const db = {
     return team;
   },
 
+  // TODO: Ensure this method is only available in test environments
   /**
    * Resets database to initial state (for testing)
    */

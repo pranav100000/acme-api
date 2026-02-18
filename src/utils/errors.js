@@ -1,3 +1,5 @@
+// TODO: Add more specific error types (e.g., UnauthorizedError, ForbiddenError, ConflictError)
+// TODO: Add error codes in addition to messages for programmatic error handling
 class NotFoundError extends Error {
   constructor(message = 'Not found') {
     super(message);

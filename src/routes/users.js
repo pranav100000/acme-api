@@ -5,6 +5,9 @@ const { validateEmail, validateRequired } = require('../middleware/validate');
 const router = express.Router();
 
 // GET /api/users - List all users
+// TODO: Add pagination support (limit, offset query params)
+// TODO: Add filtering and search query parameters
+// TODO: Add authentication middleware to protect this route
 router.get('/', async (req, res) => {
   const users = await db.getAllUsers();
   res.json(users);
@@ -53,6 +56,8 @@ router.post('/', validateRequired(['email', 'name']), validateEmail, async (req,
 });
 
 // PATCH /api/users/:id - Update user
+// TODO: Add input validation for update fields (e.g., valid roles, email format)
+// TODO: Add authorization check — only admins or the user themselves should be able to update
 router.patch('/:id', async (req, res) => {
   const user = await db.updateUser(req.params.id, req.body);
   if (!user) {

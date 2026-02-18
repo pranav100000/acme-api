@@ -12,6 +12,8 @@ export default function TeamsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [addMemberTeam, setAddMemberTeam] = useState(null);
 
+  // TODO: Add search/filter functionality for teams
+  // TODO: Add ability to delete teams
   const loadData = async () => {
     try {
       const [teamsData, usersData] = await Promise.all([
@@ -43,6 +45,7 @@ export default function TeamsPage() {
 
   useEffect(() => { loadData(); }, []);
 
+  // TODO: Replace window.confirm with a custom confirmation dialog component
   const handleRemoveMember = async (teamId, userId, userName) => {
     if (!window.confirm(`Remove ${userName} from this team?`)) return;
     try {
