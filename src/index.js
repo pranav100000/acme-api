@@ -21,6 +21,7 @@ app.use(logger);
 // Serve static frontend files in production
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// TODO: Add rate limiting middleware to protect API endpoints
 // Routes
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
