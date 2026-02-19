@@ -21,6 +21,7 @@ app.use(logger);
 // Serve static frontend files in production
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// TODO: Add rate limiting middleware to protect API endpoints from abuse
 // Routes
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -49,6 +50,7 @@ if (fs.existsSync(indexPath)) {
 // The error handler must be registered before any other error middleware and after all controllers
 Sentry.setupExpressErrorHandler(app);
 
+// TODO: Add request validation and sanitization middleware for incoming payloads
 // Fallthrough error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
