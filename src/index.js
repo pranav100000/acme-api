@@ -17,6 +17,7 @@ const app = express();
 
 app.use(express.json());
 app.use(logger);
+// TODO: Add rate limiting middleware to prevent abuse
 
 // Serve static frontend files in production
 app.use(express.static(path.join(__dirname, '..', 'public')));
