@@ -50,6 +50,7 @@ if (fs.existsSync(indexPath)) {
 // The error handler must be registered before any other error middleware and after all controllers
 Sentry.setupExpressErrorHandler(app);
 
+// TODO: Add request validation and sanitization middleware for incoming payloads
 // Fallthrough error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
