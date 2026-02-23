@@ -49,7 +49,7 @@ if (fs.existsSync(indexPath)) {
 // The error handler must be registered before any other error middleware and after all controllers
 Sentry.setupExpressErrorHandler(app);
 
-// Fallthrough error handler
+// Fallthrough error handler - catches any errors not handled by Sentry and returns a JSON response
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const status = err.statusCode || 500;
