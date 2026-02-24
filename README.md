@@ -2,12 +2,15 @@
 
 Internal API service for Acme Corp — with a React admin dashboard frontend.
 
-## Setup
+## Quick Start
 
 ```bash
 cp .env.example .env
 npm install
+npm run dev:all
 ```
+
+This starts the API on [http://localhost:3000](http://localhost:3000) and the frontend on [http://localhost:5173](http://localhost:5173).
 
 ## Development
 
@@ -15,7 +18,7 @@ npm install
 ```bash
 npm run dev
 ```
-The API runs on http://localhost:3000.
+The API runs on http://localhost:3000 with automatic restart on file changes.
 
 ### Frontend only (with hot reload)
 ```bash
@@ -34,6 +37,28 @@ npm run build:frontend
 npm start
 ```
 This builds the React frontend into `public/` and serves it from the Express server at http://localhost:3000.
+
+## Project Structure
+
+```
+acme-api/
+├── src/                      # Express backend
+│   ├── index.js              # App entry point
+│   ├── config.js             # Environment config
+│   ├── db.js                 # In-memory database
+│   ├── middleware/            # Logger, validation
+│   ├── routes/               # API route handlers + tests
+│   └── utils/                # Error classes, helpers
+├── frontend/                 # React SPA
+│   └── src/
+│       ├── App.jsx           # Root component + auth
+│       ├── api.js            # API client
+│       ├── components/       # Layout, Modal
+│       └── pages/            # Dashboard, Users, Teams, Login
+└── docs/                     # Documentation
+    ├── API.md                # Full API reference
+    └── ARCHITECTURE.md       # Architecture guide
+```
 
 ## Frontend
 
@@ -74,16 +99,29 @@ The frontend is a React SPA (built with Vite) located in the `frontend/` directo
 - `POST /api/auth/login` - Login with email
 - `POST /api/auth/logout` - Logout
 
+For detailed request/response examples, see [docs/API.md](docs/API.md).
+
 ## Testing
 
 ```bash
-npm test
+npm test              # Run all 23 tests
+npm run test:watch    # Run in watch mode
 ```
+
+Tests use Node.js built-in test runner (`node --test`) with co-located test files alongside route handlers.
 
 ## Environment Variables
 
 See `.env.example` for all available configuration options.
 
-- `PORT` - Server port (default: 3000)
-- `SENTRY_DSN` - Sentry DSN for error tracking
-- `NODE_ENV` - Environment (default: development)
+| Variable    | Default       | Description                          |
+|-------------|---------------|--------------------------------------|
+| `PORT`      | `3000`        | Server port                          |
+| `SENTRY_DSN`| —            | Sentry DSN for error tracking        |
+| `NODE_ENV`  | `development` | Environment (`development`, `production`) |
+
+## Documentation
+
+- **[API Reference](docs/API.md)** — Complete endpoint documentation with request/response examples
+- **[Architecture Guide](docs/ARCHITECTURE.md)** — Project structure, design decisions, and data flow
+- **[Contributing Guide](CONTRIBUTING.md)** — Development workflow, coding standards, and testing practices
