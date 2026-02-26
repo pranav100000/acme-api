@@ -6,6 +6,7 @@ const express = require('express');
 require('express-async-errors');
 const config = require('./config');
 const logger = require('./middleware/logger');
+const { authenticate } = require('./middleware/auth');
 const userRoutes = require('./routes/users');
 const teamRoutes = require('./routes/teams');
 const authRoutes = require('./routes/auth');
@@ -26,9 +27,12 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.use('/api/users', userRoutes);
-app.use('/api/teams', teamRoutes);
+// Auth routes are public (login doesn't require a token)
 app.use('/api/auth', authRoutes);
+
+// Protected routes - require valid JWT token
+app.use('/api/users', authenticate, userRoutes);
+app.use('/api/teams', authenticate, teamRoutes);
 
 // Sentry test route
 app.get("/debug-sentry", function mainHandler(req, res) {

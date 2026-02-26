@@ -1,9 +1,20 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../App';
+import * as api from '../api';
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch (err) {
+      // Even if server logout fails, clear local state
+      console.error('Logout API call failed:', err);
+    }
+    logout();
+  };
 
   return (
     <div className="app-layout">
@@ -45,7 +56,7 @@ export default function Layout({ children }) {
               </div>
             </div>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               title="Logout"
               style={{
                 background: 'transparent', border: 'none', color: '#9ca3af',
