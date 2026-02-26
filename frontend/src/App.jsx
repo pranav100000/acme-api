@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import UsersPage from './pages/UsersPage';
 import TeamsPage from './pages/TeamsPage';
 import LoginPage from './pages/LoginPage';
+import { setToken } from './api';
 
 export const AuthContext = createContext(null);
 
@@ -18,14 +19,16 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  const handleLogin = (userData) => {
+  const handleLogin = (userData, token) => {
     setUser(userData);
     localStorage.setItem('acme_user', JSON.stringify(userData));
+    setToken(token);
   };
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('acme_user');
+    setToken(null);
   };
 
   if (!user) {

@@ -1,12 +1,16 @@
+// Pre-hashed passwords using bcryptjs (all passwords are 'password123' for demo)
+// Generated with: bcryptjs.hashSync('password123', 10)
+const DEMO_PASSWORD_HASH = '$2b$10$8dKqwd2QJ4o7CusqPZ4nXORo0wMgHkJQiBjdfLoA3I6ETJI3q/w02';
+
 const users = [
-  { id: '1', email: 'alice@acme.com', name: 'Alice Chen', role: 'admin', status: 'active', createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-01-15T08:00:00Z' },
-  { id: '2', email: 'bob@acme.com', name: 'Bob Smith', role: 'developer', status: 'active', createdAt: '2024-01-16T09:30:00Z', updatedAt: '2024-02-01T14:00:00Z' },
-  { id: '3', email: 'carol@acme.com', name: 'Carol Jones', role: 'developer', status: 'active', createdAt: '2024-01-20T11:00:00Z', updatedAt: '2024-01-20T11:00:00Z' },
-  { id: '4', email: 'david@acme.com', name: 'David Park', role: 'designer', status: 'active', createdAt: '2024-02-01T10:00:00Z', updatedAt: '2024-02-01T10:00:00Z' },
-  { id: '5', email: 'eve@acme.com', name: 'Eve Martinez', role: 'developer', status: 'active', createdAt: '2024-02-05T13:00:00Z', updatedAt: '2024-03-10T09:00:00Z' },
-  { id: '6', email: 'frank@acme.com', name: 'Frank Wilson', role: 'product_manager', status: 'active', createdAt: '2024-02-10T08:30:00Z', updatedAt: '2024-02-10T08:30:00Z' },
-  { id: '7', email: 'grace@acme.com', name: 'Grace Lee', role: 'developer', status: 'inactive', createdAt: '2024-01-10T07:00:00Z', updatedAt: '2024-03-15T16:00:00Z' },
-  { id: '8', email: 'henry@acme.com', name: 'Henry Taylor', role: 'developer', status: 'pending', createdAt: '2024-03-20T12:00:00Z', updatedAt: '2024-03-20T12:00:00Z' },
+  { id: '1', email: 'alice@acme.com', name: 'Alice Chen', role: 'admin', status: 'active', passwordHash: DEMO_PASSWORD_HASH, createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-01-15T08:00:00Z' },
+  { id: '2', email: 'bob@acme.com', name: 'Bob Smith', role: 'developer', status: 'active', passwordHash: DEMO_PASSWORD_HASH, createdAt: '2024-01-16T09:30:00Z', updatedAt: '2024-02-01T14:00:00Z' },
+  { id: '3', email: 'carol@acme.com', name: 'Carol Jones', role: 'developer', status: 'active', passwordHash: DEMO_PASSWORD_HASH, createdAt: '2024-01-20T11:00:00Z', updatedAt: '2024-01-20T11:00:00Z' },
+  { id: '4', email: 'david@acme.com', name: 'David Park', role: 'designer', status: 'active', passwordHash: DEMO_PASSWORD_HASH, createdAt: '2024-02-01T10:00:00Z', updatedAt: '2024-02-01T10:00:00Z' },
+  { id: '5', email: 'eve@acme.com', name: 'Eve Martinez', role: 'developer', status: 'active', passwordHash: DEMO_PASSWORD_HASH, createdAt: '2024-02-05T13:00:00Z', updatedAt: '2024-03-10T09:00:00Z' },
+  { id: '6', email: 'frank@acme.com', name: 'Frank Wilson', role: 'product_manager', status: 'active', passwordHash: DEMO_PASSWORD_HASH, createdAt: '2024-02-10T08:30:00Z', updatedAt: '2024-02-10T08:30:00Z' },
+  { id: '7', email: 'grace@acme.com', name: 'Grace Lee', role: 'developer', status: 'inactive', passwordHash: DEMO_PASSWORD_HASH, createdAt: '2024-01-10T07:00:00Z', updatedAt: '2024-03-15T16:00:00Z' },
+  { id: '8', email: 'henry@acme.com', name: 'Henry Taylor', role: 'developer', status: 'pending', passwordHash: DEMO_PASSWORD_HASH, createdAt: '2024-03-20T12:00:00Z', updatedAt: '2024-03-20T12:00:00Z' },
 ];
 
 const teams = [
@@ -19,7 +23,33 @@ const teams = [
 const initialUsers = users.map(u => ({ ...u }));
 const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
 
+// In-memory store for invalidated JWT tokens (logout)
+const invalidatedTokens = new Set();
+
 const db = {
+  /**
+   * Returns a user object without the passwordHash field
+   */
+  toSafeUser(user) {
+    if (!user) return null;
+    const { passwordHash, ...safeUser } = user;
+    return safeUser;
+  },
+
+  /**
+   * Add a token to the invalidated set (for logout)
+   */
+  invalidateToken(token) {
+    invalidatedTokens.add(token);
+  },
+
+  /**
+   * Check if a token has been invalidated
+   */
+  isTokenInvalidated(token) {
+    return invalidatedTokens.has(token);
+  },
+
   async findUser(id) {
     await new Promise(resolve => setTimeout(resolve, 10));
     return users.find(u => u.id === id) || null;
@@ -35,11 +65,11 @@ const db = {
     return users;
   },
 
-  async createUser({ email, name, role }) {
+  async createUser({ email, name, role, passwordHash }) {
     await new Promise(resolve => setTimeout(resolve, 10));
     const id = String(Math.max(...users.map(u => parseInt(u.id))) + 1);
     const now = new Date().toISOString();
-    const user = { id, email, name, role: role || 'developer', status: 'active', createdAt: now, updatedAt: now };
+    const user = { id, email, name, role: role || 'developer', status: 'active', passwordHash: passwordHash || DEMO_PASSWORD_HASH, createdAt: now, updatedAt: now };
     users.push(user);
     return user;
   },
@@ -122,6 +152,7 @@ const db = {
     users.push(...initialUsers.map(u => ({ ...u })));
     teams.length = 0;
     teams.push(...initialTeams.map(t => ({ ...t, members: [...t.members] })));
+    invalidatedTokens.clear();
   }
 };
 

@@ -5,6 +5,7 @@ import * as api from '../api';
 export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -13,8 +14,8 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const data = await api.login(email);
-      login(data.user);
+      const data = await api.login(email, password);
+      login(data.user, data.token);
     } catch (err) {
       setError(err.message || 'Login failed');
     } finally {
@@ -44,6 +45,18 @@ export default function LoginPage() {
               autoFocus
             />
           </div>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              className="form-control"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
           <button
             type="submit"
             className="btn btn-primary"
@@ -60,6 +73,9 @@ export default function LoginPage() {
             <code>alice@acme.com</code> (admin)
             <code>bob@acme.com</code> (developer)
             <code>frank@acme.com</code> (product manager)
+          </div>
+          <div style={{ marginTop: '8px', fontSize: '12px', color: '#9ca3af' }}>
+            Password for all accounts: <code>password123</code>
           </div>
         </div>
       </div>
