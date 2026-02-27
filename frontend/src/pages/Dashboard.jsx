@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as api from '../api';
+import { formatRole } from '../utils/format';
 
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
@@ -103,7 +104,7 @@ export default function Dashboard() {
                         <div style={{ fontWeight: 500 }}>{user.name}</div>
                         <div style={{ fontSize: '12px', color: '#6b7280' }}>{user.email}</div>
                       </td>
-                      <td><span className={`badge badge-${user.role}`}>{user.role.replace('_', ' ')}</span></td>
+                      <td><span className={`badge badge-${user.role}`}>{formatRole(user.role)}</span></td>
                       <td><span className={`badge badge-${user.status}`}>{user.status}</span></td>
                     </tr>
                   ))}
