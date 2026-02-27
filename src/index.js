@@ -9,6 +9,7 @@ const logger = require('./middleware/logger');
 const userRoutes = require('./routes/users');
 const teamRoutes = require('./routes/teams');
 const authRoutes = require('./routes/auth');
+const { authenticate } = require('./middleware/auth');
 
 const path = require('path');
 const fs = require('fs');
@@ -26,9 +27,9 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.use('/api/users', userRoutes);
-app.use('/api/teams', teamRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/users', authenticate, userRoutes);
+app.use('/api/teams', authenticate, teamRoutes);
 
 // Sentry test route
 app.get("/debug-sentry", function mainHandler(req, res) {
