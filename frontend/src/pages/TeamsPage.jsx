@@ -1,7 +1,18 @@
+/**
+ * @module TeamsPage
+ * @description Teams management page for viewing, creating teams and managing team membership.
+ */
+
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
 
+/**
+ * Teams page component.
+ * Displays all teams as cards with their members, and provides modals
+ * for creating new teams and adding/removing members.
+ * @returns {React.ReactElement} The rendered teams management page
+ */
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
   const [users, setUsers] = useState([]);
@@ -12,6 +23,10 @@ export default function TeamsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [addMemberTeam, setAddMemberTeam] = useState(null);
 
+  /**
+   * Loads all teams, users, and team membership data from the API.
+   * Populates the teams, users, and teamMembers state.
+   */
   const loadData = async () => {
     try {
       const [teamsData, usersData] = await Promise.all([
@@ -43,6 +58,12 @@ export default function TeamsPage() {
 
   useEffect(() => { loadData(); }, []);
 
+  /**
+   * Removes a member from a team after user confirmation.
+   * @param {string} teamId - The team's ID
+   * @param {string} userId - The user's ID to remove
+   * @param {string} userName - The user's name (for confirmation dialog)
+   */
   const handleRemoveMember = async (teamId, userId, userName) => {
     if (!window.confirm(`Remove ${userName} from this team?`)) return;
     try {
@@ -166,11 +187,22 @@ export default function TeamsPage() {
   );
 }
 
+/**
+ * Modal form for creating a new team.
+ * @param {Object} props
+ * @param {Function} props.onClose - Callback to close the modal
+ * @param {Function} props.onCreated - Callback invoked after successful team creation
+ * @returns {React.ReactElement} The create team modal form
+ */
 function CreateTeamModal({ onClose, onCreated }) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Handles team creation form submission.
+   * @param {React.FormEvent<HTMLFormElement>} e - Form submit event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -211,6 +243,17 @@ function CreateTeamModal({ onClose, onCreated }) {
   );
 }
 
+/**
+ * Modal for adding a new member to a team.
+ * Shows a dropdown of available active users who are not already members.
+ * @param {Object} props
+ * @param {Object} props.team - The team object to add a member to
+ * @param {Array<Object>} props.users - All available users
+ * @param {Array<Object>} props.currentMembers - Users currently in the team
+ * @param {Function} props.onClose - Callback to close the modal
+ * @param {Function} props.onAdded - Callback invoked after successfully adding a member
+ * @returns {React.ReactElement} The add member modal form
+ */
 function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [error, setError] = useState('');
@@ -219,6 +262,10 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
   const currentMemberIds = currentMembers.filter(Boolean).map(m => m.id);
   const availableUsers = users.filter(u => !currentMemberIds.includes(u.id) && u.status === 'active');
 
+  /**
+   * Handles add member form submission.
+   * @param {React.FormEvent<HTMLFormElement>} e - Form submit event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedUserId) return;

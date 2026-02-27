@@ -1,14 +1,33 @@
+/**
+ * @module Dashboard
+ * @description Dashboard page displaying summary statistics, recent users,
+ * teams overview, and API health status.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as api from '../api';
 
+/**
+ * Dashboard page component.
+ * Fetches users, teams, and health data on mount and displays:
+ * - Summary stat cards (total users, teams, roles, API status)
+ * - Recent users table (5 most recently created)
+ * - Teams overview table
+ * @returns {React.ReactElement} The rendered dashboard page
+ */
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  /** Fetch all dashboard data on component mount */
   useEffect(() => {
+    /**
+     * Loads users, teams, and health check data in parallel.
+     * Sets loading to false when complete, regardless of success or failure.
+     */
     async function fetchData() {
       try {
         const [usersData, teamsData, healthData] = await Promise.all([

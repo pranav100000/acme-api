@@ -1,7 +1,17 @@
+/**
+ * @module UsersPage
+ * @description User management page for viewing, creating, editing, and deactivating users.
+ */
+
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
 
+/**
+ * Users page component.
+ * Displays a filterable table of all users with actions to create, edit, and deactivate.
+ * @returns {React.ReactElement} The rendered users management page
+ */
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,6 +21,9 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState(null);
   const [filter, setFilter] = useState('all');
 
+  /**
+   * Fetches the full user list from the API and updates state.
+   */
   const loadUsers = async () => {
     try {
       const data = await api.getUsers();
@@ -24,6 +37,10 @@ export default function UsersPage() {
 
   useEffect(() => { loadUsers(); }, []);
 
+  /**
+   * Deactivates a user after confirmation dialog.
+   * @param {Object} user - The user object to deactivate
+   */
   const handleDelete = async (user) => {
     if (!window.confirm(`Deactivate ${user.name}? This will set their status to inactive.`)) return;
     try {
@@ -157,11 +174,22 @@ export default function UsersPage() {
   );
 }
 
+/**
+ * Modal form for creating a new user.
+ * @param {Object} props
+ * @param {Function} props.onClose - Callback to close the modal
+ * @param {Function} props.onCreated - Callback invoked after successful user creation
+ * @returns {React.ReactElement} The create user modal form
+ */
 function CreateUserModal({ onClose, onCreated }) {
   const [form, setForm] = useState({ name: '', email: '', role: 'developer' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Handles user creation form submission.
+   * @param {React.FormEvent<HTMLFormElement>} e - Form submit event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -208,11 +236,23 @@ function CreateUserModal({ onClose, onCreated }) {
   );
 }
 
+/**
+ * Modal form for editing an existing user's details.
+ * @param {Object} props
+ * @param {Object} props.user - The user object being edited
+ * @param {Function} props.onClose - Callback to close the modal
+ * @param {Function} props.onUpdated - Callback invoked after successful user update
+ * @returns {React.ReactElement} The edit user modal form
+ */
 function EditUserModal({ user, onClose, onUpdated }) {
   const [form, setForm] = useState({ name: user.name, email: user.email, role: user.role, status: user.status });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Handles user edit form submission.
+   * @param {React.FormEvent<HTMLFormElement>} e - Form submit event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

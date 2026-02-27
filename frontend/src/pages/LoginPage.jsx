@@ -1,13 +1,29 @@
+/**
+ * @module LoginPage
+ * @description Login page with email-based authentication form and demo account hints.
+ */
+
 import React, { useState } from 'react';
 import { useAuth } from '../App';
 import * as api from '../api';
 
+/**
+ * Login page component.
+ * Renders an email login form and a list of demo accounts.
+ * On successful authentication, calls the auth context's login handler.
+ * @returns {React.ReactElement} The rendered login page
+ */
 export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Handles login form submission.
+   * Authenticates the user via the API and updates auth context on success.
+   * @param {React.FormEvent<HTMLFormElement>} e - Form submit event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
