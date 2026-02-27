@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import UsersPage from './pages/UsersPage';
 import TeamsPage from './pages/TeamsPage';
 import LoginPage from './pages/LoginPage';
+import * as api from './api';
 
 export const AuthContext = createContext(null);
 
@@ -23,9 +24,15 @@ export default function App() {
     localStorage.setItem('acme_user', JSON.stringify(userData));
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch {
+      // Ignore logout API errors
+    }
     setUser(null);
     localStorage.removeItem('acme_user');
+    localStorage.removeItem('acme_token');
   };
 
   if (!user) {

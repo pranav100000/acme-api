@@ -1,15 +1,57 @@
 const API_BASE = '/api';
 
+/**
+ * Get the stored auth token
+ * @returns {string|null}
+ */
+function getToken() {
+  return localStorage.getItem('acme_token');
+}
+
+/**
+ * Store the auth token
+ * @param {string} token
+ */
+function setToken(token) {
+  localStorage.setItem('acme_token', token);
+}
+
+/**
+ * Remove the stored auth token
+ */
+function removeToken() {
+  localStorage.removeItem('acme_token');
+}
+
 async function request(path, options = {}) {
+  const token = getToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   let res;
   try {
     res = await fetch(`${API_BASE}${path}`, {
-      headers: { 'Content-Type': 'application/json', ...options.headers },
+      headers,
       ...options,
     });
   } catch (err) {
     throw new Error('Network error — unable to reach the server');
   }
+
+  // Handle 401 by clearing token and redirecting to login (skip for auth endpoints)
+  if (res.status === 401 && !path.startsWith('/auth/login') && !path.startsWith('/auth/register')) {
+    removeToken();
+    localStorage.removeItem('acme_user');
+    window.location.href = '/';
+    throw new Error('Session expired. Please log in again.');
+  }
+
   let data;
   try {
     data = await res.json();
@@ -39,8 +81,34 @@ export const addTeamMember = (teamId, userId) => request(`/teams/${teamId}/membe
 export const removeTeamMember = (teamId, userId) => request(`/teams/${teamId}/members/${userId}`, { method: 'DELETE' });
 
 // Auth
-export const login = (email) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email }) });
-export const logout = () => request('/auth/logout', { method: 'POST' });
+export const login = (email, password) => {
+  return request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) })
+    .then(data => {
+      if (data.token) {
+        setToken(data.token);
+      }
+      return data;
+    });
+};
+
+export const register = (email, name, password, role) => {
+  return request('/auth/register', { method: 'POST', body: JSON.stringify({ email, name, password, role }) })
+    .then(data => {
+      if (data.token) {
+        setToken(data.token);
+      }
+      return data;
+    });
+};
+
+export const logout = () => {
+  return request('/auth/logout', { method: 'POST' })
+    .finally(() => {
+      removeToken();
+    });
+};
+
+export const getMe = () => request('/auth/me');
 
 // Health
 export const healthCheck = () => fetch('/health').then(r => r.json());
