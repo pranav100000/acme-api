@@ -1,7 +1,20 @@
+/**
+ * @module Layout
+ * @description Main application layout with sidebar navigation, user info, and content area.
+ */
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../App';
 
+/**
+ * Application shell layout component.
+ * Renders a sidebar with navigation links (Dashboard, Users, Teams),
+ * the logged-in user's avatar and info, a logout button, and the main content area.
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Page content to render in the main area
+ * @returns {React.ReactElement} The layout with sidebar and main content
+ */
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
 

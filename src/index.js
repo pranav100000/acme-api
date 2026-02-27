@@ -1,3 +1,9 @@
+/**
+ * @module index
+ * @description Main application entry point. Configures and starts the Express server
+ * with API routes, static file serving, Sentry error tracking, and SPA fallback.
+ */
+
 // IMPORTANT: Import instrument.js before all other imports
 require("./instrument.js");
 
@@ -49,7 +55,14 @@ if (fs.existsSync(indexPath)) {
 // The error handler must be registered before any other error middleware and after all controllers
 Sentry.setupExpressErrorHandler(app);
 
-// Fallthrough error handler
+/**
+ * Global error handler middleware.
+ * Catches all unhandled errors, logs the stack trace, and returns a JSON error response.
+ * @param {Error} err - The error object
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {import('express').NextFunction} next - Express next function
+ */
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const status = err.statusCode || 500;
