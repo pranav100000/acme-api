@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import { getInitials, formatRole } from '../utils/format';
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
@@ -109,11 +110,11 @@ export default function TeamsPage() {
                           <div key={member.id} className="member-item">
                             <div className="member-info">
                               <div className="member-avatar">
-                                {member.name.split(' ').map(n => n[0]).join('')}
+                                {getInitials(member.name)}
                               </div>
                               <div>
                                 <div style={{ fontWeight: 500, fontSize: '14px' }}>{member.name}</div>
-                                <div style={{ fontSize: '12px', color: '#6b7280' }}>{member.role.replace('_', ' ')}</div>
+                                <div style={{ fontSize: '12px', color: '#6b7280' }}>{formatRole(member.role)}</div>
                               </div>
                             </div>
                             <button
@@ -252,7 +253,7 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
               <option value="">Choose a user...</option>
               {availableUsers.map(user => (
                 <option key={user.id} value={user.id}>
-                  {user.name} ({user.email}) - {user.role.replace('_', ' ')}
+                  {user.name} ({user.email}) - {formatRole(user.role)}
                 </option>
               ))}
             </select>
