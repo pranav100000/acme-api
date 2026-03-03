@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import UsersPage from './pages/UsersPage';
 import TeamsPage from './pages/TeamsPage';
 import LoginPage from './pages/LoginPage';
+import SettingsPage from './pages/SettingsPage';
 
 export const AuthContext = createContext(null);
 
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/teams" element={<TeamsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

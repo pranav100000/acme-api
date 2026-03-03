@@ -16,6 +16,21 @@ const teams = [
   { id: '4', name: 'Infrastructure', members: ['1', '2'], createdAt: '2024-02-01T10:00:00Z', updatedAt: '2024-02-01T14:00:00Z' },
 ];
 
+const settings = {
+  appName: 'Acme Corp',
+  appDescription: 'Internal admin dashboard for managing users and teams',
+  defaultRole: 'developer',
+  allowRegistration: true,
+  requireEmailVerification: false,
+  sessionTimeout: 30,
+  maxTeamSize: 50,
+  maintenanceMode: false,
+  timezone: 'UTC',
+  dateFormat: 'MM/DD/YYYY',
+  updatedAt: '2024-01-15T08:00:00Z',
+};
+
+const initialSettings = { ...settings };
 const initialUsers = users.map(u => ({ ...u }));
 const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
 
@@ -114,6 +129,23 @@ const db = {
     return team;
   },
 
+  async getSettings() {
+    await new Promise(resolve => setTimeout(resolve, 10));
+    return { ...settings };
+  },
+
+  async updateSettings(updates) {
+    await new Promise(resolve => setTimeout(resolve, 10));
+    const allowed = ['appName', 'appDescription', 'defaultRole', 'allowRegistration', 'requireEmailVerification', 'sessionTimeout', 'maxTeamSize', 'maintenanceMode', 'timezone', 'dateFormat'];
+    for (const key of allowed) {
+      if (updates[key] !== undefined) {
+        settings[key] = updates[key];
+      }
+    }
+    settings.updatedAt = new Date().toISOString();
+    return { ...settings };
+  },
+
   /**
    * Resets database to initial state (for testing)
    */
@@ -122,6 +154,7 @@ const db = {
     users.push(...initialUsers.map(u => ({ ...u })));
     teams.length = 0;
     teams.push(...initialTeams.map(t => ({ ...t, members: [...t.members] })));
+    Object.assign(settings, { ...initialSettings });
   }
 };
 
