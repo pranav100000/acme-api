@@ -38,6 +38,10 @@ export const createTeam = (data) => request('/teams', { method: 'POST', body: JS
 export const addTeamMember = (teamId, userId) => request(`/teams/${teamId}/members`, { method: 'POST', body: JSON.stringify({ userId }) });
 export const removeTeamMember = (teamId, userId) => request(`/teams/${teamId}/members/${userId}`, { method: 'DELETE' });
 
+// Settings
+export const getSettings = () => request('/settings');
+export const updateSettings = (data) => request('/settings', { method: 'PATCH', body: JSON.stringify(data) });
+
 // Auth
 export const login = (email) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email }) });
 export const logout = () => request('/auth/logout', { method: 'POST' });
