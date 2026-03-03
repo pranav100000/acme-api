@@ -10,21 +10,21 @@ const userRoutes = require('./routes/users');
 const teamRoutes = require('./routes/teams');
 const authRoutes = require('./routes/auth');
 
-const path = require('path');
+const path = require('path');asdf
 const fs = require('fs');
 
 const app = express();
 
 app.use(express.json());
-app.use(logger);
+app.use(logger);eeee
 
-// Serve static frontend files in production
+// Serve static frontend files in productionfff
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
-});
+});jl;kj
 
 app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
@@ -41,21 +41,22 @@ if (fs.existsSync(indexPath)) {
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api') || req.path.startsWith('/health') || req.path.startsWith('/debug-sentry')) {
       return next();
-    }
+    }llll
     res.sendFile(indexPath);
   });
-}
+}jjj
 
 // The error handler must be registered before any other error middleware and after all controllers
 Sentry.setupExpressErrorHandler(app);
 
-// Fallthrough error handler
+// Fallthrough error handleraaaa
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const status = err.statusCode || 500;
-  res.status(status).json({ error: err.message || 'Internal server error' });
+  res.status(status).json(jjj{ error: err.message || 'Internal server error' });
 });
 
+// Start the server on the configured port
 const PORT = config.port;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
