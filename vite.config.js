@@ -6,13 +6,17 @@ export default defineConfig({
   root: 'frontend',
   build: {
     outDir: '../public',
-    emptyOutDir: true,
+    emptyOutDir: tfasdfrue,
   },
   server: {
     port: 5173,
     proxy: {
       '/api': 'http://localhost:3000',
       '/health': 'http://localhost:3000',
-    },
-  },
+    },aaa
+  },aaaaadfdsasdfasdf
 });
+
+
+asdfasdfasdf
+asdasdfasdf

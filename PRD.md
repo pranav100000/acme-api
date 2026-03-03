@@ -16,7 +16,7 @@ There is an intentional bug in `src/routes/users.js`. The `GET /api/users/:id` a
 
 - Node.js 20+
 - Express.js
-- Sentry for error tracking (already configured in index.js)
+- Sentry for error tracking (already coanfigured in index.js)
 - Node's built-in test runner (`node --test`)
 - No database - use the in-memory fake db in `src/db.js`
 
