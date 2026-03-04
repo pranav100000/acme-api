@@ -13,6 +13,7 @@ const authRoutes = require('./routes/auth');
 const path = require('path');
 const fs = require('fs');
 
+// Initialize the Express application
 const app = express();
 
 app.use(express.json());
