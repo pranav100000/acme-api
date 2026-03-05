@@ -14,6 +14,7 @@ export function useAuth() {
 
 export default function App() {
   const [user, setUser] = useState(() => {
+    // Restore persisted auth state for returning users.
     const saved = localStorage.getItem('acme_user');
     return saved ? JSON.parse(saved) : null;
   });
