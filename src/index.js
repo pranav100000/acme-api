@@ -16,16 +16,19 @@ const fs = require('fs');
 const app = express();
 
 app.use(express.json());
+// Request logger is registered early so all API and static requests are captured.
 app.use(logger);
 
 // Serve static frontend files in production
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes
+// Lightweight health endpoint used by uptime checks and container probes.
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Mount feature-specific API route modules under the /api namespace.
 app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/auth', authRoutes);
