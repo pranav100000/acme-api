@@ -28,6 +28,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Mount feature-specific API route modules under the /api namespace.
 app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/auth', authRoutes);
