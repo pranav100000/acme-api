@@ -26,6 +26,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Mount API route handlers for users, teams, and authentication
 app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/auth', authRoutes);
