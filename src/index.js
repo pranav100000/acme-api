@@ -1,3 +1,4 @@
+// Main application entry point - sets up the Express server, middleware, and routes
 // IMPORTANT: Import instrument.js before all other imports
 require("./instrument.js");
 
