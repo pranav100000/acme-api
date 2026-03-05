@@ -2,6 +2,8 @@
 
 Internal API service for Acme Corp — with a React admin dashboard frontend.
 
+<!-- TODO: Add a short architecture overview and contribution guidelines. -->
+
 ## Setup
 
 ```bash
