@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Load all dashboard data in parallel to keep initial render fast.
     async function fetchData() {
       try {
         const [usersData, teamsData, healthData] = await Promise.all([
