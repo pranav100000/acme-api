@@ -1,10 +1,6 @@
 [
   {
-    "name": "api-server",
-    "command": "node src/index.js"
-  },
-  {
-    "name": "api-server",
-    "command": "node src/index.js"
+    "name": "acme-fullstack-dev-2",
+    "command": "npm run dev:all"
   }
 ]
