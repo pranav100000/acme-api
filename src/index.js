@@ -13,8 +13,10 @@ const authRoutes = require('./routes/auth');
 const path = require('path');
 const fs = require('fs');
 
+// Initialize the Express application
 const app = express();
 
+// Parse incoming JSON request bodies
 app.use(express.json());
 app.use(logger);
 
@@ -56,6 +58,7 @@ app.use((err, req, res, next) => {
   res.status(status).json({ error: err.message || 'Internal server error' });
 });
 
+// Start the server on the configured port
 const PORT = config.port;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
