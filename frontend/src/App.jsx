@@ -13,6 +13,7 @@ export function useAuth() {
 }
 
 export default function App() {
+  // Persist the signed-in user so refreshes keep the dashboard session alive.
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('acme_user');
     return saved ? JSON.parse(saved) : null;
