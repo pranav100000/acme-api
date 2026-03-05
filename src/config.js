@@ -1,3 +1,4 @@
+// Application configuration — centralizes environment variables and default settings.
 const config = {
   port: process.env.PORT || 3000,
   sentryDsn: process.env.SENTRY_DSN,
