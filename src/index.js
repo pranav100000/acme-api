@@ -49,7 +49,6 @@ if (fs.existsSync(indexPath)) {
   });
 }
 
-// Register Sentry's Express error handler before the custom fallback handler.
 // The error handler must be registered before any other error middleware and after all controllers
 Sentry.setupExpressErrorHandler(app);
 
