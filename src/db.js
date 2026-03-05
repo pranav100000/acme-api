@@ -16,6 +16,7 @@ const teams = [
   { id: '4', name: 'Infrastructure', members: ['1', '2'], createdAt: '2024-02-01T10:00:00Z', updatedAt: '2024-02-01T14:00:00Z' },
 ];
 
+// Deep copy initial state so we can reset the database during tests
 const initialUsers = users.map(u => ({ ...u }));
 const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
 
