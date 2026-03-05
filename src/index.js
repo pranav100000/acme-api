@@ -22,6 +22,7 @@ app.use(logger);
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes
+// Health check endpoint for uptime monitoring
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
