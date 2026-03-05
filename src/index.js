@@ -23,6 +23,7 @@ app.use(logger);
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes
+// Lightweight health endpoint used by uptime checks and container probes.
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
