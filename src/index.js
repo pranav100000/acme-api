@@ -16,6 +16,7 @@ const fs = require('fs');
 const app = express();
 
 app.use(express.json());
+// Request logger is registered early so all API and static requests are captured.
 app.use(logger);
 
 // Serve static frontend files in production
