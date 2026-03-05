@@ -1,10 +1,10 @@
 [
   {
-    "name": "api-server",
-    "command": "node src/index.js"
+    "name": "backend-server",
+    "command": "npm run dev"
   },
   {
-    "name": "api-server",
-    "command": "node src/index.js"
+    "name": "frontend-server",
+    "command": "npm run dev:frontend"
   }
 ]
