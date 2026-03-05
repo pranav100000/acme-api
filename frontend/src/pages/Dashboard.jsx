@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Homepage dashboard loads users, teams, and API health in parallel for a quick summary view.
     async function fetchData() {
       try {
         const [usersData, teamsData, healthData] = await Promise.all([
