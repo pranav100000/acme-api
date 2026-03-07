@@ -40,6 +40,7 @@ export default function Dashboard() {
 
   const activeUsers = users.filter(u => u.status === 'active').length;
   const pendingUsers = users.filter(u => u.status === 'pending').length;
+  // Show the newest accounts first so recent activity is easy to scan.
   const recentUsers = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
 
   return (
@@ -66,6 +67,7 @@ export default function Dashboard() {
           <div className="stat-card">
             <div className="stat-label">Teams</div>
             <div className="stat-value">{teams.length}</div>
+            {/* Count every team-member relationship so shared users are reflected accurately. */}
             <div className="stat-detail">{teams.reduce((sum, t) => sum + t.members.length, 0)} total memberships</div>
           </div>
           <div className="stat-card">
