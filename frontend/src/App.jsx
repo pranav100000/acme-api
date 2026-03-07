@@ -1,5 +1,6 @@
 import React, { useState, createContext, useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import * as api from './api';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import UsersPage from './pages/UsersPage';
@@ -23,9 +24,15 @@ export default function App() {
     localStorage.setItem('acme_user', JSON.stringify(userData));
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('acme_user');
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch (err) {
+      console.error('Logout request failed:', err);
+    } finally {
+      setUser(null);
+      localStorage.removeItem('acme_user');
+    }
   };
 
   if (!user) {

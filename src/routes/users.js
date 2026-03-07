@@ -54,7 +54,25 @@ router.post('/', validateRequired(['email', 'name']), validateEmail, async (req,
 
 // PATCH /api/users/:id - Update user
 router.patch('/:id', async (req, res) => {
-  const user = await db.updateUser(req.params.id, req.body);
+  const updates = req.body || {};
+
+  if (Object.keys(updates).length === 0) {
+    return res.status(400).json({ error: 'At least one field is required' });
+  }
+
+  if (updates.email) {
+    const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updates.email);
+    if (!emailIsValid) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    const existing = await db.findUserByEmail(updates.email);
+    if (existing && existing.id !== req.params.id) {
+      return res.status(409).json({ error: 'Email already exists' });
+    }
+  }
+
+  const user = await db.updateUser(req.params.id, updates);
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
