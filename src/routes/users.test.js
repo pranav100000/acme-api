@@ -139,6 +139,51 @@ describe('User Routes', () => {
     assert.strictEqual(user.id, '2');
   });
 
+  test('PATCH /api/users/:id returns 400 for empty update payload', async () => {
+    const res = await fetch(`${baseUrl}/api/users/2`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    assert.strictEqual(res.status, 400);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'At least one field is required');
+  });
+
+  test('PATCH /api/users/:id returns 400 for invalid email update', async () => {
+    const res = await fetch(`${baseUrl}/api/users/2`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'not-an-email' })
+    });
+    assert.strictEqual(res.status, 400);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'Invalid email format');
+  });
+
+  test('PATCH /api/users/:id returns 409 for duplicate email update', async () => {
+    const res = await fetch(`${baseUrl}/api/users/2`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'alice@acme.com' })
+    });
+    assert.strictEqual(res.status, 409);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'Email already exists');
+  });
+
+  test('PATCH /api/users/:id allows keeping the same email', async () => {
+    const res = await fetch(`${baseUrl}/api/users/1`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'alice@acme.com', name: 'Alice Chen' })
+    });
+    assert.strictEqual(res.status, 200);
+    const user = await res.json();
+    assert.strictEqual(user.id, '1');
+    assert.strictEqual(user.email, 'alice@acme.com');
+  });
+
   test('DELETE /api/users/:id soft deletes a user', async () => {
     const res = await fetch(`${baseUrl}/api/users/3`, { method: 'DELETE' });
     assert.strictEqual(res.status, 200);

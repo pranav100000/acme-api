@@ -7,10 +7,12 @@ export default function Dashboard() {
   const [teams, setTeams] = useState([]);
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     async function fetchData() {
       try {
+        setError('');
         const [usersData, teamsData, healthData] = await Promise.all([
           api.getUsers(),
           api.getTeams(),
@@ -20,7 +22,7 @@ export default function Dashboard() {
         setTeams(teamsData);
         setHealth(healthData);
       } catch (err) {
-        console.error('Failed to load dashboard data:', err);
+        setError(err.message || 'Failed to load dashboard data');
       } finally {
         setLoading(false);
       }
@@ -56,6 +58,8 @@ export default function Dashboard() {
         </div>
       </div>
       <div className="page-body">
+        {error && <div className="alert alert-error">{error}</div>}
+
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-label">Total Users</div>
