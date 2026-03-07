@@ -3,6 +3,7 @@ import { useAuth } from '../App';
 import * as api from '../api';
 
 export default function LoginPage() {
+  // Login page for the admin dashboard
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
