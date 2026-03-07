@@ -13,6 +13,7 @@ export function useAuth() {
 }
 
 export default function App() {
+  // Persist the authenticated user so refreshes keep the session in the client.
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('acme_user');
     return saved ? JSON.parse(saved) : null;
