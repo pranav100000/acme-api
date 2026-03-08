@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../App';
 import * as api from '../api';
+import { showTimedMessage } from '../utils/ui';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -16,7 +17,7 @@ export default function LoginPage() {
       const data = await api.login(email);
       login(data.user);
     } catch (err) {
-      setError(err.message || 'Login failed');
+      showTimedMessage(setError, err.message || 'Login failed');
     } finally {
       setLoading(false);
     }

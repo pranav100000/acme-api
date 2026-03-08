@@ -1,11 +1,17 @@
 const API_BASE = '/api';
 
 async function request(path, options = {}) {
+  const { baseUrl = API_BASE, ...fetchOptions } = options;
   let res;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
-      headers: { 'Content-Type': 'application/json', ...options.headers },
-      ...options,
+    const headers = {
+      ...(fetchOptions.body ? { 'Content-Type': 'application/json' } : {}),
+      ...fetchOptions.headers,
+    };
+
+    res = await fetch(`${baseUrl}${path}`, {
+      ...fetchOptions,
+      ...(Object.keys(headers).length > 0 ? { headers } : {}),
     });
   } catch (err) {
     throw new Error('Network error — unable to reach the server');
@@ -43,4 +49,4 @@ export const login = (email) => request('/auth/login', { method: 'POST', body: J
 export const logout = () => request('/auth/logout', { method: 'POST' });
 
 // Health
-export const healthCheck = () => fetch('/health').then(r => r.json());
+export const healthCheck = () => request('/health', { baseUrl: '' });

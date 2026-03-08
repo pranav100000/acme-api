@@ -1,32 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import * as api from '../api';
+import useAsyncData from '../hooks/useAsyncData';
 
 export default function Dashboard() {
-  const [users, setUsers] = useState([]);
-  const [teams, setTeams] = useState([]);
-  const [health, setHealth] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const loadDashboardData = useCallback(async () => {
+    const [users, teams, health] = await Promise.all([
+      api.getUsers(),
+      api.getTeams(),
+      api.healthCheck(),
+    ]);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [usersData, teamsData, healthData] = await Promise.all([
-          api.getUsers(),
-          api.getTeams(),
-          api.healthCheck(),
-        ]);
-        setUsers(usersData);
-        setTeams(teamsData);
-        setHealth(healthData);
-      } catch (err) {
-        console.error('Failed to load dashboard data:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
+    return { users, teams, health };
   }, []);
+
+  const { data, loading, error } = useAsyncData(loadDashboardData, {
+    errorMessage: 'Failed to load dashboard data',
+    initialValue: { users: [], teams: [], health: null },
+  });
+
+  const { users, teams, health } = data;
 
   if (loading) {
     return (
@@ -56,6 +49,7 @@ export default function Dashboard() {
         </div>
       </div>
       <div className="page-body">
+        {error && <div className="alert alert-error">{error}</div>}
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-label">Total Users</div>

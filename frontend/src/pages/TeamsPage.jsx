@@ -1,58 +1,58 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import useAsyncData from '../hooks/useAsyncData';
+import { getInitials, showTimedMessage } from '../utils/ui';
 
 export default function TeamsPage() {
-  const [teams, setTeams] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [teamMembers, setTeamMembers] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const loadTeamsPageData = useCallback(async () => {
+    const [teamsData, usersData] = await Promise.all([
+      api.getTeams(),
+      api.getUsers(),
+    ]);
+
+    const memberEntries = await Promise.all(
+      teamsData.map(async (team) => {
+        try {
+          const members = await api.getTeamMembers(team.id);
+          return [team.id, members];
+        } catch {
+          return [team.id, []];
+        }
+      })
+    );
+
+    return {
+      teams: teamsData,
+      users: usersData,
+      teamMembers: Object.fromEntries(memberEntries),
+    };
+  }, []);
+
+  const {
+    data,
+    loading,
+    error,
+    setError,
+    reload: loadData,
+  } = useAsyncData(loadTeamsPageData, {
+    errorMessage: 'Failed to load teams',
+    initialValue: { teams: [], users: [], teamMembers: {} },
+  });
+
+  const { teams, users, teamMembers } = data;
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [addMemberTeam, setAddMemberTeam] = useState(null);
-
-  const loadData = async () => {
-    try {
-      const [teamsData, usersData] = await Promise.all([
-        api.getTeams(),
-        api.getUsers(),
-      ]);
-      setTeams(teamsData);
-      setUsers(usersData);
-
-      // Load members for each team
-      const membersMap = {};
-      await Promise.all(
-        teamsData.map(async (team) => {
-          try {
-            const members = await api.getTeamMembers(team.id);
-            membersMap[team.id] = members;
-          } catch {
-            membersMap[team.id] = [];
-          }
-        })
-      );
-      setTeamMembers(membersMap);
-    } catch (err) {
-      setError('Failed to load teams');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { loadData(); }, []);
 
   const handleRemoveMember = async (teamId, userId, userName) => {
     if (!window.confirm(`Remove ${userName} from this team?`)) return;
     try {
       await api.removeTeamMember(teamId, userId);
-      setSuccess(`${userName} removed from team`);
-      loadData();
-      setTimeout(() => setSuccess(''), 3000);
+      showTimedMessage(setSuccess, `${userName} removed from team`);
+      await loadData().catch(() => {});
     } catch (err) {
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
+      showTimedMessage(setError, err.message);
     }
   };
 
@@ -109,7 +109,7 @@ export default function TeamsPage() {
                           <div key={member.id} className="member-item">
                             <div className="member-info">
                               <div className="member-avatar">
-                                {member.name.split(' ').map(n => n[0]).join('')}
+                                {getInitials(member.name)}
                               </div>
                               <div>
                                 <div style={{ fontWeight: 500, fontSize: '14px' }}>{member.name}</div>
@@ -149,7 +149,7 @@ export default function TeamsPage() {
       {showCreateModal && (
         <CreateTeamModal
           onClose={() => setShowCreateModal(false)}
-          onCreated={() => { setShowCreateModal(false); loadData(); setSuccess('Team created successfully'); setTimeout(() => setSuccess(''), 3000); }}
+          onCreated={async () => { setShowCreateModal(false); await loadData().catch(() => {}); showTimedMessage(setSuccess, 'Team created successfully'); }}
         />
       )}
 
@@ -159,7 +159,7 @@ export default function TeamsPage() {
           users={users}
           currentMembers={teamMembers[addMemberTeam.id] || []}
           onClose={() => setAddMemberTeam(null)}
-          onAdded={() => { setAddMemberTeam(null); loadData(); setSuccess('Member added successfully'); setTimeout(() => setSuccess(''), 3000); }}
+          onAdded={async () => { setAddMemberTeam(null); await loadData().catch(() => {}); showTimedMessage(setSuccess, 'Member added successfully'); }}
         />
       )}
     </>
