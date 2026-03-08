@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../db');
 const { validateRequired } = require('../middleware/validate');
+const { created, notFound } = require('../utils/http');
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.get('/:id', async (req, res) => {
   const team = await db.findTeam(req.params.id);
 
   if (!team) {
-    return res.status(404).json({ error: 'Team not found' });
+    throw notFound('Team not found');
   }
 
   res.json(team);
@@ -26,7 +27,7 @@ router.get('/:id/members', async (req, res) => {
   const members = await db.getTeamMembers(req.params.id);
 
   if (!members) {
-    return res.status(404).json({ error: 'Team not found' });
+    throw notFound('Team not found');
   }
 
   res.json(members);
@@ -35,14 +36,14 @@ router.get('/:id/members', async (req, res) => {
 // POST /api/teams - Create team
 router.post('/', validateRequired(['name']), async (req, res) => {
   const team = await db.createTeam({ name: req.body.name });
-  res.status(201).json(team);
+  return created(res, team);
 });
 
 // POST /api/teams/:id/members - Add member to team
 router.post('/:id/members', validateRequired(['userId']), async (req, res) => {
   const team = await db.addTeamMember(req.params.id, req.body.userId);
   if (!team) {
-    return res.status(404).json({ error: 'Team or user not found' });
+    throw notFound('Team or user not found');
   }
   res.json(team);
 });
@@ -51,7 +52,7 @@ router.post('/:id/members', validateRequired(['userId']), async (req, res) => {
 router.delete('/:id/members/:userId', async (req, res) => {
   const team = await db.removeTeamMember(req.params.id, req.params.userId);
   if (!team) {
-    return res.status(404).json({ error: 'Team not found' });
+    throw notFound('Team not found');
   }
   res.json(team);
 });

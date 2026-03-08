@@ -1,39 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import useAsyncData from '../hooks/useAsyncData';
+import { getInitials, showTimedMessage } from '../utils/ui';
 
 export default function UsersPage() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const loadUsersList = useCallback(() => api.getUsers(), []);
+
+  const {
+    data: users,
+    loading,
+    error,
+    setError,
+    reload: loadUsers,
+  } = useAsyncData(loadUsersList, { errorMessage: 'Failed to load users', initialValue: [] });
   const [success, setSuccess] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [filter, setFilter] = useState('all');
 
-  const loadUsers = async () => {
-    try {
-      const data = await api.getUsers();
-      setUsers(data);
-    } catch (err) {
-      setError('Failed to load users');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { loadUsers(); }, []);
-
   const handleDelete = async (user) => {
     if (!window.confirm(`Deactivate ${user.name}? This will set their status to inactive.`)) return;
     try {
       await api.deleteUser(user.id);
-      setSuccess(`${user.name} has been deactivated`);
-      loadUsers();
-      setTimeout(() => setSuccess(''), 3000);
+      showTimedMessage(setSuccess, `${user.name} has been deactivated`);
+      await loadUsers().catch(() => {});
     } catch (err) {
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
+      showTimedMessage(setError, err.message);
     }
   };
 
@@ -105,7 +98,7 @@ export default function UsersPage() {
                             alignItems: 'center', justifyContent: 'center',
                             fontSize: '13px', fontWeight: '600', flexShrink: 0
                           }}>
-                            {user.name.split(' ').map(n => n[0]).join('')}
+                            {getInitials(user.name)}
                           </div>
                           <div>
                             <div style={{ fontWeight: 500 }}>{user.name}</div>
@@ -142,7 +135,7 @@ export default function UsersPage() {
       {showCreateModal && (
         <CreateUserModal
           onClose={() => setShowCreateModal(false)}
-          onCreated={() => { setShowCreateModal(false); loadUsers(); setSuccess('User created successfully'); setTimeout(() => setSuccess(''), 3000); }}
+          onCreated={async () => { setShowCreateModal(false); await loadUsers().catch(() => {}); showTimedMessage(setSuccess, 'User created successfully'); }}
         />
       )}
 
@@ -150,7 +143,7 @@ export default function UsersPage() {
         <EditUserModal
           user={editingUser}
           onClose={() => setEditingUser(null)}
-          onUpdated={() => { setEditingUser(null); loadUsers(); setSuccess('User updated successfully'); setTimeout(() => setSuccess(''), 3000); }}
+          onUpdated={async () => { setEditingUser(null); await loadUsers().catch(() => {}); showTimedMessage(setSuccess, 'User updated successfully'); }}
         />
       )}
     </>

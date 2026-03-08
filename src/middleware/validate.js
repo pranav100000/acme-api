@@ -1,10 +1,12 @@
+const { badRequest } = require('../utils/http');
+
 /**
  * Validates email format in request body
  */
 const validateEmail = (req, res, next) => {
   const { email } = req.body;
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ error: 'Invalid email format' });
+    return next(badRequest('Invalid email format'));
   }
   next();
 };
@@ -15,8 +17,9 @@ const validateEmail = (req, res, next) => {
 const validateRequired = (fields) => {
   return (req, res, next) => {
     for (const field of fields) {
-      if (!req.body[field]) {
-        return res.status(400).json({ error: `Missing required field: ${field}` });
+      const value = req.body[field];
+      if (value === undefined || value === null || value === '') {
+        return next(badRequest(`Missing required field: ${field}`));
       }
     }
     next();
