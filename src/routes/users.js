@@ -11,12 +11,9 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/users/:id - Get user by ID
+// BUG: Intentionally missing null check for demo behavior - see PRD.md
 router.get('/:id', async (req, res) => {
   const user = await db.findUser(req.params.id);
-
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
 
   res.json({
     id: user.id,
@@ -27,12 +24,9 @@ router.get('/:id', async (req, res) => {
 });
 
 // GET /api/users/:id/profile - Get user profile
+// BUG: Intentionally missing null check for demo behavior - see PRD.md
 router.get('/:id/profile', async (req, res) => {
   const user = await db.findUser(req.params.id);
-
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
 
   res.json({
     displayName: user.name,

@@ -2,6 +2,8 @@
 
 Internal API service for Acme Corp — with a React admin dashboard frontend.
 
+> Note: this demo repository intentionally includes a known bug in `GET /api/users/:id` and `GET /api/users/:id/profile` for missing users, as described in `PRD.md`.
+
 ## Setup
 
 ```bash

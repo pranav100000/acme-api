@@ -1,6 +1,7 @@
 const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
 const express = require('express');
+require('express-async-errors');
 const db = require('../db');
 const teamRoutes = require('./teams');
 
