@@ -1,3 +1,4 @@
+// In-memory seed data used by the API and that can be reset between tests.
 const users = [
   { id: '1', email: 'alice@acme.com', name: 'Alice Chen', role: 'admin', status: 'active', createdAt: '2024-01-15T08:00:00Z', updatedAt: '2024-01-15T08:00:00Z' },
   { id: '2', email: 'bob@acme.com', name: 'Bob Smith', role: 'developer', status: 'active', createdAt: '2024-01-16T09:30:00Z', updatedAt: '2024-02-01T14:00:00Z' },
@@ -16,6 +17,7 @@ const teams = [
   { id: '4', name: 'Infrastructure', members: ['1', '2'], createdAt: '2024-02-01T10:00:00Z', updatedAt: '2024-02-01T14:00:00Z' },
 ];
 
+// Keep immutable snapshots so tests can restore the original fixture state.
 const initialUsers = users.map(u => ({ ...u }));
 const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
 
@@ -37,6 +39,7 @@ const db = {
 
   async createUser({ email, name, role }) {
     await new Promise(resolve => setTimeout(resolve, 10));
+    // IDs are string-based to mirror common JSON API payloads.
     const id = String(Math.max(...users.map(u => parseInt(u.id))) + 1);
     const now = new Date().toISOString();
     const user = { id, email, name, role: role || 'developer', status: 'active', createdAt: now, updatedAt: now };
@@ -48,6 +51,7 @@ const db = {
     await new Promise(resolve => setTimeout(resolve, 10));
     const user = users.find(u => u.id === id);
     if (!user) return null;
+    // Only allow explicit fields to avoid accidental shape drift.
     const allowed = ['email', 'name', 'role', 'status'];
     for (const key of allowed) {
       if (updates[key] !== undefined) {
@@ -62,6 +66,7 @@ const db = {
     await new Promise(resolve => setTimeout(resolve, 10));
     const user = users.find(u => u.id === id);
     if (!user) return null;
+    // Soft-delete keeps historical team membership and audit metadata intact.
     user.status = 'inactive';
     user.updatedAt = new Date().toISOString();
     return user;
@@ -81,6 +86,7 @@ const db = {
     await new Promise(resolve => setTimeout(resolve, 10));
     const team = teams.find(t => t.id === teamId);
     if (!team) return null;
+    // Member IDs are resolved at read-time so team records stay compact.
     return team.members.map(memberId => users.find(u => u.id === memberId));
   },
 
@@ -98,6 +104,7 @@ const db = {
     const team = teams.find(t => t.id === teamId);
     const user = users.find(u => u.id === userId);
     if (!team || !user) return null;
+    // Duplicate inserts are treated as no-ops for idempotent client retries.
     if (!team.members.includes(userId)) {
       team.members.push(userId);
       team.updatedAt = new Date().toISOString();
@@ -109,6 +116,7 @@ const db = {
     await new Promise(resolve => setTimeout(resolve, 10));
     const team = teams.find(t => t.id === teamId);
     if (!team) return null;
+    // Removal is also idempotent: filtering an absent user leaves data unchanged.
     team.members = team.members.filter(id => id !== userId);
     team.updatedAt = new Date().toISOString();
     return team;

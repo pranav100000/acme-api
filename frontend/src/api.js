@@ -3,6 +3,7 @@ const API_BASE = '/api';
 async function request(path, options = {}) {
   let res;
   try {
+    // Centralized fetch wrapper keeps headers and error behavior consistent.
     res = await fetch(`${API_BASE}${path}`, {
       headers: { 'Content-Type': 'application/json', ...options.headers },
       ...options,
@@ -12,11 +13,13 @@ async function request(path, options = {}) {
   }
   let data;
   try {
+    // All backend routes are expected to return JSON, including failures.
     data = await res.json();
   } catch {
     throw new Error(`Server returned ${res.status} with non-JSON response`);
   }
   if (!res.ok) {
+    // Prefer API-provided errors so UI can show domain-specific messages.
     throw new Error(data.error || 'Something went wrong');
   }
   return data;
@@ -43,4 +46,5 @@ export const login = (email) => request('/auth/login', { method: 'POST', body: J
 export const logout = () => request('/auth/logout', { method: 'POST' });
 
 // Health
+// Health check intentionally bypasses API_BASE because the endpoint is top-level.
 export const healthCheck = () => fetch('/health').then(r => r.json());
