@@ -21,6 +21,7 @@ app.use(logger);
 // Serve static frontend files in production
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// NOTE: temporary comment
 // Routes
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
