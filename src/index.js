@@ -30,6 +30,7 @@ app.get('/health', (req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
+// Authentication endpoints for login/logout
 app.use('/api/auth', authRoutes);
 
 // Sentry test route
