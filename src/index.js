@@ -31,6 +31,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/auth', authRoutes);
 
+// NOTE: temporary comment
 // Sentry test route
 app.get("/debug-sentry", function mainHandler(req, res) {
   throw new Error("My first Sentry error!");
