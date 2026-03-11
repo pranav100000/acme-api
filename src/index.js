@@ -18,6 +18,8 @@ const app = express();
 app.use(express.json());
 app.use(logger);
 
+// Log all incoming requests for observability
+
 // Serve static frontend files in production
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
@@ -26,8 +28,10 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Core resource routes for users and teams
 app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
+// Authentication endpoints for login/logout
 app.use('/api/auth', authRoutes);
 
 // Sentry test route
