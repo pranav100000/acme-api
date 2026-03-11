@@ -16,6 +16,7 @@ const fs = require('fs');
 const app = express();
 
 app.use(express.json());
+// Log each incoming request for observability
 app.use(logger);
 
 // Serve static frontend files in production
