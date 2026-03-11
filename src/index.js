@@ -28,6 +28,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Core resource routes for users and teams
 app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
 // Authentication endpoints for login/logout
