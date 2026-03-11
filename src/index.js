@@ -18,6 +18,8 @@ const app = express();
 app.use(express.json());
 app.use(logger);
 
+// Log all incoming requests for observability
+
 // Serve static frontend files in production
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
