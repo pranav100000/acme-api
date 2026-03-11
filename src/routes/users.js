@@ -37,6 +37,7 @@ router.get('/:id/profile', async (req, res) => {
   res.json({
     displayName: user.name,
     email: user.email,
+    // Keep initials derivation server-side so all clients render avatars consistently.
     initials: user.name.split(' ').map(n => n[0]).join('')
   });
 });
@@ -46,6 +47,7 @@ router.post('/', validateRequired(['email', 'name']), validateEmail, async (req,
   const { email, name, role } = req.body;
   const existing = await db.findUserByEmail(email);
   if (existing) {
+    // Conflict response lets the UI show actionable duplicate-email feedback.
     return res.status(409).json({ error: 'Email already exists' });
   }
   const user = await db.createUser({ email, name, role });

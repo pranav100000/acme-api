@@ -21,7 +21,7 @@ export default function TeamsPage() {
       setTeams(teamsData);
       setUsers(usersData);
 
-      // Load members for each team
+      // Team cards need denormalized member objects, so fetch each team roster in parallel.
       const membersMap = {};
       await Promise.all(
         teamsData.map(async (team) => {
@@ -217,6 +217,7 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
   const [loading, setLoading] = useState(false);
 
   const currentMemberIds = currentMembers.filter(Boolean).map(m => m.id);
+  // Restrict to active users who are not already assigned to this team.
   const availableUsers = users.filter(u => !currentMemberIds.includes(u.id) && u.status === 'active');
 
   const handleSubmit = async (e) => {
