@@ -1,78 +1,100 @@
 # acme-api
 
-Internal API service for Acme Corp — with a React admin dashboard frontend.
+Internal API service for Acme Corp with a React admin dashboard frontend.
 
-## Setup
+## What this project includes
+
+- **Express API** for users, teams, auth, and health checks
+- **React admin dashboard** for managing users and teams
+- **In-memory fake database** (`src/db.js`) for demo-friendly local development
+- **Node test suite** for API routes
+
+---
+
+## Quickstart
 
 ```bash
 cp .env.example .env
 npm install
 ```
 
-## Development
+### Run API only
 
-### API only
 ```bash
 npm run dev
 ```
-The API runs on http://localhost:3000.
 
-### Frontend only (with hot reload)
+API URL: http://localhost:3000
+
+### Run frontend only (Vite with API proxy)
+
 ```bash
 npm run dev:frontend
 ```
-The Vite dev server runs on http://localhost:5173 and proxies API requests to port 3000.
 
-### Full stack (API + Frontend)
+Frontend URL: http://localhost:5173
+
+### Run both API + frontend
+
 ```bash
 npm run dev:all
 ```
 
-### Production build
+### Production-style run
+
 ```bash
 npm run build:frontend
 npm start
 ```
-This builds the React frontend into `public/` and serves it from the Express server at http://localhost:3000.
 
-## Frontend
+This builds the frontend into `public/` and serves the app from the Express server.
 
-The frontend is a React SPA (built with Vite) located in the `frontend/` directory. It provides:
+---
 
-- **Login page** — authenticate with any existing user email (e.g. `alice@acme.com`)
-- **Dashboard** — overview stats for users, teams, and API health
-- **Users page** — list, create, edit, and deactivate users with status filtering
-- **Teams page** — view teams as cards, create teams, add/remove members
+## Project structure
 
-### Tech Stack
-- React 19 + React Router
-- Vite for bundling
-- Pure CSS (no UI framework) — clean, modern admin dashboard design
+```text
+acme-api/
+├── frontend/               # React SPA (Vite)
+│   └── src/
+├── src/                    # Express backend
+│   ├── middleware/         # logger + request validation
+│   ├── routes/             # auth, users, teams endpoints
+│   ├── utils/              # shared error utilities
+│   ├── config.js           # runtime config
+│   ├── db.js               # in-memory fake data layer
+│   └── index.js            # app entry point
+├── README.md
+└── PRD.md
+```
 
-## API Endpoints
+---
 
-### Health
-- `GET /health` - Health check
+## Frontend overview
 
-### Users
-- `GET /api/users` - List all users
-- `GET /api/users/:id` - Get user by ID
-- `GET /api/users/:id/profile` - Get user profile
-- `POST /api/users` - Create user
-- `PATCH /api/users/:id` - Update user
-- `DELETE /api/users/:id` - Deactivate user
+The frontend is a React SPA in `frontend/` with these key pages:
 
-### Teams
-- `GET /api/teams` - List all teams
-- `GET /api/teams/:id` - Get team by ID
-- `GET /api/teams/:id/members` - Get team members
-- `POST /api/teams` - Create team
-- `POST /api/teams/:id/members` - Add member to team
-- `DELETE /api/teams/:id/members/:userId` - Remove member from team
+- **Login**: authenticate by entering an existing user email (e.g. `alice@acme.com`)
+- **Dashboard**: quick metrics for users, teams, and API health
+- **Users**: list/create/edit/deactivate users
+- **Teams**: create teams and manage team membership
 
-### Auth
-- `POST /api/auth/login` - Login with email
-- `POST /api/auth/logout` - Logout
+Main frontend API wrapper: `frontend/src/api.js`
+
+---
+
+## API overview
+
+Base paths:
+
+- Health: `/health`
+- Users: `/api/users`
+- Teams: `/api/teams`
+- Auth: `/api/auth`
+
+For request/response examples, see **[`docs/API_REFERENCE.md`](docs/API_REFERENCE.md)**.
+
+---
 
 ## Testing
 
@@ -80,10 +102,30 @@ The frontend is a React SPA (built with Vite) located in the `frontend/` directo
 npm test
 ```
 
-## Environment Variables
+Watch mode:
 
-See `.env.example` for all available configuration options.
+```bash
+npm run test:watch
+```
 
-- `PORT` - Server port (default: 3000)
+---
+
+## Environment variables
+
+See `.env.example`.
+
+- `PORT` - API server port (default `3000`)
 - `SENTRY_DSN` - Sentry DSN for error tracking
-- `NODE_ENV` - Environment (default: development)
+- `NODE_ENV` - Runtime environment (default `development`)
+
+---
+
+## Scripts
+
+- `npm start` - Run API server
+- `npm run dev` - Run API in watch mode
+- `npm run dev:frontend` - Run Vite frontend dev server
+- `npm run dev:all` - Run API and frontend together
+- `npm run build:frontend` - Build frontend into `public/`
+- `npm test` - Run route tests
+- `npm run test:watch` - Run tests in watch mode
