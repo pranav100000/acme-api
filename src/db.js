@@ -18,35 +18,52 @@ const teams = [
 
 const initialUsers = users.map(u => ({ ...u }));
 const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
+const SIMULATED_LATENCY_MS = 10;
+
+function wait() {
+  return new Promise((resolve) => setTimeout(resolve, SIMULATED_LATENCY_MS));
+}
+
+function getNextId(collection) {
+  return String(Math.max(...collection.map((entry) => Number.parseInt(entry.id, 10))) + 1);
+}
+
+function getTimestamp() {
+  return new Date().toISOString();
+}
+
+function findById(collection, id) {
+  return collection.find((entry) => entry.id === id) || null;
+}
 
 const db = {
   async findUser(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    return users.find(u => u.id === id) || null;
+    await wait();
+    return findById(users, id);
   },
 
   async findUserByEmail(email) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await wait();
     return users.find(u => u.email === email) || null;
   },
 
   async getAllUsers() {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await wait();
     return users;
   },
 
   async createUser({ email, name, role }) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const id = String(Math.max(...users.map(u => parseInt(u.id))) + 1);
-    const now = new Date().toISOString();
+    await wait();
+    const id = getNextId(users);
+    const now = getTimestamp();
     const user = { id, email, name, role: role || 'developer', status: 'active', createdAt: now, updatedAt: now };
     users.push(user);
     return user;
   },
 
   async updateUser(id, updates) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const user = users.find(u => u.id === id);
+    await wait();
+    const user = findById(users, id);
     if (!user) return null;
     const allowed = ['email', 'name', 'role', 'status'];
     for (const key of allowed) {
@@ -54,63 +71,65 @@ const db = {
         user[key] = updates[key];
       }
     }
-    user.updatedAt = new Date().toISOString();
+    user.updatedAt = getTimestamp();
     return user;
   },
 
   async deleteUser(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const user = users.find(u => u.id === id);
+    await wait();
+    const user = findById(users, id);
     if (!user) return null;
     user.status = 'inactive';
-    user.updatedAt = new Date().toISOString();
+    user.updatedAt = getTimestamp();
     return user;
   },
 
   async findTeam(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    return teams.find(t => t.id === id) || null;
+    await wait();
+    return findById(teams, id);
   },
 
   async getAllTeams() {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await wait();
     return teams;
   },
 
   async getTeamMembers(teamId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const team = teams.find(t => t.id === teamId);
+    await wait();
+    const team = findById(teams, teamId);
     if (!team) return null;
-    return team.members.map(memberId => users.find(u => u.id === memberId));
+    return team.members
+      .map((memberId) => findById(users, memberId))
+      .filter(Boolean);
   },
 
   async createTeam({ name }) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const id = String(Math.max(...teams.map(t => parseInt(t.id))) + 1);
-    const now = new Date().toISOString();
+    await wait();
+    const id = getNextId(teams);
+    const now = getTimestamp();
     const team = { id, name, members: [], createdAt: now, updatedAt: now };
     teams.push(team);
     return team;
   },
 
   async addTeamMember(teamId, userId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const team = teams.find(t => t.id === teamId);
-    const user = users.find(u => u.id === userId);
+    await wait();
+    const team = findById(teams, teamId);
+    const user = findById(users, userId);
     if (!team || !user) return null;
     if (!team.members.includes(userId)) {
       team.members.push(userId);
-      team.updatedAt = new Date().toISOString();
+      team.updatedAt = getTimestamp();
     }
     return team;
   },
 
   async removeTeamMember(teamId, userId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const team = teams.find(t => t.id === teamId);
+    await wait();
+    const team = findById(teams, teamId);
     if (!team) return null;
     team.members = team.members.filter(id => id !== userId);
-    team.updatedAt = new Date().toISOString();
+    team.updatedAt = getTimestamp();
     return team;
   },
 

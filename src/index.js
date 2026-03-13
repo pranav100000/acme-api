@@ -1,64 +1,84 @@
 // IMPORTANT: Import instrument.js before all other imports
-require("./instrument.js");
+require('./instrument.js');
 
-const Sentry = require("@sentry/node");
+const Sentry = require('@sentry/node');
 const express = require('express');
 require('express-async-errors');
+const path = require('path');
+const fs = require('fs');
 const config = require('./config');
 const logger = require('./middleware/logger');
 const userRoutes = require('./routes/users');
 const teamRoutes = require('./routes/teams');
 const authRoutes = require('./routes/auth');
 
-const path = require('path');
-const fs = require('fs');
+const STATIC_DIR = path.join(__dirname, '..', 'public');
+const SPA_ENTRYPOINT = path.join(STATIC_DIR, 'index.html');
+const NON_SPA_PREFIXES = ['/api', '/health', '/debug-sentry'];
 
-const app = express();
+function isSpaRequest(requestPath) {
+  return !NON_SPA_PREFIXES.some((prefix) => requestPath.startsWith(prefix));
+}
 
-app.use(express.json());
-app.use(logger);
+function registerSpaFallback(app) {
+  if (!fs.existsSync(SPA_ENTRYPOINT)) {
+    return;
+  }
 
-// Serve static frontend files in production
-app.use(express.static(path.join(__dirname, '..', 'public')));
-
-// Routes
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
-
-app.use('/api/users', userRoutes);
-app.use('/api/teams', teamRoutes);
-app.use('/api/auth', authRoutes);
-
-// Sentry test route
-app.get("/debug-sentry", function mainHandler(req, res) {
-  throw new Error("My first Sentry error!");
-});
-
-// SPA fallback - serve index.html for non-API routes (only when build exists)
-const indexPath = path.join(__dirname, '..', 'public', 'index.html');
-if (fs.existsSync(indexPath)) {
   app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/health') || req.path.startsWith('/debug-sentry')) {
+    if (!isSpaRequest(req.path)) {
       return next();
     }
-    res.sendFile(indexPath);
+
+    return res.sendFile(SPA_ENTRYPOINT);
   });
 }
 
-// The error handler must be registered before any other error middleware and after all controllers
-Sentry.setupExpressErrorHandler(app);
+function registerErrorHandlers(app) {
+  Sentry.setupExpressErrorHandler(app);
 
-// Fallthrough error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  const status = err.statusCode || 500;
-  res.status(status).json({ error: err.message || 'Internal server error' });
-});
+  app.use((err, req, res, next) => {
+    console.error(err.stack);
+    const status = err.statusCode || 500;
+    res.status(status).json({ error: err.message || 'Internal server error' });
+  });
+}
 
-const PORT = config.port;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+function buildApp() {
+  const app = express();
 
-module.exports = app;
+  app.use(express.json());
+  app.use(logger);
+  app.use(express.static(STATIC_DIR));
+
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok' });
+  });
+
+  app.use('/api/users', userRoutes);
+  app.use('/api/teams', teamRoutes);
+  app.use('/api/auth', authRoutes);
+
+  app.get('/debug-sentry', () => {
+    throw new Error('My first Sentry error!');
+  });
+
+  registerSpaFallback(app);
+  registerErrorHandlers(app);
+
+  return app;
+}
+
+function startServer(port = config.port) {
+  const app = buildApp();
+
+  return app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = { buildApp, startServer };
