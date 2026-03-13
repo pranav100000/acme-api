@@ -4,6 +4,26 @@ const { validateEmail, validateRequired } = require('../middleware/validate');
 
 const router = express.Router();
 
+function serializeUserSummary(user) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role
+  };
+}
+
+function serializeUserProfile(user) {
+  return {
+    displayName: user.name,
+    email: user.email,
+    initials: user.name
+      .split(' ')
+      .map((namePart) => namePart[0])
+      .join('')
+  };
+}
+
 // GET /api/users - List all users
 router.get('/', async (req, res) => {
   const users = await db.getAllUsers();
@@ -18,12 +38,7 @@ router.get('/:id', async (req, res) => {
     return res.status(404).json({ error: 'User not found' });
   }
 
-  res.json({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role
-  });
+  res.json(serializeUserSummary(user));
 });
 
 // GET /api/users/:id/profile - Get user profile
@@ -34,11 +49,7 @@ router.get('/:id/profile', async (req, res) => {
     return res.status(404).json({ error: 'User not found' });
   }
 
-  res.json({
-    displayName: user.name,
-    email: user.email,
-    initials: user.name.split(' ').map(n => n[0]).join('')
-  });
+  res.json(serializeUserProfile(user));
 });
 
 // POST /api/users - Create user

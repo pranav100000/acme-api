@@ -1,9 +1,15 @@
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function getMissingField(body, fields) {
+  return fields.find((field) => !body[field]);
+}
+
 /**
  * Validates email format in request body
  */
 const validateEmail = (req, res, next) => {
   const { email } = req.body;
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!email || !EMAIL_PATTERN.test(email)) {
     return res.status(400).json({ error: 'Invalid email format' });
   }
   next();
@@ -14,11 +20,11 @@ const validateEmail = (req, res, next) => {
  */
 const validateRequired = (fields) => {
   return (req, res, next) => {
-    for (const field of fields) {
-      if (!req.body[field]) {
-        return res.status(400).json({ error: `Missing required field: ${field}` });
-      }
+    const missingField = getMissingField(req.body, fields);
+    if (missingField) {
+      return res.status(400).json({ error: `Missing required field: ${missingField}` });
     }
+
     next();
   };
 };
