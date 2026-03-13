@@ -10,6 +10,13 @@ const authRoutes = require('./routes/auth');
 
 require('express-async-errors');
 
+const NON_SPA_PATH_PREFIXES = ['/api'];
+const NON_SPA_ROUTES = new Set(['/health', '/debug-sentry']);
+
+function shouldBypassSpaFallback(pathname) {
+  return NON_SPA_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix)) || NON_SPA_ROUTES.has(pathname);
+}
+
 function createApp({ withSentry = false, serveFrontend = true } = {}) {
   const app = express();
 
@@ -37,7 +44,7 @@ function createApp({ withSentry = false, serveFrontend = true } = {}) {
 
   if (serveFrontend && fs.existsSync(indexPath)) {
     app.get('*', (req, res, next) => {
-      if (req.path.startsWith('/api') || req.path === '/health' || req.path === '/debug-sentry') {
+      if (shouldBypassSpaFallback(req.path)) {
         return next();
       }
 

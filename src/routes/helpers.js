@@ -1,6 +1,14 @@
 const db = require('../db');
 const { NotFoundError } = require('../utils/errors');
 
+async function requireEntity(loader, message) {
+  const entity = await loader();
+  if (!entity) {
+    throw new NotFoundError(message);
+  }
+  return entity;
+}
+
 function getInitials(name = '') {
   return name
     .split(' ')
@@ -10,19 +18,11 @@ function getInitials(name = '') {
 }
 
 async function requireUser(id) {
-  const user = await db.findUser(id);
-  if (!user) {
-    throw new NotFoundError('User not found');
-  }
-  return user;
+  return requireEntity(() => db.findUser(id), 'User not found');
 }
 
 async function requireTeam(id) {
-  const team = await db.findTeam(id);
-  if (!team) {
-    throw new NotFoundError('Team not found');
-  }
-  return team;
+  return requireEntity(() => db.findTeam(id), 'Team not found');
 }
 
 function toUserSummary(user) {
