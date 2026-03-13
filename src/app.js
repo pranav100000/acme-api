@@ -5,6 +5,7 @@ const path = require('path');
 
 const logger = require('./middleware/logger');
 const authRoutes = require('./routes/auth');
+const { errorHandler } = require('./middleware/error-handler');
 const teamRoutes = require('./routes/teams');
 const userRoutes = require('./routes/users');
 
@@ -40,11 +41,7 @@ function createApp() {
 
   Sentry.setupExpressErrorHandler(app);
 
-  app.use((err, req, res, next) => {
-    console.error(err.stack);
-    const status = err.statusCode || 500;
-    res.status(status).json({ error: err.message || 'Internal server error' });
-  });
+  app.use(errorHandler);
 
   return app;
 }
