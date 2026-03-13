@@ -19,33 +19,50 @@ const teams = [
 const initialUsers = users.map(u => ({ ...u }));
 const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
 
+const sleep = (ms = 10) => new Promise(resolve => setTimeout(resolve, ms));
+const nextId = (collection) => String(Math.max(...collection.map(item => Number.parseInt(item.id, 10)), 0) + 1);
+const now = () => new Date().toISOString();
+const touch = (entity) => {
+  entity.updatedAt = now();
+  return entity;
+};
+const cloneUsers = () => initialUsers.map(user => ({ ...user }));
+const cloneTeams = () => initialTeams.map(team => ({ ...team, members: [...team.members] }));
+
 const db = {
   async findUser(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await sleep();
     return users.find(u => u.id === id) || null;
   },
 
   async findUserByEmail(email) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await sleep();
     return users.find(u => u.email === email) || null;
   },
 
   async getAllUsers() {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await sleep();
     return users;
   },
 
   async createUser({ email, name, role }) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const id = String(Math.max(...users.map(u => parseInt(u.id))) + 1);
-    const now = new Date().toISOString();
-    const user = { id, email, name, role: role || 'developer', status: 'active', createdAt: now, updatedAt: now };
+    await sleep();
+    const timestamp = now();
+    const user = {
+      id: nextId(users),
+      email,
+      name,
+      role: role || 'developer',
+      status: 'active',
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
     users.push(user);
     return user;
   },
 
   async updateUser(id, updates) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await sleep();
     const user = users.find(u => u.id === id);
     if (!user) return null;
     const allowed = ['email', 'name', 'role', 'status'];
@@ -54,64 +71,60 @@ const db = {
         user[key] = updates[key];
       }
     }
-    user.updatedAt = new Date().toISOString();
-    return user;
+    return touch(user);
   },
 
   async deleteUser(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await sleep();
     const user = users.find(u => u.id === id);
     if (!user) return null;
     user.status = 'inactive';
-    user.updatedAt = new Date().toISOString();
-    return user;
+    return touch(user);
   },
 
   async findTeam(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await sleep();
     return teams.find(t => t.id === id) || null;
   },
 
   async getAllTeams() {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await sleep();
     return teams;
   },
 
   async getTeamMembers(teamId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await sleep();
     const team = teams.find(t => t.id === teamId);
     if (!team) return null;
     return team.members.map(memberId => users.find(u => u.id === memberId));
   },
 
   async createTeam({ name }) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const id = String(Math.max(...teams.map(t => parseInt(t.id))) + 1);
-    const now = new Date().toISOString();
-    const team = { id, name, members: [], createdAt: now, updatedAt: now };
+    await sleep();
+    const timestamp = now();
+    const team = { id: nextId(teams), name, members: [], createdAt: timestamp, updatedAt: timestamp };
     teams.push(team);
     return team;
   },
 
   async addTeamMember(teamId, userId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await sleep();
     const team = teams.find(t => t.id === teamId);
     const user = users.find(u => u.id === userId);
     if (!team || !user) return null;
     if (!team.members.includes(userId)) {
       team.members.push(userId);
-      team.updatedAt = new Date().toISOString();
+      touch(team);
     }
     return team;
   },
 
   async removeTeamMember(teamId, userId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await sleep();
     const team = teams.find(t => t.id === teamId);
     if (!team) return null;
     team.members = team.members.filter(id => id !== userId);
-    team.updatedAt = new Date().toISOString();
-    return team;
+    return touch(team);
   },
 
   /**
@@ -119,9 +132,9 @@ const db = {
    */
   _reset() {
     users.length = 0;
-    users.push(...initialUsers.map(u => ({ ...u })));
+    users.push(...cloneUsers());
     teams.length = 0;
-    teams.push(...initialTeams.map(t => ({ ...t, members: [...t.members] })));
+    teams.push(...cloneTeams());
   }
 };
 
