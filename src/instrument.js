@@ -1,6 +1,30 @@
-const Sentry = require("@sentry/node");
+const Sentry = require('@sentry/node');
 
-Sentry.init({
-  dsn: "https://df3678b7bd8489203bc70fc932bdbb22@o4510703250505728.ingest.us.sentry.io/4510854705053696",
-  sendDefaultPii: true,
-});
+let initialized = false;
+
+function initSentry({ dsn = process.env.SENTRY_DSN, env = process.env.NODE_ENV || 'development' } = {}) {
+  if (initialized || !dsn) {
+    return;
+  }
+
+  Sentry.init({
+    dsn,
+    environment: env,
+    sendDefaultPii: true,
+  });
+
+  initialized = true;
+}
+
+function setupExpressErrorHandler(app) {
+  if (!initialized) {
+    return;
+  }
+
+  Sentry.setupExpressErrorHandler(app);
+}
+
+module.exports = {
+  initSentry,
+  setupExpressErrorHandler,
+};
