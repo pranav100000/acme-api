@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../App';
+import Avatar from './Avatar';
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
@@ -28,14 +29,7 @@ export default function Layout({ children }) {
         </nav>
         <div style={{ padding: '16px 12px', borderTop: '1px solid #374151' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px' }}>
-            <div style={{
-              width: '32px', height: '32px', borderRadius: '50%',
-              background: '#4f46e5', color: 'white', display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
-              fontSize: '13px', fontWeight: '600'
-            }}>
-              {user?.name?.split(' ').map(n => n[0]).join('') || '?'}
-            </div>
+            <Avatar name={user?.name} size={32} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '14px', fontWeight: '500', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user?.name}
