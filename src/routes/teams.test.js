@@ -1,19 +1,8 @@
 const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
-const express = require('express');
 const db = require('../db');
+const { createTestApp } = require('../test/createTestApp');
 const teamRoutes = require('./teams');
-
-function createApp() {
-  const app = express();
-  app.use(express.json());
-  app.use('/api/teams', teamRoutes);
-  app.use((err, req, res, next) => {
-    const status = err.statusCode || 500;
-    res.status(status).json({ error: err.message || 'Internal server error' });
-  });
-  return app;
-}
 
 describe('Team Routes', () => {
   let server;
@@ -21,7 +10,7 @@ describe('Team Routes', () => {
 
   before(async () => {
     db._reset();
-    const app = createApp();
+    const app = createTestApp('/api/teams', teamRoutes);
     server = app.listen(0);
     const { port } = server.address();
     baseUrl = `http://localhost:${port}`;
@@ -96,5 +85,12 @@ describe('Team Routes', () => {
     assert.strictEqual(res.status, 200);
     const team = await res.json();
     assert.ok(!team.members.includes('2'));
+  });
+
+  test('DELETE /api/teams/:id/members/:userId returns 404 for missing team', async () => {
+    const res = await fetch(`${baseUrl}/api/teams/999/members/2`, { method: 'DELETE' });
+    assert.strictEqual(res.status, 404);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'Team not found');
   });
 });
