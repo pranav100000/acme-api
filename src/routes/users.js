@@ -1,73 +1,77 @@
 const express = require('express');
 const db = require('../db');
+const { ValidationError, asyncHandler } = require('../utils/errors');
 const { validateEmail, validateRequired } = require('../middleware/validate');
+const { ensureFound } = require('../utils/respond');
 
 const router = express.Router();
 
-// GET /api/users - List all users
-router.get('/', async (req, res) => {
-  const users = await db.getAllUsers();
-  res.json(users);
-});
+router.get(
+  '/',
+  asyncHandler(async (req, res) => {
+    const users = await db.getAllUsers();
+    res.json(users);
+  })
+);
 
-// GET /api/users/:id - Get user by ID
-router.get('/:id', async (req, res) => {
-  const user = await db.findUser(req.params.id);
+router.get(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const user = ensureFound(await db.findUser(req.params.id), 'User not found');
 
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
+    res.json({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    });
+  })
+);
 
-  res.json({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role
-  });
-});
+router.get(
+  '/:id/profile',
+  asyncHandler(async (req, res) => {
+    const user = ensureFound(await db.findUser(req.params.id), 'User not found');
 
-// GET /api/users/:id/profile - Get user profile
-router.get('/:id/profile', async (req, res) => {
-  const user = await db.findUser(req.params.id);
+    res.json({
+      displayName: user.name,
+      email: user.email,
+      initials: user.name.split(' ').map((name) => name[0]).join(''),
+    });
+  })
+);
 
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
+router.post(
+  '/',
+  validateRequired(['email', 'name']),
+  validateEmail,
+  asyncHandler(async (req, res) => {
+    const { email, name, role } = req.body;
+    const existing = await db.findUserByEmail(email);
 
-  res.json({
-    displayName: user.name,
-    email: user.email,
-    initials: user.name.split(' ').map(n => n[0]).join('')
-  });
-});
+    if (existing) {
+      throw new ValidationError('Email already exists');
+    }
 
-// POST /api/users - Create user
-router.post('/', validateRequired(['email', 'name']), validateEmail, async (req, res) => {
-  const { email, name, role } = req.body;
-  const existing = await db.findUserByEmail(email);
-  if (existing) {
-    return res.status(409).json({ error: 'Email already exists' });
-  }
-  const user = await db.createUser({ email, name, role });
-  res.status(201).json(user);
-});
+    const user = await db.createUser({ email, name, role });
+    res.status(201).json(user);
+  })
+);
 
-// PATCH /api/users/:id - Update user
-router.patch('/:id', async (req, res) => {
-  const user = await db.updateUser(req.params.id, req.body);
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-  res.json(user);
-});
+router.patch(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const user = ensureFound(await db.updateUser(req.params.id, req.body), 'User not found');
+    res.json(user);
+  })
+);
 
-// DELETE /api/users/:id - Soft delete (set status to inactive)
-router.delete('/:id', async (req, res) => {
-  const user = await db.deleteUser(req.params.id);
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-  res.json({ message: 'User deactivated', user });
-});
+router.delete(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const user = ensureFound(await db.deleteUser(req.params.id), 'User not found');
+    res.json({ message: 'User deactivated', user });
+  })
+);
 
 module.exports = router;

@@ -1,81 +1,94 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import PageHeader from '../components/PageHeader';
+import PageLoader from '../components/PageLoader';
+import FlashMessage from '../components/FlashMessage';
+import Avatar from '../components/Avatar';
+import { useFlashMessage } from '../hooks/useFlashMessage';
+import { formatDate, formatRole } from '../utils/formatters';
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
   const [users, setUsers] = useState([]);
   const [teamMembers, setTeamMembers] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [addMemberTeam, setAddMemberTeam] = useState(null);
+  const error = useFlashMessage();
+  const success = useFlashMessage();
 
   const loadData = async () => {
     try {
-      const [teamsData, usersData] = await Promise.all([
-        api.getTeams(),
-        api.getUsers(),
-      ]);
+      const [teamsData, usersData] = await Promise.all([api.getTeams(), api.getUsers()]);
       setTeams(teamsData);
       setUsers(usersData);
 
-      // Load members for each team
       const membersMap = {};
       await Promise.all(
         teamsData.map(async (team) => {
           try {
-            const members = await api.getTeamMembers(team.id);
-            membersMap[team.id] = members;
+            membersMap[team.id] = await api.getTeamMembers(team.id);
           } catch {
             membersMap[team.id] = [];
           }
         })
       );
       setTeamMembers(membersMap);
-    } catch (err) {
-      setError('Failed to load teams');
+    } catch {
+      error.show('Failed to load teams');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleRemoveMember = async (teamId, userId, userName) => {
-    if (!window.confirm(`Remove ${userName} from this team?`)) return;
+    if (!window.confirm(`Remove ${userName} from this team?`)) {
+      return;
+    }
+
     try {
       await api.removeTeamMember(teamId, userId);
-      setSuccess(`${userName} removed from team`);
-      loadData();
-      setTimeout(() => setSuccess(''), 3000);
+      success.show(`${userName} removed from team`);
+      await loadData();
     } catch (err) {
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
+      error.show(err.message);
     }
   };
 
+  const handleCreated = async () => {
+    setShowCreateModal(false);
+    success.show('Team created successfully');
+    await loadData();
+  };
+
+  const handleAdded = async () => {
+    setAddMemberTeam(null);
+    success.show('Member added successfully');
+    await loadData();
+  };
+
   if (loading) {
-    return (
-      <>
-        <div className="page-header"><h2>Teams</h2></div>
-        <div className="page-body"><div className="loading"><div className="spinner"></div></div></div>
-      </>
-    );
+    return <PageLoader title="Teams" />;
   }
 
   return (
     <>
-      <div className="page-header">
-        <h2>Teams</h2>
-        <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
-          + Create Team
-        </button>
-      </div>
+      <PageHeader
+        title="Teams"
+        actions={
+          <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+            + Create Team
+          </button>
+        }
+      />
       <div className="page-body">
-        {error && <div className="alert alert-error">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
+        <FlashMessage type="error" message={error.message} />
+        <FlashMessage type="success" message={success.message} />
 
         {teams.length === 0 ? (
           <div className="empty-state">
@@ -84,7 +97,7 @@ export default function TeamsPage() {
           </div>
         ) : (
           <div className="teams-grid">
-            {teams.map(team => {
+            {teams.map((team) => {
               const members = teamMembers[team.id] || [];
               return (
                 <div key={team.id} className="team-card">
@@ -96,7 +109,7 @@ export default function TeamsPage() {
                   </div>
                   <div className="team-card-body">
                     <div className="team-meta">
-                      Created {new Date(team.createdAt).toLocaleDateString()} · Updated {new Date(team.updatedAt).toLocaleDateString()}
+                      Created {formatDate(team.createdAt)} · Updated {formatDate(team.updatedAt)}
                     </div>
 
                     {members.length === 0 ? (
@@ -105,15 +118,13 @@ export default function TeamsPage() {
                       </div>
                     ) : (
                       <div className="member-list">
-                        {members.map(member => member && (
+                        {members.map((member) => member && (
                           <div key={member.id} className="member-item">
                             <div className="member-info">
-                              <div className="member-avatar">
-                                {member.name.split(' ').map(n => n[0]).join('')}
-                              </div>
+                              <Avatar name={member.name} size={32} />
                               <div>
                                 <div style={{ fontWeight: 500, fontSize: '14px' }}>{member.name}</div>
-                                <div style={{ fontSize: '12px', color: '#6b7280' }}>{member.role.replace('_', ' ')}</div>
+                                <div style={{ fontSize: '12px', color: '#6b7280' }}>{formatRole(member.role)}</div>
                               </div>
                             </div>
                             <button
@@ -146,12 +157,7 @@ export default function TeamsPage() {
         )}
       </div>
 
-      {showCreateModal && (
-        <CreateTeamModal
-          onClose={() => setShowCreateModal(false)}
-          onCreated={() => { setShowCreateModal(false); loadData(); setSuccess('Team created successfully'); setTimeout(() => setSuccess(''), 3000); }}
-        />
-      )}
+      {showCreateModal && <CreateTeamModal onClose={() => setShowCreateModal(false)} onCreated={handleCreated} />}
 
       {addMemberTeam && (
         <AddMemberModal
@@ -159,7 +165,7 @@ export default function TeamsPage() {
           users={users}
           currentMembers={teamMembers[addMemberTeam.id] || []}
           onClose={() => setAddMemberTeam(null)}
-          onAdded={() => { setAddMemberTeam(null); loadData(); setSuccess('Member added successfully'); setTimeout(() => setSuccess(''), 3000); }}
+          onAdded={handleAdded}
         />
       )}
     </>
@@ -175,6 +181,7 @@ function CreateTeamModal({ onClose, onCreated }) {
     e.preventDefault();
     setError('');
     setLoading(true);
+
     try {
       await api.createTeam({ name });
       onCreated();
@@ -187,14 +194,14 @@ function CreateTeamModal({ onClose, onCreated }) {
 
   return (
     <Modal title="Create Team" onClose={onClose}>
-      {error && <div className="alert alert-error">{error}</div>}
+      <FlashMessage type="error" message={error} />
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Team Name</label>
           <input
             className="form-control"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             required
             placeholder="e.g. Marketing"
             autoFocus
@@ -216,14 +223,18 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const currentMemberIds = currentMembers.filter(Boolean).map(m => m.id);
-  const availableUsers = users.filter(u => !currentMemberIds.includes(u.id) && u.status === 'active');
+  const currentMemberIds = currentMembers.filter(Boolean).map((member) => member.id);
+  const availableUsers = users.filter((user) => !currentMemberIds.includes(user.id) && user.status === 'active');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedUserId) return;
+    if (!selectedUserId) {
+      return;
+    }
+
     setError('');
     setLoading(true);
+
     try {
       await api.addTeamMember(team.id, selectedUserId);
       onAdded();
@@ -236,7 +247,7 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
 
   return (
     <Modal title={`Add Member to ${team.name}`} onClose={onClose}>
-      {error && <div className="alert alert-error">{error}</div>}
+      <FlashMessage type="error" message={error} />
       {availableUsers.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '24px', color: '#6b7280' }}>
           <p>All active users are already members of this team.</p>
@@ -248,11 +259,11 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Select User</label>
-            <select className="form-control" value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)} required>
+            <select className="form-control" value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)} required>
               <option value="">Choose a user...</option>
-              {availableUsers.map(user => (
+              {availableUsers.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.name} ({user.email}) - {user.role.replace('_', ' ')}
+                  {user.name} ({user.email}) - {formatRole(user.role)}
                 </option>
               ))}
             </select>
