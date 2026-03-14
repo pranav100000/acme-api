@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import PageHeader from '../components/PageHeader';
+import PageLoading from '../components/PageLoading';
+import { formatDate, formatRole, getInitials } from '../utils/display';
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -40,22 +43,17 @@ export default function UsersPage() {
   const filteredUsers = filter === 'all' ? users : users.filter(u => u.status === filter);
 
   if (loading) {
-    return (
-      <>
-        <div className="page-header"><h2>Users</h2></div>
-        <div className="page-body"><div className="loading"><div className="spinner"></div></div></div>
-      </>
-    );
+    return <PageLoading title="Users" />;
   }
 
   return (
     <>
-      <div className="page-header">
-        <h2>Users</h2>
-        <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+      <PageHeader
+        title="Users"
+        actions={<button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
           + Add User
-        </button>
-      </div>
+        </button>}
+      />
       <div className="page-body">
         {error && <div className="alert alert-error">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
@@ -105,7 +103,7 @@ export default function UsersPage() {
                             alignItems: 'center', justifyContent: 'center',
                             fontSize: '13px', fontWeight: '600', flexShrink: 0
                           }}>
-                            {user.name.split(' ').map(n => n[0]).join('')}
+                            {getInitials(user.name)}
                           </div>
                           <div>
                             <div style={{ fontWeight: 500 }}>{user.name}</div>
@@ -113,10 +111,10 @@ export default function UsersPage() {
                           </div>
                         </div>
                       </td>
-                      <td><span className={`badge badge-${user.role}`}>{user.role.replace('_', ' ')}</span></td>
+                      <td><span className={`badge badge-${user.role}`}>{formatRole(user.role)}</span></td>
                       <td><span className={`badge badge-${user.status}`}>{user.status}</span></td>
                       <td style={{ fontSize: '13px', color: '#6b7280' }}>
-                        {new Date(user.createdAt).toLocaleDateString()}
+                        {formatDate(user.createdAt)}
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '4px' }}>

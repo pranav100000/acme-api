@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import PageHeader from '../components/PageHeader';
+import PageLoading from '../components/PageLoading';
+import { formatDate, formatRole, getInitials } from '../utils/display';
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
@@ -57,22 +60,17 @@ export default function TeamsPage() {
   };
 
   if (loading) {
-    return (
-      <>
-        <div className="page-header"><h2>Teams</h2></div>
-        <div className="page-body"><div className="loading"><div className="spinner"></div></div></div>
-      </>
-    );
+    return <PageLoading title="Teams" />;
   }
 
   return (
     <>
-      <div className="page-header">
-        <h2>Teams</h2>
-        <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+      <PageHeader
+        title="Teams"
+        actions={<button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
           + Create Team
-        </button>
-      </div>
+        </button>}
+      />
       <div className="page-body">
         {error && <div className="alert alert-error">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
@@ -96,7 +94,7 @@ export default function TeamsPage() {
                   </div>
                   <div className="team-card-body">
                     <div className="team-meta">
-                      Created {new Date(team.createdAt).toLocaleDateString()} · Updated {new Date(team.updatedAt).toLocaleDateString()}
+                      Created {formatDate(team.createdAt)} · Updated {formatDate(team.updatedAt)}
                     </div>
 
                     {members.length === 0 ? (
@@ -109,11 +107,11 @@ export default function TeamsPage() {
                           <div key={member.id} className="member-item">
                             <div className="member-info">
                               <div className="member-avatar">
-                                {member.name.split(' ').map(n => n[0]).join('')}
+                                {getInitials(member.name)}
                               </div>
                               <div>
                                 <div style={{ fontWeight: 500, fontSize: '14px' }}>{member.name}</div>
-                                <div style={{ fontSize: '12px', color: '#6b7280' }}>{member.role.replace('_', ' ')}</div>
+                                <div style={{ fontSize: '12px', color: '#6b7280' }}>{formatRole(member.role)}</div>
                               </div>
                             </div>
                             <button
@@ -252,7 +250,7 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
               <option value="">Choose a user...</option>
               {availableUsers.map(user => (
                 <option key={user.id} value={user.id}>
-                  {user.name} ({user.email}) - {user.role.replace('_', ' ')}
+                  {user.name} ({user.email}) - {formatRole(user.role)}
                 </option>
               ))}
             </select>
