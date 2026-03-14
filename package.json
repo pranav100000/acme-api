@@ -9,6 +9,7 @@
     "dev:frontend": "npx vite",
     "dev:all": "npm run dev & npm run dev:frontend",
     "build:frontend": "npx vite build",
+    "doordash:group-order": "node automation/doordash-group-order.js",
     "test": "node --test src/**/*.test.js",
     "test:watch": "node --test --watch src/**/*.test.js"
   },
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.4",
+    "playwright": "^1.58.2",
     "vite": "^7.3.1"
   }
 }
