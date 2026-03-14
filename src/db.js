@@ -19,99 +19,108 @@ const teams = [
 const initialUsers = users.map(u => ({ ...u }));
 const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
 
+const wait = (ms = 10) => new Promise((resolve) => setTimeout(resolve, ms));
+const cloneUser = (user) => (user ? { ...user } : null);
+const cloneTeam = (team) => (team ? { ...team, members: [...team.members] } : null);
+const nextId = (collection) => String(Math.max(...collection.map((item) => Number.parseInt(item.id, 10))) + 1);
+const updateRecord = (record, updates, allowedFields) => {
+  for (const field of allowedFields) {
+    if (updates[field] !== undefined) {
+      record[field] = updates[field];
+    }
+  }
+
+  record.updatedAt = new Date().toISOString();
+  return record;
+};
+
 const db = {
   async findUser(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    return users.find(u => u.id === id) || null;
+    await wait();
+    return cloneUser(users.find((user) => user.id === id) || null);
   },
 
   async findUserByEmail(email) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    return users.find(u => u.email === email) || null;
+    await wait();
+    return cloneUser(users.find((user) => user.email === email) || null);
   },
 
   async getAllUsers() {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    return users;
+    await wait();
+    return users.map(cloneUser);
   },
 
   async createUser({ email, name, role }) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const id = String(Math.max(...users.map(u => parseInt(u.id))) + 1);
+    await wait();
+    const id = nextId(users);
     const now = new Date().toISOString();
     const user = { id, email, name, role: role || 'developer', status: 'active', createdAt: now, updatedAt: now };
     users.push(user);
-    return user;
+    return cloneUser(user);
   },
 
   async updateUser(id, updates) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const user = users.find(u => u.id === id);
+    await wait();
+    const user = users.find((entry) => entry.id === id);
     if (!user) return null;
-    const allowed = ['email', 'name', 'role', 'status'];
-    for (const key of allowed) {
-      if (updates[key] !== undefined) {
-        user[key] = updates[key];
-      }
-    }
-    user.updatedAt = new Date().toISOString();
-    return user;
+    return cloneUser(updateRecord(user, updates, ['email', 'name', 'role', 'status']));
   },
 
   async deleteUser(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const user = users.find(u => u.id === id);
+    await wait();
+    const user = users.find((entry) => entry.id === id);
     if (!user) return null;
-    user.status = 'inactive';
-    user.updatedAt = new Date().toISOString();
-    return user;
+    return cloneUser(updateRecord(user, { status: 'inactive' }, ['status']));
   },
 
   async findTeam(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    return teams.find(t => t.id === id) || null;
+    await wait();
+    return cloneTeam(teams.find((team) => team.id === id) || null);
   },
 
   async getAllTeams() {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    return teams;
+    await wait();
+    return teams.map(cloneTeam);
   },
 
   async getTeamMembers(teamId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const team = teams.find(t => t.id === teamId);
+    await wait();
+    const team = teams.find((entry) => entry.id === teamId);
     if (!team) return null;
-    return team.members.map(memberId => users.find(u => u.id === memberId));
+    return team.members
+      .map((memberId) => users.find((user) => user.id === memberId))
+      .filter(Boolean)
+      .map(cloneUser);
   },
 
   async createTeam({ name }) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const id = String(Math.max(...teams.map(t => parseInt(t.id))) + 1);
+    await wait();
+    const id = nextId(teams);
     const now = new Date().toISOString();
     const team = { id, name, members: [], createdAt: now, updatedAt: now };
     teams.push(team);
-    return team;
+    return cloneTeam(team);
   },
 
   async addTeamMember(teamId, userId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const team = teams.find(t => t.id === teamId);
-    const user = users.find(u => u.id === userId);
+    await wait();
+    const team = teams.find((entry) => entry.id === teamId);
+    const user = users.find((entry) => entry.id === userId);
     if (!team || !user) return null;
     if (!team.members.includes(userId)) {
       team.members.push(userId);
       team.updatedAt = new Date().toISOString();
     }
-    return team;
+    return cloneTeam(team);
   },
 
   async removeTeamMember(teamId, userId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const team = teams.find(t => t.id === teamId);
+    await wait();
+    const team = teams.find((entry) => entry.id === teamId);
     if (!team) return null;
     team.members = team.members.filter(id => id !== userId);
     team.updatedAt = new Date().toISOString();
-    return team;
+    return cloneTeam(team);
   },
 
   /**
