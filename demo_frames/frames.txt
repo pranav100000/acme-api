@@ -1,0 +1,13 @@
+file '01-login.png'
+duration 1.5
+file '02-dashboard.png'
+duration 1.5
+file '03-users.png'
+duration 1.5
+file '04-add-user-modal.png'
+duration 1.5
+file '05-teams.png'
+duration 1.5
+file '06-create-team-modal.png'
+duration 2.5
+file '06-create-team-modal.png'

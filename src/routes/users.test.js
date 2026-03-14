@@ -1,19 +1,8 @@
 const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
-const express = require('express');
 const db = require('../db');
 const userRoutes = require('./users');
-
-function createApp() {
-  const app = express();
-  app.use(express.json());
-  app.use('/api/users', userRoutes);
-  app.use((err, req, res, next) => {
-    const status = err.statusCode || 500;
-    res.status(status).json({ error: err.message || 'Internal server error' });
-  });
-  return app;
-}
+const createTestApp = require('../test/createTestApp');
 
 describe('User Routes', () => {
   let server;
@@ -21,7 +10,7 @@ describe('User Routes', () => {
 
   before(async () => {
     db._reset();
-    const app = createApp();
+    const app = createTestApp('/api/users', userRoutes);
     server = app.listen(0);
     const { port } = server.address();
     baseUrl = `http://localhost:${port}`;
@@ -145,5 +134,16 @@ describe('User Routes', () => {
     const body = await res.json();
     assert.strictEqual(body.message, 'User deactivated');
     assert.strictEqual(body.user.status, 'inactive');
+  });
+
+  test('POST /api/users returns 409 for duplicate email', async () => {
+    const res = await fetch(`${baseUrl}/api/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'alice@acme.com', name: 'Another Alice' })
+    });
+    assert.strictEqual(res.status, 409);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'Email already exists');
   });
 });
