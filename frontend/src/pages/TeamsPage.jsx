@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import { getInitials } from '../utils/user';
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
@@ -109,7 +110,7 @@ export default function TeamsPage() {
                           <div key={member.id} className="member-item">
                             <div className="member-info">
                               <div className="member-avatar">
-                                {member.name.split(' ').map(n => n[0]).join('')}
+                                {getInitials(member.name)}
                               </div>
                               <div>
                                 <div style={{ fontWeight: 500, fontSize: '14px' }}>{member.name}</div>

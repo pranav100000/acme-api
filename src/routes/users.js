@@ -1,73 +1,66 @@
 const express = require('express');
 const db = require('../db');
 const { validateEmail, validateRequired } = require('../middleware/validate');
+const { sendCreated, sendNotFound, sendOk, withAsync } = require('../lib/http');
+const { serializeUserProfile, serializeUserSummary } = require('../lib/serializers');
 
 const router = express.Router();
 
 // GET /api/users - List all users
-router.get('/', async (req, res) => {
+router.get('/', withAsync(async (req, res) => {
   const users = await db.getAllUsers();
-  res.json(users);
-});
+  sendOk(res, users);
+}));
 
 // GET /api/users/:id - Get user by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', withAsync(async (req, res) => {
   const user = await db.findUser(req.params.id);
 
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return sendNotFound(res, 'User not found');
   }
 
-  res.json({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role
-  });
-});
+  return sendOk(res, serializeUserSummary(user));
+}));
 
 // GET /api/users/:id/profile - Get user profile
-router.get('/:id/profile', async (req, res) => {
+router.get('/:id/profile', withAsync(async (req, res) => {
   const user = await db.findUser(req.params.id);
 
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return sendNotFound(res, 'User not found');
   }
 
-  res.json({
-    displayName: user.name,
-    email: user.email,
-    initials: user.name.split(' ').map(n => n[0]).join('')
-  });
-});
+  return sendOk(res, serializeUserProfile(user));
+}));
 
 // POST /api/users - Create user
-router.post('/', validateRequired(['email', 'name']), validateEmail, async (req, res) => {
+router.post('/', validateRequired(['email', 'name']), validateEmail, withAsync(async (req, res) => {
   const { email, name, role } = req.body;
   const existing = await db.findUserByEmail(email);
   if (existing) {
     return res.status(409).json({ error: 'Email already exists' });
   }
   const user = await db.createUser({ email, name, role });
-  res.status(201).json(user);
-});
+  return sendCreated(res, user);
+}));
 
 // PATCH /api/users/:id - Update user
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', withAsync(async (req, res) => {
   const user = await db.updateUser(req.params.id, req.body);
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return sendNotFound(res, 'User not found');
   }
-  res.json(user);
-});
+  return sendOk(res, user);
+}));
 
 // DELETE /api/users/:id - Soft delete (set status to inactive)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', withAsync(async (req, res) => {
   const user = await db.deleteUser(req.params.id);
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return sendNotFound(res, 'User not found');
   }
-  res.json({ message: 'User deactivated', user });
-});
+  return sendOk(res, { message: 'User deactivated', user });
+}));
 
 module.exports = router;

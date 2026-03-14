@@ -1,10 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../App';
+import { getInitials } from '../utils/user';
 
-export default function Layout({ children }) {
-  const { user, logout } = useAuth();
-
+export default function Layout({ children, user, logout }) {
   return (
     <div className="app-layout">
       <aside className="sidebar">
@@ -34,7 +32,7 @@ export default function Layout({ children }) {
               alignItems: 'center', justifyContent: 'center',
               fontSize: '13px', fontWeight: '600'
             }}>
-              {user?.name?.split(' ').map(n => n[0]).join('') || '?'}
+              {getInitials(user?.name) || '?'}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '14px', fontWeight: '500', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
