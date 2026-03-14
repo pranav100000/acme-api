@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../App';
+import { useAuth } from '../auth';
 import * as api from '../api';
 
 export default function LoginPage() {

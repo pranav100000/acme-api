@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as api from '../api';
+import PageLoader from '../components/PageLoader';
+import { formatRole } from '../utils/format';
 
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
@@ -29,12 +31,7 @@ export default function Dashboard() {
   }, []);
 
   if (loading) {
-    return (
-      <>
-        <div className="page-header"><h2>Dashboard</h2></div>
-        <div className="page-body"><div className="loading"><div className="spinner"></div></div></div>
-      </>
-    );
+    return <PageLoader title="Dashboard" />;
   }
 
   const activeUsers = users.filter(u => u.status === 'active').length;
@@ -103,7 +100,7 @@ export default function Dashboard() {
                         <div style={{ fontWeight: 500 }}>{user.name}</div>
                         <div style={{ fontSize: '12px', color: '#6b7280' }}>{user.email}</div>
                       </td>
-                      <td><span className={`badge badge-${user.role}`}>{user.role.replace('_', ' ')}</span></td>
+                      <td><span className={`badge badge-${user.role}`}>{formatRole(user.role)}</span></td>
                       <td><span className={`badge badge-${user.status}`}>{user.status}</span></td>
                     </tr>
                   ))}

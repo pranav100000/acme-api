@@ -1,21 +1,26 @@
-const express = require('express');
-const db = require('../db');
-const { validateEmail, validateRequired } = require('../middleware/validate');
+const express = require('express')
+const db = require('../db')
+const { validateEmail, validateRequired } = require('../middleware/validate')
+const { asyncHandler } = require('./helpers')
 
-const router = express.Router();
+const router = express.Router()
 
-// POST /api/auth/login
-router.post('/login', validateRequired(['email']), validateEmail, async (req, res) => {
-  const user = await db.findUserByEmail(req.body.email);
+function respondUnauthorized(res) {
+  return res.status(401).json({ error: 'Invalid credentials' })
+}
+
+router.post('/login', validateRequired(['email']), validateEmail, asyncHandler(async (req, res) => {
+  const user = await db.findUserByEmail(req.body.email)
+
   if (!user) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+    return respondUnauthorized(res)
   }
-  res.json({ message: 'Login successful', user });
-});
 
-// POST /api/auth/logout
+  res.json({ message: 'Login successful', user })
+}))
+
 router.post('/logout', (req, res) => {
-  res.json({ message: 'Logout successful' });
-});
+  res.json({ message: 'Logout successful' })
+})
 
-module.exports = router;
+module.exports = router
