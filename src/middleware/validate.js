@@ -1,26 +1,25 @@
-/**
- * Validates email format in request body
- */
-const validateEmail = (req, res, next) => {
-  const { email } = req.body;
+const { ValidationError } = require('../utils/errors')
+
+function validateEmail(req, res, next) {
+  const { email } = req.body
+
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ error: 'Invalid email format' });
+    return next(new ValidationError('Invalid email format'))
   }
-  next();
-};
 
-/**
- * Factory function that returns middleware to check for required fields
- */
-const validateRequired = (fields) => {
+  next()
+}
+
+function validateRequired(fields) {
   return (req, res, next) => {
-    for (const field of fields) {
-      if (!req.body[field]) {
-        return res.status(400).json({ error: `Missing required field: ${field}` });
-      }
-    }
-    next();
-  };
-};
+    const missingField = fields.find(field => !req.body[field])
 
-module.exports = { validateEmail, validateRequired };
+    if (missingField) {
+      return next(new ValidationError(`Missing required field: ${missingField}`))
+    }
+
+    next()
+  }
+}
+
+module.exports = { validateEmail, validateRequired }

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import PageLoader from '../components/PageLoader';
+import { useFlashMessage } from '../hooks/useFlashMessage';
+import { formatRole, getInitials } from '../utils/format';
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
@@ -8,7 +11,7 @@ export default function TeamsPage() {
   const [teamMembers, setTeamMembers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [success, showSuccess] = useFlashMessage();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [addMemberTeam, setAddMemberTeam] = useState(null);
 
@@ -47,22 +50,15 @@ export default function TeamsPage() {
     if (!window.confirm(`Remove ${userName} from this team?`)) return;
     try {
       await api.removeTeamMember(teamId, userId);
-      setSuccess(`${userName} removed from team`);
+      showSuccess(`${userName} removed from team`);
       loadData();
-      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.message);
-      setTimeout(() => setError(''), 3000);
     }
   };
 
   if (loading) {
-    return (
-      <>
-        <div className="page-header"><h2>Teams</h2></div>
-        <div className="page-body"><div className="loading"><div className="spinner"></div></div></div>
-      </>
-    );
+    return <PageLoader title="Teams" />;
   }
 
   return (
@@ -109,11 +105,11 @@ export default function TeamsPage() {
                           <div key={member.id} className="member-item">
                             <div className="member-info">
                               <div className="member-avatar">
-                                {member.name.split(' ').map(n => n[0]).join('')}
+                                {getInitials(member.name)}
                               </div>
                               <div>
                                 <div style={{ fontWeight: 500, fontSize: '14px' }}>{member.name}</div>
-                                <div style={{ fontSize: '12px', color: '#6b7280' }}>{member.role.replace('_', ' ')}</div>
+                                <div style={{ fontSize: '12px', color: '#6b7280' }}>{formatRole(member.role)}</div>
                               </div>
                             </div>
                             <button
@@ -149,7 +145,7 @@ export default function TeamsPage() {
       {showCreateModal && (
         <CreateTeamModal
           onClose={() => setShowCreateModal(false)}
-          onCreated={() => { setShowCreateModal(false); loadData(); setSuccess('Team created successfully'); setTimeout(() => setSuccess(''), 3000); }}
+          onCreated={() => { setShowCreateModal(false); loadData(); showSuccess('Team created successfully'); }}
         />
       )}
 
@@ -159,7 +155,7 @@ export default function TeamsPage() {
           users={users}
           currentMembers={teamMembers[addMemberTeam.id] || []}
           onClose={() => setAddMemberTeam(null)}
-          onAdded={() => { setAddMemberTeam(null); loadData(); setSuccess('Member added successfully'); setTimeout(() => setSuccess(''), 3000); }}
+          onAdded={() => { setAddMemberTeam(null); loadData(); showSuccess('Member added successfully'); }}
         />
       )}
     </>
@@ -252,7 +248,7 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
               <option value="">Choose a user...</option>
               {availableUsers.map(user => (
                 <option key={user.id} value={user.id}>
-                  {user.name} ({user.email}) - {user.role.replace('_', ' ')}
+                  {user.name} ({user.email}) - {formatRole(user.role)}
                 </option>
               ))}
             </select>

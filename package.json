@@ -10,7 +10,8 @@
     "dev:all": "npm run dev & npm run dev:frontend",
     "build:frontend": "npx vite build",
     "test": "node --test src/**/*.test.js",
-    "test:watch": "node --test --watch src/**/*.test.js"
+    "test:watch": "node --test --watch src/**/*.test.js",
+    "build": "npm run build:frontend"
   },
   "dependencies": {
     "@sentry/node": "^10.38.0",

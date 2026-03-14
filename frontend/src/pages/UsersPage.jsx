@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import PageLoader from '../components/PageLoader';
+import { useFlashMessage } from '../hooks/useFlashMessage';
+import { formatRole, getInitials } from '../utils/format';
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [success, showSuccess] = useFlashMessage();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [filter, setFilter] = useState('all');
@@ -28,24 +31,17 @@ export default function UsersPage() {
     if (!window.confirm(`Deactivate ${user.name}? This will set their status to inactive.`)) return;
     try {
       await api.deleteUser(user.id);
-      setSuccess(`${user.name} has been deactivated`);
+      showSuccess(`${user.name} has been deactivated`);
       loadUsers();
-      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.message);
-      setTimeout(() => setError(''), 3000);
     }
   };
 
   const filteredUsers = filter === 'all' ? users : users.filter(u => u.status === filter);
 
   if (loading) {
-    return (
-      <>
-        <div className="page-header"><h2>Users</h2></div>
-        <div className="page-body"><div className="loading"><div className="spinner"></div></div></div>
-      </>
-    );
+    return <PageLoader title="Users" />;
   }
 
   return (
@@ -105,7 +101,7 @@ export default function UsersPage() {
                             alignItems: 'center', justifyContent: 'center',
                             fontSize: '13px', fontWeight: '600', flexShrink: 0
                           }}>
-                            {user.name.split(' ').map(n => n[0]).join('')}
+                            {getInitials(user.name)}
                           </div>
                           <div>
                             <div style={{ fontWeight: 500 }}>{user.name}</div>
@@ -113,7 +109,7 @@ export default function UsersPage() {
                           </div>
                         </div>
                       </td>
-                      <td><span className={`badge badge-${user.role}`}>{user.role.replace('_', ' ')}</span></td>
+                      <td><span className={`badge badge-${user.role}`}>{formatRole(user.role)}</span></td>
                       <td><span className={`badge badge-${user.status}`}>{user.status}</span></td>
                       <td style={{ fontSize: '13px', color: '#6b7280' }}>
                         {new Date(user.createdAt).toLocaleDateString()}
@@ -142,7 +138,7 @@ export default function UsersPage() {
       {showCreateModal && (
         <CreateUserModal
           onClose={() => setShowCreateModal(false)}
-          onCreated={() => { setShowCreateModal(false); loadUsers(); setSuccess('User created successfully'); setTimeout(() => setSuccess(''), 3000); }}
+          onCreated={() => { setShowCreateModal(false); loadUsers(); showSuccess('User created successfully'); }}
         />
       )}
 
@@ -150,7 +146,7 @@ export default function UsersPage() {
         <EditUserModal
           user={editingUser}
           onClose={() => setEditingUser(null)}
-          onUpdated={() => { setEditingUser(null); loadUsers(); setSuccess('User updated successfully'); setTimeout(() => setSuccess(''), 3000); }}
+          onUpdated={() => { setEditingUser(null); loadUsers(); showSuccess('User updated successfully'); }}
         />
       )}
     </>
