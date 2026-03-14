@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as api from '../api';
+import PageHeader from '../components/PageHeader';
+import PageLoading from '../components/PageLoading';
+import { formatDate, formatRole } from '../utils/display';
 
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
@@ -29,12 +32,7 @@ export default function Dashboard() {
   }, []);
 
   if (loading) {
-    return (
-      <>
-        <div className="page-header"><h2>Dashboard</h2></div>
-        <div className="page-body"><div className="loading"><div className="spinner"></div></div></div>
-      </>
-    );
+    return <PageLoading title="Dashboard" />;
   }
 
   const activeUsers = users.filter(u => u.status === 'active').length;
@@ -43,9 +41,9 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="page-header">
-        <h2>Dashboard</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <PageHeader
+        title="Dashboard"
+        actions={<div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{
             display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%',
             background: health?.status === 'ok' ? '#16a34a' : '#dc2626'
@@ -53,8 +51,8 @@ export default function Dashboard() {
           <span style={{ fontSize: '13px', color: '#6b7280' }}>
             API {health?.status === 'ok' ? 'Healthy' : 'Unhealthy'}
           </span>
-        </div>
-      </div>
+        </div>}
+      />
       <div className="page-body">
         <div className="stats-grid">
           <div className="stat-card">
@@ -103,7 +101,7 @@ export default function Dashboard() {
                         <div style={{ fontWeight: 500 }}>{user.name}</div>
                         <div style={{ fontSize: '12px', color: '#6b7280' }}>{user.email}</div>
                       </td>
-                      <td><span className={`badge badge-${user.role}`}>{user.role.replace('_', ' ')}</span></td>
+                      <td><span className={`badge badge-${user.role}`}>{formatRole(user.role)}</span></td>
                       <td><span className={`badge badge-${user.status}`}>{user.status}</span></td>
                     </tr>
                   ))}
@@ -132,7 +130,7 @@ export default function Dashboard() {
                       <td style={{ fontWeight: 500 }}>{team.name}</td>
                       <td>{team.members.length} members</td>
                       <td style={{ fontSize: '13px', color: '#6b7280' }}>
-                        {new Date(team.createdAt).toLocaleDateString()}
+                        {formatDate(team.createdAt)}
                       </td>
                     </tr>
                   ))}

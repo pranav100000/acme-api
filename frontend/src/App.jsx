@@ -1,51 +1,35 @@
-import React, { useState, createContext, useContext } from 'react';
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import UsersPage from './pages/UsersPage';
 import TeamsPage from './pages/TeamsPage';
 import LoginPage from './pages/LoginPage';
 
-export const AuthContext = createContext(null);
-
-export function useAuth() {
-  return useContext(AuthContext);
+export default function App() {
+  return (
+    <AuthProvider>
+      <AuthenticatedApp />
+    </AuthProvider>
+  );
 }
 
-export default function App() {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('acme_user');
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  const handleLogin = (userData) => {
-    setUser(userData);
-    localStorage.setItem('acme_user', JSON.stringify(userData));
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('acme_user');
-  };
+function AuthenticatedApp() {
+  const { user } = useAuth();
 
   if (!user) {
-    return (
-      <AuthContext.Provider value={{ user, login: handleLogin, logout: handleLogout }}>
-        <LoginPage />
-      </AuthContext.Provider>
-    );
+    return <LoginPage />;
   }
 
   return (
-    <AuthContext.Provider value={{ user, login: handleLogin, logout: handleLogout }}>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/teams" element={<TeamsPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
-    </AuthContext.Provider>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/teams" element={<TeamsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Layout>
   );
 }
