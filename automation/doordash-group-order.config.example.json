@@ -1,0 +1,22 @@
+{
+  "storeUrl": "https://www.doordash.com/store/example-store-id/",
+  "headless": false,
+  "pauseAfterLaunch": false,
+  "loginOnly": false,
+  "groupOrder": {
+    "enabled": true,
+    "mode": "assisted"
+  },
+  "addressLabel": "Office",
+  "participants": [
+    "joel@example.com",
+    "james@example.com"
+  ],
+  "items": [
+    {
+      "name": "Spicy Chicken Sandwich",
+      "quantity": 1,
+      "mode": "manual-confirm"
+    }
+  ]
+}

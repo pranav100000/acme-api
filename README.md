@@ -80,6 +80,18 @@ The frontend is a React SPA (built with Vite) located in the `frontend/` directo
 npm test
 ```
 
+## DoorDash group-order automation scaffold
+
+There is also a Playwright-based helper for a DoorDash group-order workflow in `automation/`.
+
+```bash
+npx playwright install chromium
+cp automation/doordash-group-order.config.example.json automation/doordash-group-order.config.json
+npm run doordash:group-order -- --login-only --pause-after-launch
+```
+
+See `automation/README.md` for the assisted-flow details.
+
 ## Environment Variables
 
 See `.env.example` for all available configuration options.
