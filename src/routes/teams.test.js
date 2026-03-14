@@ -1,34 +1,23 @@
 const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
-const express = require('express');
 const db = require('../db');
 const teamRoutes = require('./teams');
-
-function createApp() {
-  const app = express();
-  app.use(express.json());
-  app.use('/api/teams', teamRoutes);
-  app.use((err, req, res, next) => {
-    const status = err.statusCode || 500;
-    res.status(status).json({ error: err.message || 'Internal server error' });
-  });
-  return app;
-}
+const { createTestApp } = require('../test/support/create-test-app');
+const { startTestServer } = require('../test/support/test-server');
 
 describe('Team Routes', () => {
-  let server;
+  let testServer;
   let baseUrl;
 
   before(async () => {
     db._reset();
-    const app = createApp();
-    server = app.listen(0);
-    const { port } = server.address();
-    baseUrl = `http://localhost:${port}`;
+    const app = createTestApp('/api/teams', teamRoutes);
+    testServer = await startTestServer(app);
+    baseUrl = testServer.baseUrl;
   });
 
   after(async () => {
-    server.close();
+    await testServer.close();
     db._reset();
   });
 
