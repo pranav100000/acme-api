@@ -1,9 +1,10 @@
 const express = require('express')
 const db = require('../db')
 const { validateRequired } = require('../middleware/validate')
-const { asyncHandler, notFound } = require('./helpers')
+const { asyncHandler, createLookup, notFound } = require('./helpers')
 
 const router = express.Router()
+const loadTeam = createLookup((id) => db.findTeam(id), 'Team not found')
 
 router.get('/', asyncHandler(async (req, res) => {
   const teams = await db.getAllTeams()
@@ -11,11 +12,9 @@ router.get('/', asyncHandler(async (req, res) => {
 }))
 
 router.get('/:id', asyncHandler(async (req, res) => {
-  const team = await db.findTeam(req.params.id)
+  const team = await loadTeam(req.params.id, res)
 
-  if (!team) {
-    return notFound(res, 'Team not found')
-  }
+  if (!team) return
 
   res.json(team)
 }))

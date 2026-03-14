@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import ModalActions from '../components/ModalActions';
 import PageLoader from '../components/PageLoader';
 import { useFlashMessage } from '../hooks/useFlashMessage';
 import { formatRole, getInitials } from '../utils/format';
@@ -196,12 +197,7 @@ function CreateTeamModal({ onClose, onCreated }) {
             autoFocus
           />
         </div>
-        <div className="form-actions">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Creating...' : 'Create Team'}
-          </button>
-        </div>
+        <ModalActions onCancel={onClose} submitLabel="Create Team" loadingLabel="Creating..." isLoading={loading} />
       </form>
     </Modal>
   );
@@ -236,9 +232,7 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
       {availableUsers.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '24px', color: '#6b7280' }}>
           <p>All active users are already members of this team.</p>
-          <div className="form-actions" style={{ justifyContent: 'center' }}>
-            <button className="btn btn-secondary" onClick={onClose}>Close</button>
-          </div>
+          <ModalActions onCancel={onClose} cancelLabel="Close" align="center" />
         </div>
       ) : (
         <form onSubmit={handleSubmit}>
@@ -253,12 +247,13 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
               ))}
             </select>
           </div>
-          <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn btn-primary" disabled={loading || !selectedUserId}>
-              {loading ? 'Adding...' : 'Add Member'}
-            </button>
-          </div>
+          <ModalActions
+            onCancel={onClose}
+            submitLabel="Add Member"
+            loadingLabel="Adding..."
+            isLoading={loading}
+            submitDisabled={!selectedUserId}
+          />
         </form>
       )}
     </Modal>

@@ -5,11 +5,15 @@ const { asyncHandler } = require('./helpers')
 
 const router = express.Router()
 
+function respondUnauthorized(res) {
+  return res.status(401).json({ error: 'Invalid credentials' })
+}
+
 router.post('/login', validateRequired(['email']), validateEmail, asyncHandler(async (req, res) => {
   const user = await db.findUserByEmail(req.body.email)
 
   if (!user) {
-    return res.status(401).json({ error: 'Invalid credentials' })
+    return respondUnauthorized(res)
   }
 
   res.json({ message: 'Login successful', user })

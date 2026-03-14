@@ -1,9 +1,10 @@
 const express = require('express')
 const db = require('../db')
 const { validateEmail, validateRequired } = require('../middleware/validate')
-const { asyncHandler, notFound } = require('./helpers')
+const { asyncHandler, createLookup, notFound } = require('./helpers')
 
 const router = express.Router()
+const loadUser = createLookup((id) => db.findUser(id), 'User not found')
 
 router.get('/', asyncHandler(async (req, res) => {
   const users = await db.getAllUsers()
@@ -11,11 +12,9 @@ router.get('/', asyncHandler(async (req, res) => {
 }))
 
 router.get('/:id', asyncHandler(async (req, res) => {
-  const user = await db.findUser(req.params.id)
+  const user = await loadUser(req.params.id, res)
 
-  if (!user) {
-    return notFound(res, 'User not found')
-  }
+  if (!user) return
 
   res.json({
     id: user.id,
@@ -26,11 +25,9 @@ router.get('/:id', asyncHandler(async (req, res) => {
 }))
 
 router.get('/:id/profile', asyncHandler(async (req, res) => {
-  const user = await db.findUser(req.params.id)
+  const user = await loadUser(req.params.id, res)
 
-  if (!user) {
-    return notFound(res, 'User not found')
-  }
+  if (!user) return
 
   res.json({
     displayName: user.name,

@@ -1,9 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import ModalActions from '../components/ModalActions';
 import PageLoader from '../components/PageLoader';
 import { useFlashMessage } from '../hooks/useFlashMessage';
 import { formatRole, getInitials } from '../utils/format';
+
+const ROLE_OPTIONS = [
+  { value: 'developer', label: 'Developer' },
+  { value: 'designer', label: 'Designer' },
+  { value: 'admin', label: 'Admin' },
+  { value: 'product_manager', label: 'Product Manager' },
+];
+
+const STATUS_OPTIONS = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'pending', label: 'Pending' },
+];
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -176,29 +190,8 @@ function CreateUserModal({ onClose, onCreated }) {
     <Modal title="Create User" onClose={onClose}>
       {error && <div className="alert alert-error">{error}</div>}
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Name</label>
-          <input className="form-control" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required placeholder="John Doe" />
-        </div>
-        <div className="form-group">
-          <label>Email</label>
-          <input className="form-control" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required placeholder="john@acme.com" />
-        </div>
-        <div className="form-group">
-          <label>Role</label>
-          <select className="form-control" value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}>
-            <option value="developer">Developer</option>
-            <option value="designer">Designer</option>
-            <option value="admin">Admin</option>
-            <option value="product_manager">Product Manager</option>
-          </select>
-        </div>
-        <div className="form-actions">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Creating...' : 'Create User'}
-          </button>
-        </div>
+        <UserFormFields form={form} setForm={setForm} />
+        <ModalActions onCancel={onClose} submitLabel="Create User" loadingLabel="Creating..." isLoading={loading} />
       </form>
     </Modal>
   );
@@ -227,38 +220,42 @@ function EditUserModal({ user, onClose, onUpdated }) {
     <Modal title={`Edit ${user.name}`} onClose={onClose}>
       {error && <div className="alert alert-error">{error}</div>}
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Name</label>
-          <input className="form-control" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
-        </div>
-        <div className="form-group">
-          <label>Email</label>
-          <input className="form-control" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
-        </div>
-        <div className="form-group">
-          <label>Role</label>
-          <select className="form-control" value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}>
-            <option value="developer">Developer</option>
-            <option value="designer">Designer</option>
-            <option value="admin">Admin</option>
-            <option value="product_manager">Product Manager</option>
-          </select>
-        </div>
+        <UserFormFields form={form} setForm={setForm} />
         <div className="form-group">
           <label>Status</label>
           <select className="form-control" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="pending">Pending</option>
+            {STATUS_OPTIONS.map(status => (
+              <option key={status.value} value={status.value}>{status.label}</option>
+            ))}
           </select>
         </div>
-        <div className="form-actions">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
+        <ModalActions onCancel={onClose} submitLabel="Save Changes" loadingLabel="Saving..." isLoading={loading} />
       </form>
     </Modal>
+  );
+}
+
+function UserFormFields({ form, setForm }) {
+  const updateField = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+
+  return (
+    <>
+      <div className="form-group">
+        <label>Name</label>
+        <input className="form-control" value={form.name} onChange={updateField('name')} required placeholder="John Doe" />
+      </div>
+      <div className="form-group">
+        <label>Email</label>
+        <input className="form-control" type="email" value={form.email} onChange={updateField('email')} required placeholder="john@acme.com" />
+      </div>
+      <div className="form-group">
+        <label>Role</label>
+        <select className="form-control" value={form.role} onChange={updateField('role')}>
+          {ROLE_OPTIONS.map(role => (
+            <option key={role.value} value={role.value}>{role.label}</option>
+          ))}
+        </select>
+      </div>
+    </>
   );
 }
