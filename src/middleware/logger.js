@@ -1,9 +1,15 @@
 /**
- * Simple request logger middleware
+ * Logs each request with method, path, status, and duration.
  */
 const logger = (req, res, next) => {
-  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
-  next();
-};
+  const startedAt = Date.now()
 
-module.exports = logger;
+  res.on('finish', () => {
+    const durationMs = Date.now() - startedAt
+    console.log(`${req.method} ${req.path} ${res.statusCode} ${durationMs}ms`)
+  })
+
+  next()
+}
+
+module.exports = logger
