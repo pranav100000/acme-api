@@ -15,6 +15,7 @@ const fs = require('fs');
 
 const app = express();
 
+// Parse incoming JSON request bodies for API routes.
 app.use(express.json());
 app.use(logger);
 
