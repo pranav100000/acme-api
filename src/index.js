@@ -16,6 +16,7 @@ const fs = require('fs');
 const app = express();
 
 app.use(express.json());
+// Log each incoming request before route handlers run.
 app.use(logger);
 
 // Serve static frontend files in production
