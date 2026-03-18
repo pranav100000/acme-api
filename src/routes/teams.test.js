@@ -1,39 +1,20 @@
 const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
-const express = require('express');
-const db = require('../db');
-const teamRoutes = require('./teams');
-
-function createApp() {
-  const app = express();
-  app.use(express.json());
-  app.use('/api/teams', teamRoutes);
-  app.use((err, req, res, next) => {
-    const status = err.statusCode || 500;
-    res.status(status).json({ error: err.message || 'Internal server error' });
-  });
-  return app;
-}
+const { createTestServer } = require('../test-helpers');
 
 describe('Team Routes', () => {
-  let server;
-  let baseUrl;
+  let testServer;
 
   before(async () => {
-    db._reset();
-    const app = createApp();
-    server = app.listen(0);
-    const { port } = server.address();
-    baseUrl = `http://localhost:${port}`;
+    testServer = await createTestServer();
   });
 
   after(async () => {
-    server.close();
-    db._reset();
+    await testServer.close();
   });
 
   test('GET /api/teams returns all teams', async () => {
-    const res = await fetch(`${baseUrl}/api/teams`);
+    const res = await fetch(`${testServer.baseUrl}/api/teams`);
     assert.strictEqual(res.status, 200);
     const teams = await res.json();
     assert.ok(Array.isArray(teams));
@@ -43,7 +24,7 @@ describe('Team Routes', () => {
   });
 
   test('GET /api/teams/:id returns team when found', async () => {
-    const res = await fetch(`${baseUrl}/api/teams/1`);
+    const res = await fetch(`${testServer.baseUrl}/api/teams/1`);
     assert.strictEqual(res.status, 200);
     const team = await res.json();
     assert.strictEqual(team.id, '1');
@@ -52,14 +33,14 @@ describe('Team Routes', () => {
   });
 
   test('GET /api/teams/:id returns 404 for non-existent team', async () => {
-    const res = await fetch(`${baseUrl}/api/teams/999`);
+    const res = await fetch(`${testServer.baseUrl}/api/teams/999`);
     assert.strictEqual(res.status, 404);
     const body = await res.json();
     assert.ok(body.error);
   });
 
   test('GET /api/teams/:id/members returns team members', async () => {
-    const res = await fetch(`${baseUrl}/api/teams/1/members`);
+    const res = await fetch(`${testServer.baseUrl}/api/teams/1/members`);
     assert.strictEqual(res.status, 200);
     const members = await res.json();
     assert.ok(Array.isArray(members));
@@ -68,7 +49,7 @@ describe('Team Routes', () => {
   });
 
   test('POST /api/teams creates a new team', async () => {
-    const res = await fetch(`${baseUrl}/api/teams`, {
+    const res = await fetch(`${testServer.baseUrl}/api/teams`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Marketing' })
@@ -81,7 +62,7 @@ describe('Team Routes', () => {
   });
 
   test('POST /api/teams/:id/members adds a member to team', async () => {
-    const res = await fetch(`${baseUrl}/api/teams/3/members`, {
+    const res = await fetch(`${testServer.baseUrl}/api/teams/3/members`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: '5' })
@@ -92,7 +73,7 @@ describe('Team Routes', () => {
   });
 
   test('DELETE /api/teams/:id/members/:userId removes a member from team', async () => {
-    const res = await fetch(`${baseUrl}/api/teams/1/members/2`, { method: 'DELETE' });
+    const res = await fetch(`${testServer.baseUrl}/api/teams/1/members/2`, { method: 'DELETE' });
     assert.strictEqual(res.status, 200);
     const team = await res.json();
     assert.ok(!team.members.includes('2'));
