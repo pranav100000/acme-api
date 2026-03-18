@@ -59,6 +59,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = config.port;
+// Start the HTTP server on the configured port.
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
