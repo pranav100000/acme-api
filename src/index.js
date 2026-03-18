@@ -15,6 +15,7 @@ const fs = require('fs');
 
 const app = express();
 
+// Parse incoming JSON request bodies for API routes.
 app.use(express.json());
 app.use(logger);
 
@@ -28,6 +29,7 @@ app.get('/health', (req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
+// Mount authentication endpoints under the /api/auth prefix.
 app.use('/api/auth', authRoutes);
 
 // Sentry test route
@@ -57,6 +59,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = config.port;
+// Start the HTTP server on the configured port.
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
