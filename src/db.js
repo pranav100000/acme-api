@@ -16,6 +16,7 @@ const teams = [
   { id: '4', name: 'Infrastructure', members: ['1', '2'], createdAt: '2024-02-01T10:00:00Z', updatedAt: '2024-02-01T14:00:00Z' },
 ];
 
+// Keep a pristine copy of the seed data so tests can reset state between runs.
 const initialUsers = users.map(u => ({ ...u }));
 const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
 
