@@ -29,6 +29,7 @@ app.get('/health', (req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/teams', teamRoutes);
+// Mount authentication endpoints under the /api/auth prefix.
 app.use('/api/auth', authRoutes);
 
 // Sentry test route
