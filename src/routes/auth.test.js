@@ -1,39 +1,20 @@
 const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
-const express = require('express');
-const db = require('../db');
-const authRoutes = require('./auth');
-
-function createApp() {
-  const app = express();
-  app.use(express.json());
-  app.use('/api/auth', authRoutes);
-  app.use((err, req, res, next) => {
-    const status = err.statusCode || 500;
-    res.status(status).json({ error: err.message || 'Internal server error' });
-  });
-  return app;
-}
+const { createTestServer } = require('../test-helpers');
 
 describe('Auth Routes', () => {
-  let server;
-  let baseUrl;
+  let testServer;
 
   before(async () => {
-    db._reset();
-    const app = createApp();
-    server = app.listen(0);
-    const { port } = server.address();
-    baseUrl = `http://localhost:${port}`;
+    testServer = await createTestServer();
   });
 
   after(async () => {
-    server.close();
-    db._reset();
+    await testServer.close();
   });
 
   test('POST /api/auth/login with valid email returns user', async () => {
-    const res = await fetch(`${baseUrl}/api/auth/login`, {
+    const res = await fetch(`${testServer.baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: 'alice@acme.com' })
@@ -45,7 +26,7 @@ describe('Auth Routes', () => {
   });
 
   test('POST /api/auth/login with non-existent email returns 401', async () => {
-    const res = await fetch(`${baseUrl}/api/auth/login`, {
+    const res = await fetch(`${testServer.baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: 'nobody@acme.com' })
@@ -56,7 +37,7 @@ describe('Auth Routes', () => {
   });
 
   test('POST /api/auth/login with invalid email format returns 400', async () => {
-    const res = await fetch(`${baseUrl}/api/auth/login`, {
+    const res = await fetch(`${testServer.baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: 'not-valid' })
@@ -67,7 +48,7 @@ describe('Auth Routes', () => {
   });
 
   test('POST /api/auth/logout returns success', async () => {
-    const res = await fetch(`${baseUrl}/api/auth/logout`, { method: 'POST' });
+    const res = await fetch(`${testServer.baseUrl}/api/auth/logout`, { method: 'POST' });
     assert.strictEqual(res.status, 200);
     const body = await res.json();
     assert.strictEqual(body.message, 'Logout successful');
