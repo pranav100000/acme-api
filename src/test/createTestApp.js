@@ -1,0 +1,14 @@
+const express = require('express');
+
+function createTestApp(routePrefix, routeHandler) {
+  const app = express();
+  app.use(express.json());
+  app.use(routePrefix, routeHandler);
+  app.use((err, req, res, next) => {
+    const status = err.statusCode || 500;
+    res.status(status).json({ error: err.message || 'Internal server error' });
+  });
+  return app;
+}
+
+module.exports = { createTestApp };

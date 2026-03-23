@@ -1,24 +1,45 @@
-class NotFoundError extends Error {
+class HttpError extends Error {
+  constructor(message, statusCode, name = 'HttpError') {
+    super(message);
+    this.name = name;
+    this.statusCode = statusCode;
+  }
+}
+
+class NotFoundError extends HttpError {
   constructor(message = 'Not found') {
-    super(message);
-    this.name = 'NotFoundError';
-    this.statusCode = 404;
+    super(message, 404, 'NotFoundError');
   }
 }
 
-class ValidationError extends Error {
+class ValidationError extends HttpError {
   constructor(message = 'Validation failed') {
-    super(message);
-    this.name = 'ValidationError';
-    this.statusCode = 400;
+    super(message, 400, 'ValidationError');
   }
 }
 
-/**
- * Wraps an async route handler to catch errors and forward to Express error handler
- */
+class ConflictError extends HttpError {
+  constructor(message = 'Conflict') {
+    super(message, 409, 'ConflictError');
+  }
+}
+
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-module.exports = { NotFoundError, ValidationError, asyncHandler };
+function assertFound(value, message) {
+  if (!value) {
+    throw new NotFoundError(message);
+  }
+  return value;
+}
+
+module.exports = {
+  ConflictError,
+  HttpError,
+  NotFoundError,
+  ValidationError,
+  asyncHandler,
+  assertFound,
+};
