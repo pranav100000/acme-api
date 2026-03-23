@@ -127,6 +127,17 @@ describe('User Routes', () => {
     assert.ok(body.error.includes('name'));
   });
 
+  test('POST /api/users returns 409 for duplicate email', async () => {
+    const res = await fetch(`${baseUrl}/api/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'alice@acme.com', name: 'Duplicate User' })
+    });
+    assert.strictEqual(res.status, 409);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'Email already exists');
+  });
+
   test('PATCH /api/users/:id updates a user', async () => {
     const res = await fetch(`${baseUrl}/api/users/2`, {
       method: 'PATCH',
