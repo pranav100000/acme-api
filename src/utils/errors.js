@@ -14,6 +14,22 @@ class ValidationError extends Error {
   }
 }
 
+class UnauthorizedError extends Error {
+  constructor(message = 'Unauthorized') {
+    super(message);
+    this.name = 'UnauthorizedError';
+    this.statusCode = 401;
+  }
+}
+
+class ConflictError extends Error {
+  constructor(message = 'Conflict') {
+    super(message);
+    this.name = 'ConflictError';
+    this.statusCode = 409;
+  }
+}
+
 /**
  * Wraps an async route handler to catch errors and forward to Express error handler
  */
@@ -21,4 +37,4 @@ const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-module.exports = { NotFoundError, ValidationError, asyncHandler };
+module.exports = { NotFoundError, ValidationError, UnauthorizedError, ConflictError, asyncHandler };
