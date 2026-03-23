@@ -7,10 +7,10 @@ class NotFoundError extends Error {
 }
 
 class ValidationError extends Error {
-  constructor(message = 'Validation failed') {
+  constructor(message = 'Validation failed', statusCode = 400) {
     super(message);
     this.name = 'ValidationError';
-    this.statusCode = 400;
+    this.statusCode = statusCode;
   }
 }
 
