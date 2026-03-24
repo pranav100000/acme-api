@@ -1,4 +1,5 @@
 const express = require('express');
+require('express-async-errors');
 const db = require('../db');
 const { validateEmail, validateRequired } = require('../middleware/validate');
 
