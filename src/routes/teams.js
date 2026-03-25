@@ -4,6 +4,10 @@ const { validateRequired } = require('../middleware/validate');
 
 const router = express.Router();
 
+const TEAM_NOT_FOUND = { error: 'Team not found' };
+const TEAM_OR_USER_NOT_FOUND = { error: 'Team or user not found' };
+const sendTeamNotFound = (res) => res.status(404).json(TEAM_NOT_FOUND);
+
 // GET /api/teams - List all teams
 router.get('/', async (req, res) => {
   const teams = await db.getAllTeams();
@@ -15,7 +19,7 @@ router.get('/:id', async (req, res) => {
   const team = await db.findTeam(req.params.id);
 
   if (!team) {
-    return res.status(404).json({ error: 'Team not found' });
+    return sendTeamNotFound(res);
   }
 
   res.json(team);
@@ -26,7 +30,7 @@ router.get('/:id/members', async (req, res) => {
   const members = await db.getTeamMembers(req.params.id);
 
   if (!members) {
-    return res.status(404).json({ error: 'Team not found' });
+    return sendTeamNotFound(res);
   }
 
   res.json(members);
@@ -42,7 +46,7 @@ router.post('/', validateRequired(['name']), async (req, res) => {
 router.post('/:id/members', validateRequired(['userId']), async (req, res) => {
   const team = await db.addTeamMember(req.params.id, req.body.userId);
   if (!team) {
-    return res.status(404).json({ error: 'Team or user not found' });
+    return res.status(404).json(TEAM_OR_USER_NOT_FOUND);
   }
   res.json(team);
 });
@@ -51,7 +55,7 @@ router.post('/:id/members', validateRequired(['userId']), async (req, res) => {
 router.delete('/:id/members/:userId', async (req, res) => {
   const team = await db.removeTeamMember(req.params.id, req.params.userId);
   if (!team) {
-    return res.status(404).json({ error: 'Team not found' });
+    return sendTeamNotFound(res);
   }
   res.json(team);
 });

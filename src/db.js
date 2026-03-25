@@ -16,112 +16,143 @@ const teams = [
   { id: '4', name: 'Infrastructure', members: ['1', '2'], createdAt: '2024-02-01T10:00:00Z', updatedAt: '2024-02-01T14:00:00Z' },
 ];
 
-const initialUsers = users.map(u => ({ ...u }));
-const initialTeams = teams.map(t => ({ ...t, members: [...t.members] }));
+const initialUsers = users.map((user) => ({ ...user }));
+const initialTeams = teams.map((team) => ({ ...team, members: [...team.members] }));
+const USER_UPDATABLE_FIELDS = ['email', 'name', 'role', 'status'];
+const SIMULATED_DELAY_MS = 10;
+
+const wait = () => new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+const now = () => new Date().toISOString();
+const findById = (collection, id) => collection.find((record) => record.id === id) || null;
+const getNextId = (collection) => String(Math.max(...collection.map(({ id }) => Number.parseInt(id, 10))) + 1);
+const touchRecord = (record) => {
+  record.updatedAt = now();
+  return record;
+};
+
+const resetCollection = (target, initialState, mapper) => {
+  target.length = 0;
+  target.push(...initialState.map(mapper));
+};
 
 const db = {
   async findUser(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    return users.find(u => u.id === id) || null;
+    await wait();
+    return findById(users, id);
   },
 
   async findUserByEmail(email) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    return users.find(u => u.email === email) || null;
+    await wait();
+    return users.find((user) => user.email === email) || null;
   },
 
   async getAllUsers() {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await wait();
     return users;
   },
 
   async createUser({ email, name, role }) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const id = String(Math.max(...users.map(u => parseInt(u.id))) + 1);
-    const now = new Date().toISOString();
-    const user = { id, email, name, role: role || 'developer', status: 'active', createdAt: now, updatedAt: now };
+    await wait();
+    const timestamp = now();
+    const user = {
+      id: getNextId(users),
+      email,
+      name,
+      role: role || 'developer',
+      status: 'active',
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+
     users.push(user);
     return user;
   },
 
   async updateUser(id, updates) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const user = users.find(u => u.id === id);
+    await wait();
+    const user = findById(users, id);
     if (!user) return null;
-    const allowed = ['email', 'name', 'role', 'status'];
-    for (const key of allowed) {
-      if (updates[key] !== undefined) {
-        user[key] = updates[key];
+
+    for (const field of USER_UPDATABLE_FIELDS) {
+      if (updates[field] !== undefined) {
+        user[field] = updates[field];
       }
     }
-    user.updatedAt = new Date().toISOString();
-    return user;
+
+    return touchRecord(user);
   },
 
   async deleteUser(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const user = users.find(u => u.id === id);
+    await wait();
+    const user = findById(users, id);
     if (!user) return null;
+
     user.status = 'inactive';
-    user.updatedAt = new Date().toISOString();
-    return user;
+    return touchRecord(user);
   },
 
   async findTeam(id) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    return teams.find(t => t.id === id) || null;
+    await wait();
+    return findById(teams, id);
   },
 
   async getAllTeams() {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await wait();
     return teams;
   },
 
   async getTeamMembers(teamId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const team = teams.find(t => t.id === teamId);
+    await wait();
+    const team = findById(teams, teamId);
     if (!team) return null;
-    return team.members.map(memberId => users.find(u => u.id === memberId));
+
+    return team.members.map((memberId) => findById(users, memberId));
   },
 
   async createTeam({ name }) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const id = String(Math.max(...teams.map(t => parseInt(t.id))) + 1);
-    const now = new Date().toISOString();
-    const team = { id, name, members: [], createdAt: now, updatedAt: now };
+    await wait();
+    const timestamp = now();
+    const team = {
+      id: getNextId(teams),
+      name,
+      members: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+
     teams.push(team);
     return team;
   },
 
   async addTeamMember(teamId, userId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const team = teams.find(t => t.id === teamId);
-    const user = users.find(u => u.id === userId);
+    await wait();
+    const team = findById(teams, teamId);
+    const user = findById(users, userId);
     if (!team || !user) return null;
+
     if (!team.members.includes(userId)) {
       team.members.push(userId);
-      team.updatedAt = new Date().toISOString();
+      touchRecord(team);
     }
+
     return team;
   },
 
   async removeTeamMember(teamId, userId) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    const team = teams.find(t => t.id === teamId);
+    await wait();
+    const team = findById(teams, teamId);
     if (!team) return null;
-    team.members = team.members.filter(id => id !== userId);
-    team.updatedAt = new Date().toISOString();
-    return team;
+
+    team.members = team.members.filter((id) => id !== userId);
+    return touchRecord(team);
   },
 
   /**
    * Resets database to initial state (for testing)
    */
   _reset() {
-    users.length = 0;
-    users.push(...initialUsers.map(u => ({ ...u })));
-    teams.length = 0;
-    teams.push(...initialTeams.map(t => ({ ...t, members: [...t.members] })));
+    resetCollection(users, initialUsers, (user) => ({ ...user }));
+    resetCollection(teams, initialTeams, (team) => ({ ...team, members: [...team.members] }));
   }
 };
 

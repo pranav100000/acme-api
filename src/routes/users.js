@@ -4,6 +4,13 @@ const { validateEmail, validateRequired } = require('../middleware/validate');
 
 const router = express.Router();
 
+const USER_RESPONSE_FIELDS = ['id', 'email', 'name', 'role'];
+const USER_NOT_FOUND = { error: 'User not found' };
+
+const pick = (record, fields) => Object.fromEntries(fields.map((field) => [field, record[field]]));
+const getInitials = (name) => name.split(' ').map((part) => part[0]).join('');
+const sendUserNotFound = (res) => res.status(404).json(USER_NOT_FOUND);
+
 // GET /api/users - List all users
 router.get('/', async (req, res) => {
   const users = await db.getAllUsers();
@@ -15,15 +22,10 @@ router.get('/:id', async (req, res) => {
   const user = await db.findUser(req.params.id);
 
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return sendUserNotFound(res);
   }
 
-  res.json({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role
-  });
+  res.json(pick(user, USER_RESPONSE_FIELDS));
 });
 
 // GET /api/users/:id/profile - Get user profile
@@ -31,13 +33,13 @@ router.get('/:id/profile', async (req, res) => {
   const user = await db.findUser(req.params.id);
 
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return sendUserNotFound(res);
   }
 
   res.json({
     displayName: user.name,
     email: user.email,
-    initials: user.name.split(' ').map(n => n[0]).join('')
+    initials: getInitials(user.name)
   });
 });
 
@@ -56,7 +58,7 @@ router.post('/', validateRequired(['email', 'name']), validateEmail, async (req,
 router.patch('/:id', async (req, res) => {
   const user = await db.updateUser(req.params.id, req.body);
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return sendUserNotFound(res);
   }
   res.json(user);
 });
@@ -65,7 +67,7 @@ router.patch('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const user = await db.deleteUser(req.params.id);
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return sendUserNotFound(res);
   }
   res.json({ message: 'User deactivated', user });
 });
