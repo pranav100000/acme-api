@@ -7,6 +7,7 @@ export default function Dashboard() {
   const [teams, setTeams] = useState([]);
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -21,6 +22,7 @@ export default function Dashboard() {
         setHealth(healthData);
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
+        setError('Failed to load dashboard data. Please refresh the page.');
       } finally {
         setLoading(false);
       }
@@ -33,6 +35,15 @@ export default function Dashboard() {
       <>
         <div className="page-header"><h2>Dashboard</h2></div>
         <div className="page-body"><div className="loading"><div className="spinner"></div></div></div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <div className="page-header"><h2>Dashboard</h2></div>
+        <div className="page-body"><div className="error-message">{error}</div></div>
       </>
     );
   }
