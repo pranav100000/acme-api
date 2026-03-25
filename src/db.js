@@ -37,7 +37,7 @@ const db = {
 
   async createUser({ email, name, role }) {
     await new Promise(resolve => setTimeout(resolve, 10));
-    const id = String(Math.max(...users.map(u => parseInt(u.id))) + 1);
+    const id = String(users.length === 0 ? 1 : Math.max(...users.map(u => parseInt(u.id))) + 1);
     const now = new Date().toISOString();
     const user = { id, email, name, role: role || 'developer', status: 'active', createdAt: now, updatedAt: now };
     users.push(user);
@@ -86,7 +86,7 @@ const db = {
 
   async createTeam({ name }) {
     await new Promise(resolve => setTimeout(resolve, 10));
-    const id = String(Math.max(...teams.map(t => parseInt(t.id))) + 1);
+    const id = String(teams.length === 0 ? 1 : Math.max(...teams.map(t => parseInt(t.id))) + 1);
     const now = new Date().toISOString();
     const team = { id, name, members: [], createdAt: now, updatedAt: now };
     teams.push(team);
