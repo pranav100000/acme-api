@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../api';
 import Modal from '../components/Modal';
+import { getInitials } from '../utils';
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -105,7 +106,7 @@ export default function UsersPage() {
                             alignItems: 'center', justifyContent: 'center',
                             fontSize: '13px', fontWeight: '600', flexShrink: 0
                           }}>
-                            {user.name.split(' ').map(n => n[0]).join('')}
+                            {getInitials(user.name)}
                           </div>
                           <div>
                             <div style={{ fontWeight: 500 }}>{user.name}</div>
