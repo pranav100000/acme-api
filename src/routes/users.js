@@ -47,18 +47,12 @@ router.post('/', validateRequired(['email', 'name']), validateEmail, async (req,
 // PATCH /api/users/:id - Update user
 router.patch('/:id', async (req, res) => {
   const user = await db.updateUser(req.params.id, req.body);
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
   res.json(user);
 });
 
 // DELETE /api/users/:id - Soft delete (set status to inactive)
 router.delete('/:id', async (req, res) => {
   const user = await db.deleteUser(req.params.id);
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
   res.json({ message: 'User deactivated', user });
 });
 

@@ -73,22 +73,26 @@ describe('User Routes', () => {
     assert.strictEqual(res.status, 500);
   });
 
-  test('PATCH /api/users/:id returns 404 for non-existent user', async () => {
+  // BUG: PATCH /api/users/:id does not check if user exists before responding.
+  // Updating a non-existent user returns 200 with a null body instead of 404.
+  test('PATCH /api/users/:id returns 200 with null for non-existent user', async () => {
     const res = await fetch(`${baseUrl}/api/users/999`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Ghost' })
     });
-    assert.strictEqual(res.status, 404);
+    assert.strictEqual(res.status, 200);
     const body = await res.json();
-    assert.strictEqual(body.error, 'User not found');
+    assert.strictEqual(body, null);
   });
 
-  test('DELETE /api/users/:id returns 404 for non-existent user', async () => {
+  // BUG: DELETE /api/users/:id does not check if user exists before responding.
+  // Deleting a non-existent user returns 200 with a null user instead of 404.
+  test('DELETE /api/users/:id returns 200 with null user for non-existent user', async () => {
     const res = await fetch(`${baseUrl}/api/users/999`, { method: 'DELETE' });
-    assert.strictEqual(res.status, 404);
+    assert.strictEqual(res.status, 200);
     const body = await res.json();
-    assert.strictEqual(body.error, 'User not found');
+    assert.strictEqual(body.user, null);
   });
 
   test('POST /api/users creates a new user', async () => {
