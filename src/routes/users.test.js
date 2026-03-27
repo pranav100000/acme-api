@@ -60,39 +60,36 @@ describe('User Routes', () => {
     assert.strictEqual(profile.initials, 'AC');
   });
 
-  // BUG: GET /api/users/:id does not check if user exists before accessing properties.
-  // Requesting a non-existent user ID causes a TypeError (null reference crash).
-  test('GET /api/users/:id crashes with 500 for non-existent user', async () => {
+  test('GET /api/users/:id returns 404 for non-existent user', async () => {
     const res = await fetch(`${baseUrl}/api/users/999`);
-    assert.strictEqual(res.status, 500);
+    assert.strictEqual(res.status, 404);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'User not found');
   });
 
-  // BUG: Same null reference bug applies to the profile endpoint.
-  test('GET /api/users/:id/profile crashes with 500 for non-existent user', async () => {
+  test('GET /api/users/:id/profile returns 404 for non-existent user', async () => {
     const res = await fetch(`${baseUrl}/api/users/999/profile`);
-    assert.strictEqual(res.status, 500);
+    assert.strictEqual(res.status, 404);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'User not found');
   });
 
-  // BUG: PATCH /api/users/:id does not check if user exists before responding.
-  // Updating a non-existent user returns 200 with a null body instead of 404.
-  test('PATCH /api/users/:id returns 200 with null for non-existent user', async () => {
+  test('PATCH /api/users/:id returns 404 for non-existent user', async () => {
     const res = await fetch(`${baseUrl}/api/users/999`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Ghost' })
     });
-    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.status, 404);
     const body = await res.json();
-    assert.strictEqual(body, null);
+    assert.strictEqual(body.error, 'User not found');
   });
 
-  // BUG: DELETE /api/users/:id does not check if user exists before responding.
-  // Deleting a non-existent user returns 200 with a null user instead of 404.
-  test('DELETE /api/users/:id returns 200 with null user for non-existent user', async () => {
+  test('DELETE /api/users/:id returns 404 for non-existent user', async () => {
     const res = await fetch(`${baseUrl}/api/users/999`, { method: 'DELETE' });
-    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.status, 404);
     const body = await res.json();
-    assert.strictEqual(body.user, null);
+    assert.strictEqual(body.error, 'User not found');
   });
 
   test('POST /api/users creates a new user', async () => {

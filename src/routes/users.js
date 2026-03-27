@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../db');
 const { validateEmail, validateRequired } = require('../middleware/validate');
+const { NotFoundError } = require('../utils/errors');
 
 const router = express.Router();
 
@@ -13,6 +14,7 @@ router.get('/', async (req, res) => {
 // GET /api/users/:id - Get user by ID
 router.get('/:id', async (req, res) => {
   const user = await db.findUser(req.params.id);
+  if (!user) throw new NotFoundError('User not found');
 
   res.json({
     id: user.id,
@@ -25,6 +27,7 @@ router.get('/:id', async (req, res) => {
 // GET /api/users/:id/profile - Get user profile
 router.get('/:id/profile', async (req, res) => {
   const user = await db.findUser(req.params.id);
+  if (!user) throw new NotFoundError('User not found');
 
   res.json({
     displayName: user.name,
@@ -47,12 +50,14 @@ router.post('/', validateRequired(['email', 'name']), validateEmail, async (req,
 // PATCH /api/users/:id - Update user
 router.patch('/:id', async (req, res) => {
   const user = await db.updateUser(req.params.id, req.body);
+  if (!user) throw new NotFoundError('User not found');
   res.json(user);
 });
 
 // DELETE /api/users/:id - Soft delete (set status to inactive)
 router.delete('/:id', async (req, res) => {
   const user = await db.deleteUser(req.params.id);
+  if (!user) throw new NotFoundError('User not found');
   res.json({ message: 'User deactivated', user });
 });
 
