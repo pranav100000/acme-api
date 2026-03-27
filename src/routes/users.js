@@ -5,13 +5,11 @@ const { NotFoundError } = require('../utils/errors');
 
 const router = express.Router();
 
-// GET /api/users - List all users
 router.get('/', async (req, res) => {
   const users = await db.getAllUsers();
   res.json(users);
 });
 
-// GET /api/users/:id - Get user by ID
 router.get('/:id', async (req, res) => {
   const user = await db.findUser(req.params.id);
   if (!user) throw new NotFoundError('User not found');
@@ -24,7 +22,6 @@ router.get('/:id', async (req, res) => {
   });
 });
 
-// GET /api/users/:id/profile - Get user profile
 router.get('/:id/profile', async (req, res) => {
   const user = await db.findUser(req.params.id);
   if (!user) throw new NotFoundError('User not found');
@@ -36,7 +33,6 @@ router.get('/:id/profile', async (req, res) => {
   });
 });
 
-// POST /api/users - Create user
 router.post('/', validateRequired(['email', 'name']), validateEmail, async (req, res) => {
   const { email, name, role } = req.body;
   const existing = await db.findUserByEmail(email);
@@ -47,17 +43,17 @@ router.post('/', validateRequired(['email', 'name']), validateEmail, async (req,
   res.status(201).json(user);
 });
 
-// PATCH /api/users/:id - Update user
 router.patch('/:id', async (req, res) => {
   const user = await db.updateUser(req.params.id, req.body);
   if (!user) throw new NotFoundError('User not found');
+
   res.json(user);
 });
 
-// DELETE /api/users/:id - Soft delete (set status to inactive)
 router.delete('/:id', async (req, res) => {
   const user = await db.deleteUser(req.params.id);
   if (!user) throw new NotFoundError('User not found');
+
   res.json({ message: 'User deactivated', user });
 });
 
