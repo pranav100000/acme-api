@@ -1,35 +1,18 @@
 const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
-const express = require('express');
-const db = require('../db');
 const authRoutes = require('./auth');
-
-function createApp() {
-  const app = express();
-  app.use(express.json());
-  app.use('/api/auth', authRoutes);
-  app.use((err, req, res, next) => {
-    const status = err.statusCode || 500;
-    res.status(status).json({ error: err.message || 'Internal server error' });
-  });
-  return app;
-}
+const { startTestServer } = require('./test-helpers');
 
 describe('Auth Routes', () => {
-  let server;
   let baseUrl;
+  let closeServer;
 
   before(async () => {
-    db._reset();
-    const app = createApp();
-    server = app.listen(0);
-    const { port } = server.address();
-    baseUrl = `http://localhost:${port}`;
+    ({ baseUrl, close: closeServer } = await startTestServer('/api/auth', authRoutes));
   });
 
   after(async () => {
-    server.close();
-    db._reset();
+    await closeServer();
   });
 
   test('POST /api/auth/login with valid email returns user', async () => {
