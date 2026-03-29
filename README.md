@@ -30,10 +30,20 @@ npm run dev:all
 
 ### Production build
 ```bash
-npm run build:frontend
+npm run build
 npm start
 ```
 This builds the React frontend into `public/` and serves it from the Express server at http://localhost:3000.
+
+## Quality checks
+
+```bash
+npm run lint
+npm test
+npm run build
+```
+
+GitHub Actions runs the same lint, test, and build checks on pull requests and pushes to `main`.
 
 ## Frontend
 
