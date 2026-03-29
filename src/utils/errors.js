@@ -1,15 +1,15 @@
 class NotFoundError extends Error {
-  constructor(message = 'Not found') {
+  constructor(message = "Not found") {
     super(message);
-    this.name = 'NotFoundError';
+    this.name = "NotFoundError";
     this.statusCode = 404;
   }
 }
 
 class ValidationError extends Error {
-  constructor(message = 'Validation failed') {
+  constructor(message = "Validation failed") {
     super(message);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
     this.statusCode = 400;
   }
 }
