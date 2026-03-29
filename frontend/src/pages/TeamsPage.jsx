@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import * as api from '../api';
-import Modal from '../components/Modal';
+import { useCallback, useEffect, useState } from "react";
+import * as api from "../api";
+import Modal from "../components/Modal";
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
   const [users, setUsers] = useState([]);
   const [teamMembers, setTeamMembers] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [addMemberTeam, setAddMemberTeam] = useState(null);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [teamsData, usersData] = await Promise.all([
         api.getTeams(),
@@ -21,7 +21,6 @@ export default function TeamsPage() {
       setTeams(teamsData);
       setUsers(usersData);
 
-      // Load members for each team
       const membersMap = {};
       await Promise.all(
         teamsData.map(async (team) => {
@@ -31,17 +30,19 @@ export default function TeamsPage() {
           } catch {
             membersMap[team.id] = [];
           }
-        })
+        }),
       );
       setTeamMembers(membersMap);
-    } catch (err) {
-      setError('Failed to load teams');
+    } catch (_err) {
+      setError("Failed to load teams");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleRemoveMember = async (teamId, userId, userName) => {
     if (!window.confirm(`Remove ${userName} from this team?`)) return;
@@ -49,18 +50,24 @@ export default function TeamsPage() {
       await api.removeTeamMember(teamId, userId);
       setSuccess(`${userName} removed from team`);
       loadData();
-      setTimeout(() => setSuccess(''), 3000);
+      setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError(err.message);
-      setTimeout(() => setError(''), 3000);
+      setTimeout(() => setError(""), 3000);
     }
   };
 
   if (loading) {
     return (
       <>
-        <div className="page-header"><h2>Teams</h2></div>
-        <div className="page-body"><div className="loading"><div className="spinner"></div></div></div>
+        <div className="page-header">
+          <h2>Teams</h2>
+        </div>
+        <div className="page-body">
+          <div className="loading">
+            <div className="spinner"></div>
+          </div>
+        </div>
       </>
     );
   }
@@ -69,7 +76,11 @@ export default function TeamsPage() {
     <>
       <div className="page-header">
         <h2>Teams</h2>
-        <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+        <button
+          className="btn btn-primary"
+          onClick={() => setShowCreateModal(true)}
+          type="button"
+        >
           + Create Team
         </button>
       </div>
@@ -84,56 +95,92 @@ export default function TeamsPage() {
           </div>
         ) : (
           <div className="teams-grid">
-            {teams.map(team => {
+            {teams.map((team) => {
               const members = teamMembers[team.id] || [];
               return (
                 <div key={team.id} className="team-card">
                   <div className="team-card-header">
                     <h3>{team.name}</h3>
-                    <span style={{ fontSize: '13px', color: '#6b7280' }}>
-                      {members.length} member{members.length !== 1 ? 's' : ''}
+                    <span style={{ fontSize: "13px", color: "#6b7280" }}>
+                      {members.length} member{members.length !== 1 ? "s" : ""}
                     </span>
                   </div>
                   <div className="team-card-body">
                     <div className="team-meta">
-                      Created {new Date(team.createdAt).toLocaleDateString()} · Updated {new Date(team.updatedAt).toLocaleDateString()}
+                      Created {new Date(team.createdAt).toLocaleDateString()} ·
+                      Updated {new Date(team.updatedAt).toLocaleDateString()}
                     </div>
 
                     {members.length === 0 ? (
-                      <div style={{ padding: '16px', textAlign: 'center', color: '#9ca3af', fontSize: '14px' }}>
+                      <div
+                        style={{
+                          padding: "16px",
+                          textAlign: "center",
+                          color: "#9ca3af",
+                          fontSize: "14px",
+                        }}
+                      >
                         No members yet
                       </div>
                     ) : (
                       <div className="member-list">
-                        {members.map(member => member && (
-                          <div key={member.id} className="member-item">
-                            <div className="member-info">
-                              <div className="member-avatar">
-                                {member.name.split(' ').map(n => n[0]).join('')}
+                        {members.map(
+                          (member) =>
+                            member && (
+                              <div key={member.id} className="member-item">
+                                <div className="member-info">
+                                  <div className="member-avatar">
+                                    {member.name
+                                      .split(" ")
+                                      .map((n) => n[0])
+                                      .join("")}
+                                  </div>
+                                  <div>
+                                    <div
+                                      style={{
+                                        fontWeight: 500,
+                                        fontSize: "14px",
+                                      }}
+                                    >
+                                      {member.name}
+                                    </div>
+                                    <div
+                                      style={{
+                                        fontSize: "12px",
+                                        color: "#6b7280",
+                                      }}
+                                    >
+                                      {member.role.replace("_", " ")}
+                                    </div>
+                                  </div>
+                                </div>
+                                <button
+                                  className="btn-icon"
+                                  onClick={() =>
+                                    handleRemoveMember(
+                                      team.id,
+                                      member.id,
+                                      member.name,
+                                    )
+                                  }
+                                  style={{ fontSize: "16px" }}
+                                  title="Remove member"
+                                  type="button"
+                                >
+                                  ✕
+                                </button>
                               </div>
-                              <div>
-                                <div style={{ fontWeight: 500, fontSize: '14px' }}>{member.name}</div>
-                                <div style={{ fontSize: '12px', color: '#6b7280' }}>{member.role.replace('_', ' ')}</div>
-                              </div>
-                            </div>
-                            <button
-                              className="btn-icon"
-                              title="Remove member"
-                              onClick={() => handleRemoveMember(team.id, member.id, member.name)}
-                              style={{ fontSize: '16px' }}
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ))}
+                            ),
+                        )}
                       </div>
                     )}
 
-                    <div style={{ marginTop: '16px' }}>
+                    <div style={{ marginTop: "16px" }}>
                       <button
                         className="btn btn-secondary btn-sm"
-                        style={{ width: '100%', justifyContent: 'center' }}
                         onClick={() => setAddMemberTeam(team)}
+                        style={{ width: "100%", justifyContent: "center" }}
+                        type="button"
                       >
                         + Add Member
                       </button>
@@ -149,17 +196,27 @@ export default function TeamsPage() {
       {showCreateModal && (
         <CreateTeamModal
           onClose={() => setShowCreateModal(false)}
-          onCreated={() => { setShowCreateModal(false); loadData(); setSuccess('Team created successfully'); setTimeout(() => setSuccess(''), 3000); }}
+          onCreated={() => {
+            setShowCreateModal(false);
+            loadData();
+            setSuccess("Team created successfully");
+            setTimeout(() => setSuccess(""), 3000);
+          }}
         />
       )}
 
       {addMemberTeam && (
         <AddMemberModal
+          currentMembers={teamMembers[addMemberTeam.id] || []}
+          onAdded={() => {
+            setAddMemberTeam(null);
+            loadData();
+            setSuccess("Member added successfully");
+            setTimeout(() => setSuccess(""), 3000);
+          }}
+          onClose={() => setAddMemberTeam(null)}
           team={addMemberTeam}
           users={users}
-          currentMembers={teamMembers[addMemberTeam.id] || []}
-          onClose={() => setAddMemberTeam(null)}
-          onAdded={() => { setAddMemberTeam(null); loadData(); setSuccess('Member added successfully'); setTimeout(() => setSuccess(''), 3000); }}
         />
       )}
     </>
@@ -167,13 +224,13 @@ export default function TeamsPage() {
 }
 
 function CreateTeamModal({ onClose, onCreated }) {
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
     try {
       await api.createTeam({ name });
@@ -190,20 +247,22 @@ function CreateTeamModal({ onClose, onCreated }) {
       {error && <div className="alert alert-error">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Team Name</label>
+          <label htmlFor="team-name">Team Name</label>
           <input
             className="form-control"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            required
+            id="team-name"
+            onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Marketing"
-            autoFocus
+            required
+            value={name}
           />
         </div>
         <div className="form-actions">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Creating...' : 'Create Team'}
+          <button className="btn btn-secondary" onClick={onClose} type="button">
+            Cancel
+          </button>
+          <button className="btn btn-primary" disabled={loading} type="submit">
+            {loading ? "Creating..." : "Create Team"}
           </button>
         </div>
       </form>
@@ -212,17 +271,19 @@ function CreateTeamModal({ onClose, onCreated }) {
 }
 
 function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
-  const [selectedUserId, setSelectedUserId] = useState('');
-  const [error, setError] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const currentMemberIds = currentMembers.filter(Boolean).map(m => m.id);
-  const availableUsers = users.filter(u => !currentMemberIds.includes(u.id) && u.status === 'active');
+  const currentMemberIds = currentMembers.filter(Boolean).map((m) => m.id);
+  const availableUsers = users.filter(
+    (u) => !currentMemberIds.includes(u.id) && u.status === "active",
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedUserId) return;
-    setError('');
+    setError("");
     setLoading(true);
     try {
       await api.addTeamMember(team.id, selectedUserId);
@@ -238,29 +299,51 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
     <Modal title={`Add Member to ${team.name}`} onClose={onClose}>
       {error && <div className="alert alert-error">{error}</div>}
       {availableUsers.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '24px', color: '#6b7280' }}>
+        <div style={{ textAlign: "center", padding: "24px", color: "#6b7280" }}>
           <p>All active users are already members of this team.</p>
-          <div className="form-actions" style={{ justifyContent: 'center' }}>
-            <button className="btn btn-secondary" onClick={onClose}>Close</button>
+          <div className="form-actions" style={{ justifyContent: "center" }}>
+            <button
+              className="btn btn-secondary"
+              onClick={onClose}
+              type="button"
+            >
+              Close
+            </button>
           </div>
         </div>
       ) : (
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Select User</label>
-            <select className="form-control" value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)} required>
+            <label htmlFor="team-member-user">Select User</label>
+            <select
+              className="form-control"
+              id="team-member-user"
+              onChange={(e) => setSelectedUserId(e.target.value)}
+              required
+              value={selectedUserId}
+            >
               <option value="">Choose a user...</option>
-              {availableUsers.map(user => (
+              {availableUsers.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.name} ({user.email}) - {user.role.replace('_', ' ')}
+                  {user.name} ({user.email}) - {user.role.replace("_", " ")}
                 </option>
               ))}
             </select>
           </div>
           <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn btn-primary" disabled={loading || !selectedUserId}>
-              {loading ? 'Adding...' : 'Add Member'}
+            <button
+              className="btn btn-secondary"
+              onClick={onClose}
+              type="button"
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary"
+              disabled={loading || !selectedUserId}
+              type="submit"
+            >
+              {loading ? "Adding..." : "Add Member"}
             </button>
           </div>
         </form>
