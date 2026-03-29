@@ -1,16 +1,32 @@
-class NotFoundError extends Error {
-  constructor(message = 'Not found') {
+class HttpError extends Error {
+  constructor(message, statusCode) {
     super(message);
-    this.name = 'NotFoundError';
-    this.statusCode = 404;
+    this.name = this.constructor.name;
+    this.statusCode = statusCode;
   }
 }
 
-class ValidationError extends Error {
+class NotFoundError extends HttpError {
+  constructor(message = 'Not found') {
+    super(message, 404);
+  }
+}
+
+class ValidationError extends HttpError {
   constructor(message = 'Validation failed') {
-    super(message);
-    this.name = 'ValidationError';
-    this.statusCode = 400;
+    super(message, 400);
+  }
+}
+
+class UnauthorizedError extends HttpError {
+  constructor(message = 'Unauthorized') {
+    super(message, 401);
+  }
+}
+
+class ConflictError extends HttpError {
+  constructor(message = 'Conflict') {
+    super(message, 409);
   }
 }
 
@@ -21,4 +37,11 @@ const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-module.exports = { NotFoundError, ValidationError, asyncHandler };
+module.exports = {
+  HttpError,
+  NotFoundError,
+  ValidationError,
+  UnauthorizedError,
+  ConflictError,
+  asyncHandler,
+};
