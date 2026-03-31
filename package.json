@@ -1,30 +1,34 @@
 {
-  "name": "acme-api",
-  "version": "1.0.0",
-  "description": "Acme Corp internal API",
-  "main": "src/index.js",
-  "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
-    "dev:frontend": "npx vite",
-    "dev:all": "npm run dev & npm run dev:frontend",
-    "build:frontend": "npx vite build",
-    "test": "node --test src/**/*.test.js",
-    "test:watch": "node --test --watch src/**/*.test.js"
-  },
-  "dependencies": {
-    "@sentry/node": "^10.38.0",
-    "express": "^4.18.2",
-    "express-async-errors": "^3.1.1",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-router-dom": "^7.13.0"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^5.1.4",
-    "vite": "^7.3.1"
-  }
+	"name": "acme-api",
+	"version": "1.0.0",
+	"description": "Acme Corp internal API",
+	"main": "src/index.js",
+	"scripts": {
+		"start": "node src/index.js",
+		"dev": "node --watch src/index.js",
+		"dev:frontend": "npx vite",
+		"dev:all": "npm run dev & npm run dev:frontend",
+		"lint": "biome lint src frontend/src vite.config.js package.json .github/workflows",
+		"format": "biome check --write src frontend/src vite.config.js package.json .github/workflows",
+		"build": "npm run build:frontend",
+		"build:frontend": "npx vite build",
+		"test": "node --test src/**/*.test.js",
+		"test:watch": "node --test --watch src/**/*.test.js"
+	},
+	"dependencies": {
+		"@sentry/node": "^10.38.0",
+		"express": "^4.18.2",
+		"express-async-errors": "^3.1.1",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4",
+		"react-router-dom": "^7.13.0"
+	},
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.9",
+		"@vitejs/plugin-react": "^5.1.4",
+		"vite": "^7.3.1"
+	}
 }
