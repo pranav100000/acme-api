@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { UserPlus } from "lucide-react";
 import * as api from "../api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,7 +73,7 @@ export default function UsersPage() {
 	if (loading) {
 		return (
 			<>
-				<div className="bg-white border-b border-gray-200 px-8 py-6">
+				<div className="px-8 py-8">
 					<h2 className="text-2xl font-bold text-gray-900">Users</h2>
 				</div>
 				<div className="p-8">
@@ -85,12 +86,20 @@ export default function UsersPage() {
 	}
 
 	return (
-		<>
-			<div className="bg-white border-b border-gray-200 px-8 py-6 flex items-center justify-between">
-				<h2 className="text-2xl font-bold text-gray-900">Users</h2>
-				<Button onClick={() => setShowCreateModal(true)}>+ Add User</Button>
+		<div className="animate-fade-in">
+			<div className="px-8 pt-8 pb-2">
+				<div className="flex items-center justify-between mb-6">
+					<div>
+						<h2 className="text-2xl font-bold text-gray-900">Users</h2>
+						<p className="text-sm text-gray-500 mt-1">{users.length} total users in your organization</p>
+					</div>
+					<Button onClick={() => setShowCreateModal(true)} className="gap-2">
+						<UserPlus className="h-4 w-4" />
+						Add User
+					</Button>
+				</div>
 			</div>
-			<div className="p-8">
+			<div className="px-8 pb-8">
 				{error && (
 					<Alert variant="destructive" className="mb-4">
 						{error}
@@ -102,7 +111,7 @@ export default function UsersPage() {
 					</Alert>
 				)}
 
-				<div className="flex gap-2 mb-4">
+				<div className="flex gap-2 mb-5">
 					{["all", "active", "inactive", "pending"].map((f) => (
 						<Button
 							key={f}
@@ -125,15 +134,15 @@ export default function UsersPage() {
 								<TableHead>Role</TableHead>
 								<TableHead>Status</TableHead>
 								<TableHead>Created</TableHead>
-								<TableHead>Actions</TableHead>
+								<TableHead className="text-right">Actions</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
 							{filteredUsers.length === 0 ? (
 								<TableRow>
 									<TableCell colSpan={5}>
-										<div className="text-center py-12 text-gray-500">
-											<p>No users found</p>
+										<div className="text-center py-12 text-gray-400">
+											<p className="text-sm">No users found</p>
 										</div>
 									</TableCell>
 								</TableRow>
@@ -151,8 +160,8 @@ export default function UsersPage() {
 													</AvatarFallback>
 												</Avatar>
 												<div>
-													<div className="font-medium">{user.name}</div>
-													<div className="text-xs text-gray-500">
+													<div className="font-medium text-gray-900">{user.name}</div>
+													<div className="text-xs text-gray-400">
 														{user.email}
 													</div>
 												</div>
@@ -166,11 +175,11 @@ export default function UsersPage() {
 										<TableCell>
 											<Badge variant={user.status}>{user.status}</Badge>
 										</TableCell>
-										<TableCell className="text-sm text-gray-500">
+										<TableCell className="text-sm text-gray-400">
 											{new Date(user.createdAt).toLocaleDateString()}
 										</TableCell>
-										<TableCell>
-											<div className="flex gap-1">
+										<TableCell className="text-right">
+											<div className="flex gap-1.5 justify-end">
 												<Button
 													variant="outline"
 													size="sm"
@@ -221,7 +230,7 @@ export default function UsersPage() {
 					setTimeout(() => setSuccess(""), 3000);
 				}}
 			/>
-		</>
+		</div>
 	);
 }
 

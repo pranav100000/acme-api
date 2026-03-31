@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Plus, X, Users } from "lucide-react";
 import * as api from "../api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +15,6 @@ import {
 	DialogTitle,
 	DialogFooter,
 } from "@/components/ui/dialog";
-import { X } from "lucide-react";
 
 export default function TeamsPage() {
 	const [teams, setTeams] = useState([]);
@@ -74,7 +74,7 @@ export default function TeamsPage() {
 	if (loading) {
 		return (
 			<>
-				<div className="bg-white border-b border-gray-200 px-8 py-6">
+				<div className="px-8 py-8">
 					<h2 className="text-2xl font-bold text-gray-900">Teams</h2>
 				</div>
 				<div className="p-8">
@@ -87,12 +87,20 @@ export default function TeamsPage() {
 	}
 
 	return (
-		<>
-			<div className="bg-white border-b border-gray-200 px-8 py-6 flex items-center justify-between">
-				<h2 className="text-2xl font-bold text-gray-900">Teams</h2>
-				<Button onClick={() => setShowCreateModal(true)}>+ Create Team</Button>
+		<div className="animate-fade-in">
+			<div className="px-8 pt-8 pb-2">
+				<div className="flex items-center justify-between mb-6">
+					<div>
+						<h2 className="text-2xl font-bold text-gray-900">Teams</h2>
+						<p className="text-sm text-gray-500 mt-1">{teams.length} teams in your organization</p>
+					</div>
+					<Button onClick={() => setShowCreateModal(true)} className="gap-2">
+						<Plus className="h-4 w-4" />
+						Create Team
+					</Button>
+				</div>
 			</div>
-			<div className="p-8">
+			<div className="px-8 pb-8">
 				{error && (
 					<Alert variant="destructive" className="mb-4">
 						{error}
@@ -105,9 +113,12 @@ export default function TeamsPage() {
 				)}
 
 				{teams.length === 0 ? (
-					<div className="text-center py-12 text-gray-500">
-						<p className="text-5xl mb-4">🏷️</p>
-						<p className="text-base">No teams yet. Create your first team!</p>
+					<div className="text-center py-16">
+						<div className="mx-auto h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+							<Users className="h-7 w-7 text-gray-400" />
+						</div>
+						<p className="text-base text-gray-500 font-medium">No teams yet</p>
+						<p className="text-sm text-gray-400 mt-1">Create your first team to get started</p>
 					</div>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -115,33 +126,33 @@ export default function TeamsPage() {
 							const members = teamMembers[team.id] || [];
 							return (
 								<Card key={team.id} className="overflow-hidden">
-									<CardHeader className="flex-row items-center justify-between pb-3">
-										<CardTitle className="text-lg">{team.name}</CardTitle>
-										<span className="text-sm text-gray-500">
-											{members.length} member
-											{members.length !== 1 ? "s" : ""}
-										</span>
-									</CardHeader>
-									<CardContent className="pt-0">
-										<p className="text-sm text-gray-500 mb-4">
+									<CardHeader className="pb-3">
+										<div className="flex items-center justify-between">
+											<CardTitle className="text-lg">{team.name}</CardTitle>
+											<span className="text-xs font-medium text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">
+												{members.length} member{members.length !== 1 ? "s" : ""}
+											</span>
+										</div>
+										<p className="text-xs text-gray-400 mt-1">
 											Created{" "}
 											{new Date(team.createdAt).toLocaleDateString()} ·
 											Updated{" "}
 											{new Date(team.updatedAt).toLocaleDateString()}
 										</p>
-
+									</CardHeader>
+									<CardContent className="pt-0">
 										{members.length === 0 ? (
-											<div className="text-center py-4 text-sm text-gray-400">
+											<div className="text-center py-5 text-sm text-gray-400 bg-gray-50/50 rounded-lg border border-dashed border-gray-200">
 												No members yet
 											</div>
 										) : (
-											<div className="flex flex-col gap-2">
+											<div className="flex flex-col gap-1.5">
 												{members.map(
 													(member) =>
 														member && (
 															<div
 																key={member.id}
-																className="flex items-center justify-between p-2.5 bg-gray-50 rounded-md"
+																className="flex items-center justify-between p-2.5 rounded-lg hover:bg-gray-50 transition-colors group"
 															>
 																<div className="flex items-center gap-3">
 																	<Avatar className="h-8 w-8">
@@ -153,10 +164,10 @@ export default function TeamsPage() {
 																		</AvatarFallback>
 																	</Avatar>
 																	<div>
-																		<div className="text-sm font-medium">
+																		<div className="text-sm font-medium text-gray-900">
 																			{member.name}
 																		</div>
-																		<div className="text-xs text-gray-500">
+																		<div className="text-xs text-gray-400">
 																			{member.role.replace("_", " ")}
 																		</div>
 																	</div>
@@ -171,9 +182,9 @@ export default function TeamsPage() {
 																			member.name,
 																		)
 																	}
-																	className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-200 transition-colors cursor-pointer"
+																	className="text-gray-300 hover:text-red-500 p-1.5 rounded-md hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
 																>
-																	<X className="h-4 w-4" />
+																	<X className="h-3.5 w-3.5" />
 																</button>
 															</div>
 														),
@@ -184,10 +195,11 @@ export default function TeamsPage() {
 										<Button
 											variant="outline"
 											size="sm"
-											className="w-full mt-4"
+											className="w-full mt-4 gap-1.5"
 											onClick={() => setAddMemberTeam(team)}
 										>
-											+ Add Member
+											<Plus className="h-3.5 w-3.5" />
+											Add Member
 										</Button>
 									</CardContent>
 								</Card>
@@ -223,7 +235,7 @@ export default function TeamsPage() {
 					setTimeout(() => setSuccess(""), 3000);
 				}}
 			/>
-		</>
+		</div>
 	);
 }
 

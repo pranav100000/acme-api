@@ -4,7 +4,7 @@ function Card({ className, ...props }) {
 	return (
 		<div
 			className={cn(
-				"rounded-lg border border-gray-200 bg-white shadow-sm",
+				"rounded-xl border border-gray-200/80 bg-white shadow-sm hover:shadow-md transition-shadow duration-200",
 				className,
 			)}
 			{...props}
@@ -24,7 +24,7 @@ function CardHeader({ className, ...props }) {
 function CardTitle({ className, ...props }) {
 	return (
 		<h3
-			className={cn("font-semibold leading-none tracking-tight", className)}
+			className={cn("font-semibold leading-none tracking-tight text-gray-900", className)}
 			{...props}
 		/>
 	);

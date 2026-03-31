@@ -28,11 +28,20 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600">
-			<Card className="w-full max-w-md shadow-2xl">
-				<CardHeader className="space-y-1 pb-4">
-					<CardTitle className="text-2xl font-bold">Acme Corp</CardTitle>
-					<CardDescription>Sign in to the admin dashboard</CardDescription>
+		<div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 relative overflow-hidden">
+			{/* Background decoration */}
+			<div className="absolute inset-0 overflow-hidden">
+				<div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-indigo-500/20 to-transparent rounded-full blur-3xl" />
+				<div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-500/20 to-transparent rounded-full blur-3xl" />
+			</div>
+
+			<Card className="w-full max-w-md shadow-2xl border-gray-200/20 relative z-10 animate-fade-in">
+				<CardHeader className="space-y-1 pb-6 text-center">
+					<div className="mx-auto mb-3 h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30">
+						A
+					</div>
+					<CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+					<CardDescription className="text-gray-500">Sign in to the Acme Corp admin dashboard</CardDescription>
 				</CardHeader>
 				<CardContent>
 					{error && (
@@ -53,17 +62,17 @@ export default function LoginPage() {
 								required
 							/>
 						</div>
-						<Button type="submit" className="w-full" disabled={loading}>
+						<Button type="submit" className="w-full h-10" disabled={loading}>
 							{loading ? "Signing in..." : "Sign in"}
 						</Button>
 					</form>
 
-					<div className="mt-6 rounded-lg bg-gray-50 p-4 text-sm text-gray-500">
-						<p className="font-semibold text-gray-700 mb-2">Demo accounts:</p>
-						<div className="flex flex-col gap-1">
-							<span><code className="text-xs bg-gray-100 px-1 py-0.5 rounded">alice@acme.com</code> (admin)</span>
-							<span><code className="text-xs bg-gray-100 px-1 py-0.5 rounded">bob@acme.com</code> (developer)</span>
-							<span><code className="text-xs bg-gray-100 px-1 py-0.5 rounded">frank@acme.com</code> (product manager)</span>
+					<div className="mt-6 rounded-xl bg-gray-50 border border-gray-100 p-4 text-sm text-gray-500">
+						<p className="font-semibold text-gray-700 mb-2.5">Demo accounts</p>
+						<div className="flex flex-col gap-1.5">
+							<span><code className="text-xs bg-white border border-gray-200 px-1.5 py-0.5 rounded-md font-mono">alice@acme.com</code> <span className="text-gray-400">admin</span></span>
+							<span><code className="text-xs bg-white border border-gray-200 px-1.5 py-0.5 rounded-md font-mono">bob@acme.com</code> <span className="text-gray-400">developer</span></span>
+							<span><code className="text-xs bg-white border border-gray-200 px-1.5 py-0.5 rounded-md font-mono">frank@acme.com</code> <span className="text-gray-400">product manager</span></span>
 						</div>
 					</div>
 				</CardContent>

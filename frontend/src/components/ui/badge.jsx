@@ -2,18 +2,18 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-	"inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors",
+	"inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors",
 	{
 		variants: {
 			variant: {
-				default: "bg-indigo-100 text-indigo-800",
-				active: "bg-green-100 text-green-800",
-				inactive: "bg-red-100 text-red-800",
-				pending: "bg-yellow-100 text-yellow-800",
-				admin: "bg-violet-100 text-violet-800",
-				developer: "bg-blue-100 text-blue-800",
-				designer: "bg-pink-100 text-pink-800",
-				product_manager: "bg-orange-100 text-orange-800",
+				default: "bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-600/20",
+				active: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20",
+				inactive: "bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20",
+				pending: "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20",
+				admin: "bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-600/20",
+				developer: "bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-600/20",
+				designer: "bg-pink-50 text-pink-700 ring-1 ring-inset ring-pink-600/20",
+				product_manager: "bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-600/20",
 			},
 		},
 		defaultVariants: {

@@ -25,7 +25,7 @@ function TableRow({ className, ...props }) {
 	return (
 		<tr
 			className={cn(
-				"border-b border-gray-100 transition-colors hover:bg-gray-50/50",
+				"border-b border-gray-100 transition-colors hover:bg-gray-50/80",
 				className,
 			)}
 			{...props}
@@ -37,7 +37,7 @@ function TableHead({ className, ...props }) {
 	return (
 		<th
 			className={cn(
-				"h-10 px-4 text-left align-middle font-semibold text-xs uppercase tracking-wide text-gray-500 bg-gray-50 [&:has([role=checkbox])]:pr-0",
+				"h-11 px-4 text-left align-middle font-medium text-xs uppercase tracking-wider text-gray-500 bg-gray-50/80 [&:has([role=checkbox])]:pr-0",
 				className,
 			)}
 			{...props}
@@ -49,7 +49,7 @@ function TableCell({ className, ...props }) {
 	return (
 		<td
 			className={cn(
-				"px-4 py-3 align-middle text-sm [&:has([role=checkbox])]:pr-0",
+				"px-4 py-3.5 align-middle text-sm [&:has([role=checkbox])]:pr-0",
 				className,
 			)}
 			{...props}
