@@ -1,6 +1,103 @@
+import {
+	Activity,
+	ArrowRight,
+	Layers3,
+	ShieldCheck,
+	Users2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as api from "../api";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "../components/ui/card";
+import { Skeleton } from "../components/ui/skeleton";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "../components/ui/table";
+
+function metricCards({ users, teams, health }) {
+	const activeUsers = users.filter((u) => u.status === "active").length;
+	const pendingUsers = users.filter((u) => u.status === "pending").length;
+	return [
+		{
+			label: "Total users",
+			value: users.length,
+			detail: `${activeUsers} active · ${pendingUsers} pending`,
+			icon: Users2,
+		},
+		{
+			label: "Teams",
+			value: teams.length,
+			detail: `${teams.reduce((sum, team) => sum + team.members.length, 0)} memberships`,
+			icon: Layers3,
+		},
+		{
+			label: "Unique roles",
+			value: new Set(users.map((u) => u.role)).size,
+			detail: "Across the organization",
+			icon: ShieldCheck,
+		},
+		{
+			label: "API status",
+			value: health?.status === "ok" ? "Healthy" : "Issues",
+			detail:
+				health?.status === "ok"
+					? "All systems operational"
+					: "Action recommended",
+			icon: Activity,
+		},
+	];
+}
+
+const roleVariant = {
+	admin: "info",
+	developer: "secondary",
+	designer: "pink",
+	product_manager: "orange",
+};
+
+const statusVariant = {
+	active: "success",
+	inactive: "danger",
+	pending: "warning",
+};
+
+function LoadingDashboard() {
+	return (
+		<div className="space-y-6">
+			<div className="flex items-center justify-between rounded-3xl border border-white/70 bg-white/80 px-6 py-5 shadow-sm backdrop-blur">
+				<div className="space-y-2">
+					<Skeleton className="h-8 w-40" />
+					<Skeleton className="h-4 w-56" />
+				</div>
+				<Skeleton className="h-10 w-24" />
+			</div>
+			<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+				{["users", "teams", "roles", "status"].map((item) => (
+					<Card key={item}>
+						<CardContent className="space-y-3 py-6">
+							<Skeleton className="h-4 w-24" />
+							<Skeleton className="h-8 w-20" />
+							<Skeleton className="h-4 w-32" />
+						</CardContent>
+					</Card>
+				))}
+			</div>
+		</div>
+	);
+}
 
 export default function Dashboard() {
 	const [users, setUsers] = useState([]);
@@ -29,166 +126,161 @@ export default function Dashboard() {
 	}, []);
 
 	if (loading) {
-		return (
-			<>
-				<div className="page-header">
-					<h2>Dashboard</h2>
-				</div>
-				<div className="page-body">
-					<div className="loading">
-						<div className="spinner"></div>
-					</div>
-				</div>
-			</>
-		);
+		return <LoadingDashboard />;
 	}
 
-	const activeUsers = users.filter((u) => u.status === "active").length;
-	const pendingUsers = users.filter((u) => u.status === "pending").length;
 	const recentUsers = [...users]
 		.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 		.slice(0, 5);
 
 	return (
-		<>
-			<div className="page-header">
-				<h2>Dashboard</h2>
-				<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-					<span
-						style={{
-							display: "inline-block",
-							width: "8px",
-							height: "8px",
-							borderRadius: "50%",
-							background: health?.status === "ok" ? "#16a34a" : "#dc2626",
-						}}
-					></span>
-					<span style={{ fontSize: "13px", color: "#6b7280" }}>
-						API {health?.status === "ok" ? "Healthy" : "Unhealthy"}
-					</span>
+		<div className="space-y-6">
+			<section className="rounded-[1.75rem] border border-white/70 bg-white/80 px-6 py-6 shadow-sm backdrop-blur">
+				<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+					<div>
+						<p className="text-sm font-medium uppercase tracking-[0.3em] text-indigo-500">
+							Overview
+						</p>
+						<h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+							Dashboard
+						</h2>
+						<p className="mt-2 max-w-2xl text-sm text-slate-500">
+							Quickly review user growth, team coverage, and service health from
+							one polished command center.
+						</p>
+					</div>
+					<div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+						<span
+							className={`size-2.5 rounded-full ${health?.status === "ok" ? "bg-emerald-500" : "bg-rose-500"}`}
+						/>
+						<div>
+							<p className="text-sm font-medium text-slate-900">
+								API {health?.status === "ok" ? "Healthy" : "Unhealthy"}
+							</p>
+							<p className="text-xs text-slate-500">
+								Latest health check synced live
+							</p>
+						</div>
+					</div>
 				</div>
-			</div>
-			<div className="page-body">
-				<div className="stats-grid">
-					<div className="stat-card">
-						<div className="stat-label">Total Users</div>
-						<div className="stat-value">{users.length}</div>
-						<div className="stat-detail">
-							{activeUsers} active, {pendingUsers} pending
-						</div>
-					</div>
-					<div className="stat-card">
-						<div className="stat-label">Teams</div>
-						<div className="stat-value">{teams.length}</div>
-						<div className="stat-detail">
-							{teams.reduce((sum, t) => sum + t.members.length, 0)} total
-							memberships
-						</div>
-					</div>
-					<div className="stat-card">
-						<div className="stat-label">Roles</div>
-						<div className="stat-value">
-							{new Set(users.map((u) => u.role)).size}
-						</div>
-						<div className="stat-detail">Unique roles across users</div>
-					</div>
-					<div className="stat-card">
-						<div className="stat-label">API Status</div>
-						<div
-							className="stat-value"
-							style={{ color: health?.status === "ok" ? "#16a34a" : "#dc2626" }}
+			</section>
+
+			<section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+				{metricCards({ users, teams, health }).map(
+					({ label, value, detail, icon: Icon }) => (
+						<Card
+							key={label}
+							className="border-white/70 bg-white/85 backdrop-blur"
 						>
-							{health?.status === "ok" ? "✓" : "✗"}
-						</div>
-						<div className="stat-detail">
-							{health?.status === "ok"
-								? "All systems operational"
-								: "Issues detected"}
-						</div>
-					</div>
-				</div>
+							<CardContent className="flex items-start justify-between gap-4 py-6">
+								<div>
+									<p className="text-sm text-slate-500">{label}</p>
+									<p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+										{value}
+									</p>
+									<p className="mt-2 text-sm text-slate-500">{detail}</p>
+								</div>
+								<div className="rounded-2xl bg-indigo-50 p-3 text-indigo-600">
+									<Icon className="size-5" />
+								</div>
+							</CardContent>
+						</Card>
+					),
+				)}
+			</section>
 
-				<div
-					style={{
-						display: "grid",
-						gridTemplateColumns: "1fr 1fr",
-						gap: "20px",
-					}}
-				>
-					<div className="card">
-						<div className="card-header">
-							<h3>Recent Users</h3>
-							<Link to="/users" className="btn btn-secondary btn-sm">
-								View all
+			<section className="grid gap-6 xl:grid-cols-2">
+				<Card className="border-white/70 bg-white/90 backdrop-blur">
+					<CardHeader className="flex-row items-center justify-between space-y-0">
+						<div>
+							<CardTitle>Recent users</CardTitle>
+							<CardDescription>
+								The newest accounts added to the workspace.
+							</CardDescription>
+						</div>
+						<Button asChild variant="secondary" size="sm">
+							<Link to="/users">
+								View all <ArrowRight className="size-4" />
 							</Link>
-						</div>
-						<div className="table-container">
-							<table>
-								<thead>
-									<tr>
-										<th>Name</th>
-										<th>Role</th>
-										<th>Status</th>
-									</tr>
-								</thead>
-								<tbody>
-									{recentUsers.map((user) => (
-										<tr key={user.id}>
-											<td>
-												<div style={{ fontWeight: 500 }}>{user.name}</div>
-												<div style={{ fontSize: "12px", color: "#6b7280" }}>
-													{user.email}
-												</div>
-											</td>
-											<td>
-												<span className={`badge badge-${user.role}`}>
-													{user.role.replace("_", " ")}
-												</span>
-											</td>
-											<td>
-												<span className={`badge badge-${user.status}`}>
-													{user.status}
-												</span>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-					</div>
+						</Button>
+					</CardHeader>
+					<CardContent className="pt-0">
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>Name</TableHead>
+									<TableHead>Role</TableHead>
+									<TableHead>Status</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{recentUsers.map((user) => (
+									<TableRow key={user.id}>
+										<TableCell>
+											<div className="font-medium text-slate-900">
+												{user.name}
+											</div>
+											<div className="text-xs text-slate-500">{user.email}</div>
+										</TableCell>
+										<TableCell>
+											<Badge variant={roleVariant[user.role] || "secondary"}>
+												{user.role.replace("_", " ")}
+											</Badge>
+										</TableCell>
+										<TableCell>
+											<Badge
+												variant={statusVariant[user.status] || "secondary"}
+											>
+												{user.status}
+											</Badge>
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</CardContent>
+				</Card>
 
-					<div className="card">
-						<div className="card-header">
-							<h3>Teams Overview</h3>
-							<Link to="/teams" className="btn btn-secondary btn-sm">
-								View all
+				<Card className="border-white/70 bg-white/90 backdrop-blur">
+					<CardHeader className="flex-row items-center justify-between space-y-0">
+						<div>
+							<CardTitle>Teams overview</CardTitle>
+							<CardDescription>
+								Current team coverage and member counts.
+							</CardDescription>
+						</div>
+						<Button asChild variant="secondary" size="sm">
+							<Link to="/teams">
+								View all <ArrowRight className="size-4" />
 							</Link>
-						</div>
-						<div className="table-container">
-							<table>
-								<thead>
-									<tr>
-										<th>Team</th>
-										<th>Members</th>
-										<th>Created</th>
-									</tr>
-								</thead>
-								<tbody>
-									{teams.map((team) => (
-										<tr key={team.id}>
-											<td style={{ fontWeight: 500 }}>{team.name}</td>
-											<td>{team.members.length} members</td>
-											<td style={{ fontSize: "13px", color: "#6b7280" }}>
-												{new Date(team.createdAt).toLocaleDateString()}
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-		</>
+						</Button>
+					</CardHeader>
+					<CardContent className="pt-0">
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>Team</TableHead>
+									<TableHead>Members</TableHead>
+									<TableHead>Created</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{teams.map((team) => (
+									<TableRow key={team.id}>
+										<TableCell className="font-medium text-slate-900">
+											{team.name}
+										</TableCell>
+										<TableCell>{team.members.length} members</TableCell>
+										<TableCell>
+											{new Date(team.createdAt).toLocaleDateString()}
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</CardContent>
+				</Card>
+			</section>
+		</div>
 	);
 }
