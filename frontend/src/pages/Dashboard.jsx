@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as api from "../api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 
 export default function Dashboard() {
 	const [users, setUsers] = useState([]);
@@ -31,12 +42,12 @@ export default function Dashboard() {
 	if (loading) {
 		return (
 			<>
-				<div className="page-header">
-					<h2>Dashboard</h2>
+				<div className="bg-white border-b border-gray-200 px-8 py-6 flex items-center justify-between">
+					<h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
 				</div>
-				<div className="page-body">
-					<div className="loading">
-						<div className="spinner"></div>
+				<div className="p-8">
+					<div className="flex items-center justify-center py-12">
+						<div className="spinner" />
 					</div>
 				</div>
 			</>
@@ -51,142 +62,143 @@ export default function Dashboard() {
 
 	return (
 		<>
-			<div className="page-header">
-				<h2>Dashboard</h2>
-				<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+			<div className="bg-white border-b border-gray-200 px-8 py-6 flex items-center justify-between">
+				<h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
+				<div className="flex items-center gap-2">
 					<span
-						style={{
-							display: "inline-block",
-							width: "8px",
-							height: "8px",
-							borderRadius: "50%",
-							background: health?.status === "ok" ? "#16a34a" : "#dc2626",
-						}}
-					></span>
-					<span style={{ fontSize: "13px", color: "#6b7280" }}>
+						className={`inline-block w-2 h-2 rounded-full ${health?.status === "ok" ? "bg-green-500" : "bg-red-500"}`}
+					/>
+					<span className="text-sm text-gray-500">
 						API {health?.status === "ok" ? "Healthy" : "Unhealthy"}
 					</span>
 				</div>
 			</div>
-			<div className="page-body">
-				<div className="stats-grid">
-					<div className="stat-card">
-						<div className="stat-label">Total Users</div>
-						<div className="stat-value">{users.length}</div>
-						<div className="stat-detail">
-							{activeUsers} active, {pendingUsers} pending
-						</div>
-					</div>
-					<div className="stat-card">
-						<div className="stat-label">Teams</div>
-						<div className="stat-value">{teams.length}</div>
-						<div className="stat-detail">
-							{teams.reduce((sum, t) => sum + t.members.length, 0)} total
-							memberships
-						</div>
-					</div>
-					<div className="stat-card">
-						<div className="stat-label">Roles</div>
-						<div className="stat-value">
-							{new Set(users.map((u) => u.role)).size}
-						</div>
-						<div className="stat-detail">Unique roles across users</div>
-					</div>
-					<div className="stat-card">
-						<div className="stat-label">API Status</div>
-						<div
-							className="stat-value"
-							style={{ color: health?.status === "ok" ? "#16a34a" : "#dc2626" }}
-						>
-							{health?.status === "ok" ? "✓" : "✗"}
-						</div>
-						<div className="stat-detail">
-							{health?.status === "ok"
-								? "All systems operational"
-								: "Issues detected"}
-						</div>
-					</div>
+			<div className="p-8">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+					<Card>
+						<CardContent className="p-6">
+							<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+								Total Users
+							</p>
+							<p className="text-3xl font-bold text-gray-900 mt-1">
+								{users.length}
+							</p>
+							<p className="text-sm text-gray-500 mt-1">
+								{activeUsers} active, {pendingUsers} pending
+							</p>
+						</CardContent>
+					</Card>
+					<Card>
+						<CardContent className="p-6">
+							<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+								Teams
+							</p>
+							<p className="text-3xl font-bold text-gray-900 mt-1">
+								{teams.length}
+							</p>
+							<p className="text-sm text-gray-500 mt-1">
+								{teams.reduce((sum, t) => sum + t.members.length, 0)} total
+								memberships
+							</p>
+						</CardContent>
+					</Card>
+					<Card>
+						<CardContent className="p-6">
+							<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+								Roles
+							</p>
+							<p className="text-3xl font-bold text-gray-900 mt-1">
+								{new Set(users.map((u) => u.role)).size}
+							</p>
+							<p className="text-sm text-gray-500 mt-1">
+								Unique roles across users
+							</p>
+						</CardContent>
+					</Card>
+					<Card>
+						<CardContent className="p-6">
+							<p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+								API Status
+							</p>
+							<p
+								className={`text-3xl font-bold mt-1 ${health?.status === "ok" ? "text-green-600" : "text-red-600"}`}
+							>
+								{health?.status === "ok" ? "✓" : "✗"}
+							</p>
+							<p className="text-sm text-gray-500 mt-1">
+								{health?.status === "ok"
+									? "All systems operational"
+									: "Issues detected"}
+							</p>
+						</CardContent>
+					</Card>
 				</div>
 
-				<div
-					style={{
-						display: "grid",
-						gridTemplateColumns: "1fr 1fr",
-						gap: "20px",
-					}}
-				>
-					<div className="card">
-						<div className="card-header">
-							<h3>Recent Users</h3>
-							<Link to="/users" className="btn btn-secondary btn-sm">
-								View all
-							</Link>
-						</div>
-						<div className="table-container">
-							<table>
-								<thead>
-									<tr>
-										<th>Name</th>
-										<th>Role</th>
-										<th>Status</th>
-									</tr>
-								</thead>
-								<tbody>
-									{recentUsers.map((user) => (
-										<tr key={user.id}>
-											<td>
-												<div style={{ fontWeight: 500 }}>{user.name}</div>
-												<div style={{ fontSize: "12px", color: "#6b7280" }}>
-													{user.email}
-												</div>
-											</td>
-											<td>
-												<span className={`badge badge-${user.role}`}>
-													{user.role.replace("_", " ")}
-												</span>
-											</td>
-											<td>
-												<span className={`badge badge-${user.status}`}>
-													{user.status}
-												</span>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-					</div>
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+					<Card>
+						<CardHeader className="flex-row items-center justify-between pb-4">
+							<CardTitle className="text-base">Recent Users</CardTitle>
+							<Button variant="outline" size="sm" asChild>
+								<Link to="/users">View all</Link>
+							</Button>
+						</CardHeader>
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>Name</TableHead>
+									<TableHead>Role</TableHead>
+									<TableHead>Status</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{recentUsers.map((user) => (
+									<TableRow key={user.id}>
+										<TableCell>
+											<div className="font-medium">{user.name}</div>
+											<div className="text-xs text-gray-500">{user.email}</div>
+										</TableCell>
+										<TableCell>
+											<Badge variant={user.role}>
+												{user.role.replace("_", " ")}
+											</Badge>
+										</TableCell>
+										<TableCell>
+											<Badge variant={user.status}>{user.status}</Badge>
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</Card>
 
-					<div className="card">
-						<div className="card-header">
-							<h3>Teams Overview</h3>
-							<Link to="/teams" className="btn btn-secondary btn-sm">
-								View all
-							</Link>
-						</div>
-						<div className="table-container">
-							<table>
-								<thead>
-									<tr>
-										<th>Team</th>
-										<th>Members</th>
-										<th>Created</th>
-									</tr>
-								</thead>
-								<tbody>
-									{teams.map((team) => (
-										<tr key={team.id}>
-											<td style={{ fontWeight: 500 }}>{team.name}</td>
-											<td>{team.members.length} members</td>
-											<td style={{ fontSize: "13px", color: "#6b7280" }}>
-												{new Date(team.createdAt).toLocaleDateString()}
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-					</div>
+					<Card>
+						<CardHeader className="flex-row items-center justify-between pb-4">
+							<CardTitle className="text-base">Teams Overview</CardTitle>
+							<Button variant="outline" size="sm" asChild>
+								<Link to="/teams">View all</Link>
+							</Button>
+						</CardHeader>
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>Team</TableHead>
+									<TableHead>Members</TableHead>
+									<TableHead>Created</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{teams.map((team) => (
+									<TableRow key={team.id}>
+										<TableCell className="font-medium">{team.name}</TableCell>
+										<TableCell>{team.members.length} members</TableCell>
+										<TableCell className="text-sm text-gray-500">
+											{new Date(team.createdAt).toLocaleDateString()}
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</Card>
 				</div>
 			</div>
 		</>
