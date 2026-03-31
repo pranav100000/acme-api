@@ -22,7 +22,7 @@ function TableRow({ className, ...props }) {
 	return (
 		<tr
 			className={cn(
-				"border-b border-slate-100 transition-colors hover:bg-slate-50/80",
+				"border-b border-zinc-900 transition-colors hover:bg-zinc-900/70",
 				className,
 			)}
 			{...props}
@@ -33,7 +33,7 @@ function TableHead({ className, ...props }) {
 	return (
 		<th
 			className={cn(
-				"h-11 px-4 text-left align-middle text-xs font-semibold uppercase tracking-[0.2em] text-slate-500",
+				"h-11 px-4 text-left align-middle text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500",
 				className,
 			)}
 			{...props}
@@ -43,7 +43,7 @@ function TableHead({ className, ...props }) {
 function TableCell({ className, ...props }) {
 	return (
 		<td
-			className={cn("p-4 align-middle text-slate-700", className)}
+			className={cn("p-4 align-middle text-zinc-300", className)}
 			{...props}
 		/>
 	);

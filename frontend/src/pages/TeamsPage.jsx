@@ -80,15 +80,15 @@ export default function TeamsPage() {
 
 	return (
 		<div className="space-y-6">
-			<section className="flex flex-col gap-4 rounded-[1.75rem] border border-white/70 bg-white/80 px-6 py-6 shadow-sm backdrop-blur lg:flex-row lg:items-center lg:justify-between">
+			<section className="flex flex-col gap-4 rounded-[1.75rem] border border-zinc-800 bg-zinc-950/80 px-6 py-6 shadow-sm shadow-black/20 backdrop-blur lg:flex-row lg:items-center lg:justify-between">
 				<div>
-					<p className="text-sm font-medium uppercase tracking-[0.3em] text-indigo-500">
+					<p className="text-sm font-medium uppercase tracking-[0.3em] text-zinc-500">
 						Collaboration
 					</p>
-					<h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+					<h2 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-100">
 						Teams
 					</h2>
-					<p className="mt-2 text-sm text-slate-500">
+					<p className="mt-2 text-sm text-zinc-400">
 						Organize members into focused groups and manage access in a more
 						polished team workspace.
 					</p>
@@ -111,21 +111,21 @@ export default function TeamsPage() {
 			) : null}
 
 			{loading ? (
-				<Card className="border-white/70 bg-white/90 backdrop-blur">
-					<CardContent className="py-12 text-center text-sm text-slate-500">
+				<Card className="border-zinc-800 bg-zinc-950/90 backdrop-blur">
+					<CardContent className="py-12 text-center text-sm text-zinc-400">
 						Loading teams...
 					</CardContent>
 				</Card>
 			) : teams.length === 0 ? (
-				<Card className="border-dashed border-slate-300 bg-white/90">
+				<Card className="border-dashed border-zinc-700 bg-zinc-950/90">
 					<CardContent className="py-16 text-center">
-						<div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
+						<div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-slate-100 text-zinc-400">
 							<Plus className="size-6" />
 						</div>
-						<p className="mt-4 text-lg font-medium text-slate-900">
+						<p className="mt-4 text-lg font-medium text-zinc-100">
 							No teams yet
 						</p>
-						<p className="mt-2 text-sm text-slate-500">
+						<p className="mt-2 text-sm text-zinc-400">
 							Create your first team to start grouping members.
 						</p>
 					</CardContent>
@@ -137,7 +137,7 @@ export default function TeamsPage() {
 						return (
 							<Card
 								key={team.id}
-								className="border-white/70 bg-white/90 backdrop-blur"
+								className="border-zinc-800 bg-zinc-950/90 backdrop-blur"
 							>
 								<CardHeader className="flex-row items-start justify-between space-y-0">
 									<div>
@@ -153,7 +153,7 @@ export default function TeamsPage() {
 								</CardHeader>
 								<CardContent>
 									{members.length === 0 ? (
-										<div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+										<div className="rounded-2xl border border-dashed border-zinc-800 bg-black/60 px-4 py-8 text-center text-sm text-zinc-400">
 											No members yet
 										</div>
 									) : (
@@ -162,7 +162,7 @@ export default function TeamsPage() {
 												member ? (
 													<div
 														key={member.id}
-														className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+														className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-black/60 px-4 py-3"
 													>
 														<div className="flex items-center gap-3">
 															<Avatar>
@@ -172,10 +172,10 @@ export default function TeamsPage() {
 																	.join("")}
 															</Avatar>
 															<div>
-																<p className="font-medium text-slate-900">
+																<p className="font-medium text-zinc-100">
 																	{member.name}
 																</p>
-																<div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+																<div className="mt-1 flex items-center gap-2 text-xs text-zinc-400">
 																	<span>{member.email}</span>
 																	<Badge
 																		variant={
@@ -345,7 +345,7 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
 				</Alert>
 			) : null}
 			{availableUsers.length === 0 ? (
-				<div className="space-y-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-500">
+				<div className="space-y-4 rounded-2xl border border-dashed border-zinc-800 bg-black/60 p-5 text-center text-sm text-zinc-400">
 					<p>All active users are already members of this team.</p>
 					<div className="flex justify-center">
 						<Button type="button" variant="secondary" onClick={onClose}>
@@ -359,7 +359,7 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
 						<Label htmlFor="team-member-user">Select user</Label>
 						<select
 							id="team-member-user"
-							className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+							className="flex h-10 w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 shadow-sm outline-none focus:border-zinc-600 focus:ring-2 focus:ring-zinc-100/10"
 							value={selectedUserId}
 							onChange={(e) => setSelectedUserId(e.target.value)}
 							required

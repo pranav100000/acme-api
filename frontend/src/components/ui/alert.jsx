@@ -4,9 +4,9 @@ import { cn } from "../../lib/utils";
 const alertVariants = cva("rounded-lg border px-4 py-3 text-sm", {
 	variants: {
 		variant: {
-			default: "border-slate-200 bg-white text-slate-700",
-			destructive: "border-rose-200 bg-rose-50 text-rose-700",
-			success: "border-emerald-200 bg-emerald-50 text-emerald-700",
+			default: "border-zinc-800 bg-zinc-950 text-zinc-200",
+			destructive: "border-zinc-700 bg-black text-zinc-100",
+			success: "border-zinc-800 bg-zinc-900 text-zinc-100",
 		},
 	},
 	defaultVariants: { variant: "default" },

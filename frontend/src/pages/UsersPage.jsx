@@ -85,15 +85,15 @@ export default function UsersPage() {
 
 	return (
 		<div className="space-y-6">
-			<section className="flex flex-col gap-4 rounded-[1.75rem] border border-white/70 bg-white/80 px-6 py-6 shadow-sm backdrop-blur lg:flex-row lg:items-center lg:justify-between">
+			<section className="flex flex-col gap-4 rounded-[1.75rem] border border-zinc-800 bg-zinc-950/80 px-6 py-6 shadow-sm shadow-black/20 backdrop-blur lg:flex-row lg:items-center lg:justify-between">
 				<div>
-					<p className="text-sm font-medium uppercase tracking-[0.3em] text-indigo-500">
+					<p className="text-sm font-medium uppercase tracking-[0.3em] text-zinc-500">
 						Workspace
 					</p>
-					<h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+					<h2 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-100">
 						Users
 					</h2>
-					<p className="mt-2 text-sm text-slate-500">
+					<p className="mt-2 text-sm text-zinc-400">
 						Review every teammate, filter by status, and update roles without
 						leaving the table.
 					</p>
@@ -115,7 +115,7 @@ export default function UsersPage() {
 				</Alert>
 			) : null}
 
-			<Card className="border-white/70 bg-white/90 backdrop-blur">
+			<Card className="border-zinc-800 bg-zinc-950/90 backdrop-blur">
 				<CardHeader className="gap-4 border-b-0 lg:flex-row lg:items-center lg:justify-between">
 					<div>
 						<CardTitle>User directory</CardTitle>
@@ -149,7 +149,7 @@ export default function UsersPage() {
 				</CardHeader>
 				<CardContent className="pt-0">
 					{loading ? (
-						<div className="py-12 text-center text-sm text-slate-500">
+						<div className="py-12 text-center text-sm text-zinc-400">
 							Loading users...
 						</div>
 					) : (
@@ -168,7 +168,7 @@ export default function UsersPage() {
 									<TableRow>
 										<TableCell
 											colSpan={5}
-											className="py-12 text-center text-sm text-slate-500"
+											className="py-12 text-center text-sm text-zinc-400"
 										>
 											No users found for this filter.
 										</TableCell>
@@ -185,10 +185,10 @@ export default function UsersPage() {
 															.join("")}
 													</Avatar>
 													<div>
-														<div className="font-medium text-slate-900">
+														<div className="font-medium text-zinc-100">
 															{user.name}
 														</div>
-														<div className="text-xs text-slate-500">
+														<div className="text-xs text-zinc-400">
 															{user.email}
 														</div>
 													</div>
@@ -301,7 +301,7 @@ function UserFormFields({ form, setForm, includeStatus = false }) {
 					</Label>
 					<select
 						id={`${includeStatus ? "edit" : "create"}-user-role`}
-						className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+						className="flex h-10 w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 shadow-sm outline-none focus:border-zinc-600 focus:ring-2 focus:ring-zinc-100/10"
 						value={form.role}
 						onChange={(e) => setForm({ ...form, role: e.target.value })}
 					>
@@ -316,7 +316,7 @@ function UserFormFields({ form, setForm, includeStatus = false }) {
 						<Label htmlFor="edit-user-status">Status</Label>
 						<select
 							id="edit-user-status"
-							className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+							className="flex h-10 w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 shadow-sm outline-none focus:border-zinc-600 focus:ring-2 focus:ring-zinc-100/10"
 							value={form.status}
 							onChange={(e) => setForm({ ...form, status: e.target.value })}
 						>

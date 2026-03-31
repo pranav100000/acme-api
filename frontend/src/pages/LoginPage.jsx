@@ -42,35 +42,35 @@ export default function LoginPage() {
 
 	return (
 		<div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
-			<div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#6366f140,transparent_30%),linear-gradient(180deg,#0f172a_0%,#1e1b4b_45%,#eef2ff_100%)]" />
+			<div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_28%),linear-gradient(180deg,#000_0%,#09090b_45%,#18181b_100%)]" />
 			<div className="relative grid w-full max-w-6xl gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-				<div className="hidden rounded-[2rem] border border-white/10 bg-white/10 p-10 text-white shadow-2xl backdrop-blur lg:flex lg:flex-col lg:justify-between">
+				<div className="hidden rounded-[2rem] border border-zinc-800 bg-zinc-950/80 p-10 text-zinc-100 shadow-2xl shadow-black/30 backdrop-blur lg:flex lg:flex-col lg:justify-between">
 					<div>
-						<div className="flex size-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20">
+						<div className="flex size-14 items-center justify-center rounded-2xl bg-zinc-900 ring-1 ring-inset ring-zinc-700">
 							<Building2 className="size-6" />
 						</div>
 						<h1 className="mt-8 max-w-md text-4xl font-semibold tracking-tight">
 							A cleaner admin experience powered by shadcn-inspired UI
 							primitives.
 						</h1>
-						<p className="mt-4 max-w-lg text-base text-indigo-100/90">
+						<p className="mt-4 max-w-lg text-base text-zinc-300">
 							Manage users, teams, and health status from a polished workspace
 							built for demos and day-to-day operations.
 						</p>
 					</div>
 					<div className="grid gap-4 sm:grid-cols-2">
-						<div className="rounded-2xl border border-white/10 bg-slate-950/20 p-5">
-							<Sparkles className="size-5 text-indigo-200" />
+						<div className="rounded-2xl border border-zinc-800 bg-black/60 p-5">
+							<Sparkles className="size-5 text-zinc-200" />
 							<p className="mt-3 font-medium">Modernized UI kit</p>
-							<p className="mt-1 text-sm text-indigo-100/80">
+							<p className="mt-1 text-sm text-zinc-400">
 								Cards, dialogs, badges, and tables now share a consistent design
 								language.
 							</p>
 						</div>
-						<div className="rounded-2xl border border-white/10 bg-slate-950/20 p-5">
-							<ShieldCheck className="size-5 text-emerald-200" />
+						<div className="rounded-2xl border border-zinc-800 bg-black/60 p-5">
+							<ShieldCheck className="size-5 text-zinc-200" />
 							<p className="mt-3 font-medium">Fast demo login</p>
-							<p className="mt-1 text-sm text-indigo-100/80">
+							<p className="mt-1 text-sm text-zinc-400">
 								Use one of the seeded accounts to explore users, teams, and API
 								status instantly.
 							</p>
@@ -78,11 +78,11 @@ export default function LoginPage() {
 					</div>
 				</div>
 
-				<Card className="relative overflow-hidden border-white/60 bg-white/95 shadow-2xl backdrop-blur">
-					<div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-500" />
+				<Card className="relative overflow-hidden border-zinc-800 bg-zinc-950/95 shadow-2xl shadow-black/40 backdrop-blur">
+					<div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-zinc-700 via-zinc-500 to-zinc-700" />
 					<CardHeader className="border-b-0 px-8 pt-8">
 						<div className="flex items-center gap-3">
-							<div className="flex size-12 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg">
+							<div className="flex size-12 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-950 shadow-lg">
 								<Building2 className="size-5" />
 							</div>
 							<div>
@@ -123,25 +123,23 @@ export default function LoginPage() {
 							</Button>
 						</form>
 
-						<div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-							<p className="text-sm font-medium text-slate-900">
-								Demo accounts
-							</p>
+						<div className="rounded-2xl border border-zinc-800 bg-black/60 p-5">
+							<p className="text-sm font-medium text-zinc-100">Demo accounts</p>
 							<div className="mt-4 space-y-3">
 								{accounts.map(([accountEmail, role]) => (
 									<button
 										key={accountEmail}
 										type="button"
-										className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition hover:border-indigo-300 hover:bg-indigo-50"
+										className="flex w-full items-center justify-between rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-left transition hover:border-zinc-700 hover:bg-zinc-900"
 										onClick={() => setEmail(accountEmail)}
 									>
 										<div>
-											<p className="font-medium text-slate-900">
+											<p className="font-medium text-zinc-100">
 												{accountEmail}
 											</p>
-											<p className="text-sm text-slate-500">{role}</p>
+											<p className="text-sm text-zinc-400">{role}</p>
 										</div>
-										<ArrowRight className="size-4 text-slate-400" />
+										<ArrowRight className="size-4 text-zinc-500" />
 									</button>
 								))}
 							</div>

@@ -4,7 +4,7 @@ function Avatar({ className, ...props }) {
 	return (
 		<div
 			className={cn(
-				"flex size-10 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white",
+				"flex size-10 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-zinc-950",
 				className,
 			)}
 			{...props}
