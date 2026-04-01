@@ -37,7 +37,7 @@ export default function LoginPage() {
 
   return (
     <div className='grid min-h-screen bg-slate-950 lg:grid-cols-[1.1fr_0.9fr]'>
-      <div className='relative hidden overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.45),_transparent_45%),linear-gradient(160deg,#0f172a_10%,#312e81_55%,#1e1b4b_100%)] p-12 text-white lg:flex lg:flex-col'>
+      <div className='relative hidden overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(250,204,21,0.28),_transparent_40%),radial-gradient(circle_at_bottom_right,_rgba(34,197,94,0.35),_transparent_38%),linear-gradient(160deg,#133117_10%,#166534_55%,#365314_100%)] p-12 text-white lg:flex lg:flex-col'>
         <div className='absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:72px_72px] opacity-40' />
         <div className='relative z-10 flex items-center gap-3'>
           <div className='rounded-2xl bg-white/10 p-3 backdrop-blur'>

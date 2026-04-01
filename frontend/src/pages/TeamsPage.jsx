@@ -13,10 +13,10 @@ import { Select } from '../components/ui/select'
 
 function getRoleVariant(role) {
   return {
-    admin: 'violet',
-    developer: 'info',
-    designer: 'rose',
-    product_manager: 'orange',
+    admin: 'warning',
+    developer: 'success',
+    designer: 'secondary',
+    product_manager: 'lime',
   }[role] || 'secondary'
 }
 

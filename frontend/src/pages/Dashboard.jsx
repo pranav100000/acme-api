@@ -16,10 +16,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 
 function getRoleVariant(role) {
   return {
-    admin: 'violet',
-    developer: 'info',
-    designer: 'rose',
-    product_manager: 'orange',
+    admin: 'warning',
+    developer: 'success',
+    designer: 'secondary',
+    product_manager: 'lime',
   }[role] || 'secondary'
 }
 
@@ -88,7 +88,7 @@ export default function Dashboard() {
 
   return (
     <div className='space-y-8 p-4 md:p-8'>
-      <section className='rounded-3xl border border-border/60 bg-[linear-gradient(135deg,rgba(79,70,229,0.12),rgba(14,165,233,0.08),rgba(255,255,255,0.9))] p-6 shadow-sm md:p-8'>
+      <section className='rounded-3xl border border-border/60 bg-[linear-gradient(135deg,rgba(34,197,94,0.14),rgba(250,204,21,0.12),rgba(255,255,255,0.92))] p-6 shadow-sm md:p-8'>
         <div className='flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between'>
           <div className='space-y-3'>
             <Badge variant='secondary' className='w-fit'>
@@ -105,7 +105,7 @@ export default function Dashboard() {
           <div className='flex flex-wrap gap-3'>
             <div className='rounded-2xl border bg-background/80 px-4 py-3 shadow-sm'>
               <div className='flex items-center gap-2 text-sm font-medium'>
-                <ShieldCheck className={`h-4 w-4 ${health?.status === 'ok' ? 'text-emerald-500' : 'text-red-500'}`} />
+                <ShieldCheck className={`h-4 w-4 ${health?.status === 'ok' ? 'text-green-600' : 'text-red-500'}`} />
                 API {health?.status === 'ok' ? 'Healthy' : 'Unhealthy'}
               </div>
               <p className='mt-1 text-xs text-muted-foreground'>Live system health check from /health.</p>
@@ -119,9 +119,9 @@ export default function Dashboard() {
 
       <section className='grid gap-4 md:grid-cols-2 xl:grid-cols-4'>
         <StatCard title='Total users' value={users.length} detail={`${activeUsers} active • ${pendingUsers} pending`} icon={Users} />
-        <StatCard title='Teams' value={teams.length} detail={`${teams.reduce((sum, t) => sum + t.members.length, 0)} total memberships`} icon={ArrowUpRight} accentClass='bg-sky-100 text-sky-700' />
-        <StatCard title='Unique roles' value={new Set(users.map((u) => u.role)).size} detail='Coverage across the org chart' icon={Sparkles} accentClass='bg-violet-100 text-violet-700' />
-        <StatCard title='API status' value={health?.status === 'ok' ? '✓' : '✕'} detail={health?.status === 'ok' ? 'All systems operational' : 'Issues detected'} icon={Activity} accentClass={health?.status === 'ok' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'} />
+        <StatCard title='Teams' value={teams.length} detail={`${teams.reduce((sum, t) => sum + t.members.length, 0)} total memberships`} icon={ArrowUpRight} accentClass='bg-yellow-100 text-yellow-800' />
+        <StatCard title='Unique roles' value={new Set(users.map((u) => u.role)).size} detail='Coverage across the org chart' icon={Sparkles} accentClass='bg-lime-100 text-lime-800' />
+        <StatCard title='API status' value={health?.status === 'ok' ? '✓' : '✕'} detail={health?.status === 'ok' ? 'All systems operational' : 'Issues detected'} icon={Activity} accentClass={health?.status === 'ok' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} />
       </section>
 
       <section className='grid gap-6 xl:grid-cols-2'>
@@ -200,7 +200,7 @@ export default function Dashboard() {
       <section>
         <Card className='border-dashed'>
           <CardContent className='flex items-center gap-3 p-6 text-sm text-muted-foreground'>
-            <CheckCircle2 className='h-4 w-4 text-emerald-500' />
+            <CheckCircle2 className='h-4 w-4 text-green-600' />
             This screen now uses composable, shadcn-style cards, badges, buttons, and tables instead of the old bespoke CSS widgets.
           </CardContent>
         </Card>

@@ -52,7 +52,7 @@ export default function Layout({ children }) {
           <div className='px-6 pb-4'>
             <div className='rounded-xl border border-white/10 bg-white/5 p-4'>
               <div className='flex items-center gap-2 text-sm font-medium'>
-                <Sparkles className='h-4 w-4 text-amber-300' />
+                <Sparkles className='h-4 w-4 text-yellow-300' />
                 Shadcn refresh
               </div>
               <p className='mt-2 text-sm text-sidebar-foreground/70'>
