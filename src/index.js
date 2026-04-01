@@ -15,6 +15,7 @@ const fs = require("node:fs");
 
 const app = express();
 
+// Parse JSON request bodies before route handlers run.
 app.use(express.json());
 app.use(logger);
 
