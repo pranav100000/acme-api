@@ -1,3 +1,4 @@
+// Centralize environment-derived runtime settings in one export.
 const config = {
 	port: process.env.PORT || 3000,
 	sentryDsn: process.env.SENTRY_DSN,
