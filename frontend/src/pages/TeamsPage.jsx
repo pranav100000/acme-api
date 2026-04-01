@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import * as api from "../api";
 import Modal from "../components/Modal";
+import useIsMobile from "../hooks/useIsMobile";
 
 export default function TeamsPage() {
 	const [teams, setTeams] = useState([]);
@@ -11,6 +12,7 @@ export default function TeamsPage() {
 	const [success, setSuccess] = useState("");
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [addMemberTeam, setAddMemberTeam] = useState(null);
+	const isMobile = useIsMobile();
 
 	const loadData = useCallback(async () => {
 		try {
@@ -21,7 +23,6 @@ export default function TeamsPage() {
 			setTeams(teamsData);
 			setUsers(usersData);
 
-			// Load members for each team
 			const membersMap = {};
 			await Promise.all(
 				teamsData.map(async (team) => {
@@ -76,7 +77,15 @@ export default function TeamsPage() {
 	return (
 		<>
 			<div className="page-header">
-				<h2>Teams</h2>
+				<div>
+					<h2>Teams</h2>
+					{isMobile && (
+						<p className="page-subtitle">
+							Create teams, add members, and manage collaboration from any
+							screen.
+						</p>
+					)}
+				</div>
 				<button
 					type="button"
 					className="btn btn-primary"
@@ -101,28 +110,30 @@ export default function TeamsPage() {
 							return (
 								<div key={team.id} className="team-card">
 									<div className="team-card-header">
-										<h3>{team.name}</h3>
+										<div>
+											<h3>{team.name}</h3>
+											{isMobile && (
+												<div className="team-meta">
+													Updated{" "}
+													{new Date(team.updatedAt).toLocaleDateString()}
+												</div>
+											)}
+										</div>
 										<span style={{ fontSize: "13px", color: "#6b7280" }}>
 											{members.length} member{members.length !== 1 ? "s" : ""}
 										</span>
 									</div>
 									<div className="team-card-body">
-										<div className="team-meta">
-											Created {new Date(team.createdAt).toLocaleDateString()} ·
-											Updated {new Date(team.updatedAt).toLocaleDateString()}
-										</div>
+										{!isMobile && (
+											<div className="team-meta">
+												Created {new Date(team.createdAt).toLocaleDateString()}{" "}
+												· Updated{" "}
+												{new Date(team.updatedAt).toLocaleDateString()}
+											</div>
+										)}
 
 										{members.length === 0 ? (
-											<div
-												style={{
-													padding: "16px",
-													textAlign: "center",
-													color: "#9ca3af",
-													fontSize: "14px",
-												}}
-											>
-												No members yet
-											</div>
+											<div className="team-empty-members">No members yet</div>
 										) : (
 											<div className="member-list">
 												{members.map(
@@ -133,7 +144,7 @@ export default function TeamsPage() {
 																	<div className="member-avatar">
 																		{member.name
 																			.split(" ")
-																			.map((n) => n[0])
+																			.map((namePart) => namePart[0])
 																			.join("")}
 																	</div>
 																	<div>
@@ -276,9 +287,11 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	const currentMemberIds = currentMembers.filter(Boolean).map((m) => m.id);
+	const currentMemberIds = currentMembers
+		.filter(Boolean)
+		.map((member) => member.id);
 	const availableUsers = users.filter(
-		(u) => !currentMemberIds.includes(u.id) && u.status === "active",
+		(user) => !currentMemberIds.includes(user.id) && user.status === "active",
 	);
 
 	const handleSubmit = async (e) => {

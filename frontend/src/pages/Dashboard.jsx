@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as api from "../api";
+import useIsMobile from "../hooks/useIsMobile";
 
 export default function Dashboard() {
 	const [users, setUsers] = useState([]);
 	const [teams, setTeams] = useState([]);
 	const [health, setHealth] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const isMobile = useIsMobile();
 
 	useEffect(() => {
 		async function fetchData() {
@@ -52,20 +54,19 @@ export default function Dashboard() {
 	return (
 		<>
 			<div className="page-header">
-				<h2>Dashboard</h2>
-				<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+				<div>
+					<h2>Dashboard</h2>
+					{isMobile && (
+						<p className="page-subtitle">
+							Key metrics and the latest account activity.
+						</p>
+					)}
+				</div>
+				<div className="status-pill">
 					<span
-						style={{
-							display: "inline-block",
-							width: "8px",
-							height: "8px",
-							borderRadius: "50%",
-							background: health?.status === "ok" ? "#16a34a" : "#dc2626",
-						}}
+						className={`status-indicator ${health?.status === "ok" ? "is-healthy" : "is-unhealthy"}`}
 					></span>
-					<span style={{ fontSize: "13px", color: "#6b7280" }}>
-						API {health?.status === "ok" ? "Healthy" : "Unhealthy"}
-					</span>
+					<span>API {health?.status === "ok" ? "Healthy" : "Unhealthy"}</span>
 				</div>
 			</div>
 			<div className="page-body">
@@ -81,22 +82,21 @@ export default function Dashboard() {
 						<div className="stat-label">Teams</div>
 						<div className="stat-value">{teams.length}</div>
 						<div className="stat-detail">
-							{teams.reduce((sum, t) => sum + t.members.length, 0)} total
+							{teams.reduce((sum, team) => sum + team.members.length, 0)} total
 							memberships
 						</div>
 					</div>
 					<div className="stat-card">
 						<div className="stat-label">Roles</div>
 						<div className="stat-value">
-							{new Set(users.map((u) => u.role)).size}
+							{new Set(users.map((user) => user.role)).size}
 						</div>
 						<div className="stat-detail">Unique roles across users</div>
 					</div>
 					<div className="stat-card">
 						<div className="stat-label">API Status</div>
 						<div
-							className="stat-value"
-							style={{ color: health?.status === "ok" ? "#16a34a" : "#dc2626" }}
+							className={`stat-value ${health?.status === "ok" ? "stat-value-success" : "stat-value-danger"}`}
 						>
 							{health?.status === "ok" ? "✓" : "✗"}
 						</div>
@@ -108,13 +108,7 @@ export default function Dashboard() {
 					</div>
 				</div>
 
-				<div
-					style={{
-						display: "grid",
-						gridTemplateColumns: "1fr 1fr",
-						gap: "20px",
-					}}
-				>
+				<div className="dashboard-panels">
 					<div className="card">
 						<div className="card-header">
 							<h3>Recent Users</h3>
@@ -122,39 +116,63 @@ export default function Dashboard() {
 								View all
 							</Link>
 						</div>
-						<div className="table-container">
-							<table>
-								<thead>
-									<tr>
-										<th>Name</th>
-										<th>Role</th>
-										<th>Status</th>
-									</tr>
-								</thead>
-								<tbody>
-									{recentUsers.map((user) => (
-										<tr key={user.id}>
-											<td>
-												<div style={{ fontWeight: 500 }}>{user.name}</div>
-												<div style={{ fontSize: "12px", color: "#6b7280" }}>
-													{user.email}
-												</div>
-											</td>
-											<td>
-												<span className={`badge badge-${user.role}`}>
-													{user.role.replace("_", " ")}
-												</span>
-											</td>
-											<td>
-												<span className={`badge badge-${user.status}`}>
-													{user.status}
-												</span>
-											</td>
+						{isMobile ? (
+							<div className="card-body mobile-stack-list">
+								{recentUsers.map((user) => (
+									<div key={user.id} className="mobile-data-card">
+										<div className="mobile-data-card-header">
+											<div>
+												<div className="mobile-data-title">{user.name}</div>
+												<div className="mobile-data-subtitle">{user.email}</div>
+											</div>
+											<span className={`badge badge-${user.status}`}>
+												{user.status}
+											</span>
+										</div>
+										<div className="mobile-data-meta-row">
+											<span>Role</span>
+											<span className={`badge badge-${user.role}`}>
+												{user.role.replace("_", " ")}
+											</span>
+										</div>
+									</div>
+								))}
+							</div>
+						) : (
+							<div className="table-container">
+								<table>
+									<thead>
+										<tr>
+											<th>Name</th>
+											<th>Role</th>
+											<th>Status</th>
 										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
+									</thead>
+									<tbody>
+										{recentUsers.map((user) => (
+											<tr key={user.id}>
+												<td>
+													<div style={{ fontWeight: 500 }}>{user.name}</div>
+													<div style={{ fontSize: "12px", color: "#6b7280" }}>
+														{user.email}
+													</div>
+												</td>
+												<td>
+													<span className={`badge badge-${user.role}`}>
+														{user.role.replace("_", " ")}
+													</span>
+												</td>
+												<td>
+													<span className={`badge badge-${user.status}`}>
+														{user.status}
+													</span>
+												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						)}
 					</div>
 
 					<div className="card">
@@ -164,28 +182,46 @@ export default function Dashboard() {
 								View all
 							</Link>
 						</div>
-						<div className="table-container">
-							<table>
-								<thead>
-									<tr>
-										<th>Team</th>
-										<th>Members</th>
-										<th>Created</th>
-									</tr>
-								</thead>
-								<tbody>
-									{teams.map((team) => (
-										<tr key={team.id}>
-											<td style={{ fontWeight: 500 }}>{team.name}</td>
-											<td>{team.members.length} members</td>
-											<td style={{ fontSize: "13px", color: "#6b7280" }}>
-												{new Date(team.createdAt).toLocaleDateString()}
-											</td>
+						{isMobile ? (
+							<div className="card-body mobile-stack-list">
+								{teams.map((team) => (
+									<div key={team.id} className="mobile-data-card">
+										<div className="mobile-data-card-header">
+											<div className="mobile-data-title">{team.name}</div>
+											<span className="badge badge-admin">
+												{team.members.length} members
+											</span>
+										</div>
+										<div className="mobile-data-subtitle">
+											Created {new Date(team.createdAt).toLocaleDateString()}
+										</div>
+									</div>
+								))}
+							</div>
+						) : (
+							<div className="table-container">
+								<table>
+									<thead>
+										<tr>
+											<th>Team</th>
+											<th>Members</th>
+											<th>Created</th>
 										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
+									</thead>
+									<tbody>
+										{teams.map((team) => (
+											<tr key={team.id}>
+												<td style={{ fontWeight: 500 }}>{team.name}</td>
+												<td>{team.members.length} members</td>
+												<td style={{ fontSize: "13px", color: "#6b7280" }}>
+													{new Date(team.createdAt).toLocaleDateString()}
+												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import * as api from "../api";
 import Modal from "../components/Modal";
+import useIsMobile from "../hooks/useIsMobile";
 
 export default function UsersPage() {
 	const [users, setUsers] = useState([]);
@@ -10,6 +11,7 @@ export default function UsersPage() {
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [editingUser, setEditingUser] = useState(null);
 	const [filter, setFilter] = useState("all");
+	const isMobile = useIsMobile();
 
 	const loadUsers = useCallback(async () => {
 		try {
@@ -45,7 +47,7 @@ export default function UsersPage() {
 	};
 
 	const filteredUsers =
-		filter === "all" ? users : users.filter((u) => u.status === filter);
+		filter === "all" ? users : users.filter((user) => user.status === filter);
 
 	if (loading) {
 		return (
@@ -65,7 +67,14 @@ export default function UsersPage() {
 	return (
 		<>
 			<div className="page-header">
-				<h2>Users</h2>
+				<div>
+					<h2>Users</h2>
+					{isMobile && (
+						<p className="page-subtitle">
+							Manage people, roles, and account status on the go.
+						</p>
+					)}
+				</div>
 				<button
 					type="button"
 					className="btn btn-primary"
@@ -78,120 +87,166 @@ export default function UsersPage() {
 				{error && <div className="alert alert-error">{error}</div>}
 				{success && <div className="alert alert-success">{success}</div>}
 
-				<div style={{ marginBottom: "16px", display: "flex", gap: "8px" }}>
-					{["all", "active", "inactive", "pending"].map((f) => (
+				<div className="filter-pills">
+					{["all", "active", "inactive", "pending"].map((status) => (
 						<button
 							type="button"
-							key={f}
-							className={`btn btn-sm ${filter === f ? "btn-primary" : "btn-secondary"}`}
-							onClick={() => setFilter(f)}
+							key={status}
+							className={`btn btn-sm ${filter === status ? "btn-primary" : "btn-secondary"}`}
+							onClick={() => setFilter(status)}
 						>
-							{f.charAt(0).toUpperCase() + f.slice(1)}
-							{f !== "all" &&
-								` (${users.filter((u) => u.status === f).length})`}
+							{status.charAt(0).toUpperCase() + status.slice(1)}
+							{status !== "all" &&
+								` (${users.filter((user) => user.status === status).length})`}
 						</button>
 					))}
 				</div>
 
 				<div className="card">
-					<div className="table-container">
-						<table>
-							<thead>
-								<tr>
-									<th>User</th>
-									<th>Role</th>
-									<th>Status</th>
-									<th>Created</th>
-									<th>Actions</th>
-								</tr>
-							</thead>
-							<tbody>
-								{filteredUsers.length === 0 ? (
-									<tr>
-										<td colSpan="5">
-											<div className="empty-state">
-												<p>No users found</p>
-											</div>
-										</td>
-									</tr>
-								) : (
-									filteredUsers.map((user) => (
-										<tr key={user.id}>
-											<td>
-												<div
-													style={{
-														display: "flex",
-														alignItems: "center",
-														gap: "12px",
-													}}
-												>
-													<div
-														style={{
-															width: "36px",
-															height: "36px",
-															borderRadius: "50%",
-															background: "#4f46e5",
-															color: "white",
-															display: "flex",
-															alignItems: "center",
-															justifyContent: "center",
-															fontSize: "13px",
-															fontWeight: "600",
-															flexShrink: 0,
-														}}
-													>
-														{user.name
-															.split(" ")
-															.map((n) => n[0])
-															.join("")}
-													</div>
-													<div>
-														<div style={{ fontWeight: 500 }}>{user.name}</div>
-														<div style={{ fontSize: "12px", color: "#6b7280" }}>
-															{user.email}
-														</div>
+					{isMobile ? (
+						<div className="card-body mobile-stack-list">
+							{filteredUsers.length === 0 ? (
+								<div className="empty-state">
+									<p>No users found</p>
+								</div>
+							) : (
+								filteredUsers.map((user) => (
+									<div key={user.id} className="mobile-user-card">
+										<div className="mobile-user-card-top">
+											<div className="mobile-user-identity">
+												<div className="member-avatar mobile-user-avatar">
+													{user.name
+														.split(" ")
+														.map((namePart) => namePart[0])
+														.join("")}
+												</div>
+												<div>
+													<div className="mobile-data-title">{user.name}</div>
+													<div className="mobile-data-subtitle">
+														{user.email}
 													</div>
 												</div>
-											</td>
-											<td>
-												<span className={`badge badge-${user.role}`}>
-													{user.role.replace("_", " ")}
-												</span>
-											</td>
-											<td>
-												<span className={`badge badge-${user.status}`}>
-													{user.status}
-												</span>
-											</td>
-											<td style={{ fontSize: "13px", color: "#6b7280" }}>
-												{new Date(user.createdAt).toLocaleDateString()}
-											</td>
-											<td>
-												<div style={{ display: "flex", gap: "4px" }}>
-													<button
-														type="button"
-														className="btn btn-secondary btn-sm"
-														onClick={() => setEditingUser(user)}
-													>
-														Edit
-													</button>
-													{user.status !== "inactive" && (
-														<button
-															type="button"
-															className="btn btn-danger btn-sm"
-															onClick={() => handleDelete(user)}
-														>
-															Deactivate
-														</button>
-													)}
+											</div>
+											<span className={`badge badge-${user.status}`}>
+												{user.status}
+											</span>
+										</div>
+										<div className="mobile-data-meta-grid">
+											<div>
+												<span>Role</span>
+												<strong>{user.role.replace("_", " ")}</strong>
+											</div>
+											<div>
+												<span>Created</span>
+												<strong>
+													{new Date(user.createdAt).toLocaleDateString()}
+												</strong>
+											</div>
+										</div>
+										<div className="mobile-action-row">
+											<button
+												type="button"
+												className="btn btn-secondary btn-sm"
+												onClick={() => setEditingUser(user)}
+											>
+												Edit
+											</button>
+											{user.status !== "inactive" && (
+												<button
+													type="button"
+													className="btn btn-danger btn-sm"
+													onClick={() => handleDelete(user)}
+												>
+													Deactivate
+												</button>
+											)}
+										</div>
+									</div>
+								))
+							)}
+						</div>
+					) : (
+						<div className="table-container">
+							<table>
+								<thead>
+									<tr>
+										<th>User</th>
+										<th>Role</th>
+										<th>Status</th>
+										<th>Created</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									{filteredUsers.length === 0 ? (
+										<tr>
+											<td colSpan="5">
+												<div className="empty-state">
+													<p>No users found</p>
 												</div>
 											</td>
 										</tr>
-									))
-								)}
-							</tbody>
-						</table>
-					</div>
+									) : (
+										filteredUsers.map((user) => (
+											<tr key={user.id}>
+												<td>
+													<div className="table-user-cell">
+														<div className="member-avatar table-user-avatar">
+															{user.name
+																.split(" ")
+																.map((namePart) => namePart[0])
+																.join("")}
+														</div>
+														<div>
+															<div style={{ fontWeight: 500 }}>{user.name}</div>
+															<div
+																style={{ fontSize: "12px", color: "#6b7280" }}
+															>
+																{user.email}
+															</div>
+														</div>
+													</div>
+												</td>
+												<td>
+													<span className={`badge badge-${user.role}`}>
+														{user.role.replace("_", " ")}
+													</span>
+												</td>
+												<td>
+													<span className={`badge badge-${user.status}`}>
+														{user.status}
+													</span>
+												</td>
+												<td style={{ fontSize: "13px", color: "#6b7280" }}>
+													{new Date(user.createdAt).toLocaleDateString()}
+												</td>
+												<td>
+													<div style={{ display: "flex", gap: "4px" }}>
+														<button
+															type="button"
+															className="btn btn-secondary btn-sm"
+															onClick={() => setEditingUser(user)}
+														>
+															Edit
+														</button>
+														{user.status !== "inactive" && (
+															<button
+																type="button"
+																className="btn btn-danger btn-sm"
+																onClick={() => handleDelete(user)}
+															>
+																Deactivate
+															</button>
+														)}
+													</div>
+												</td>
+											</tr>
+										))
+									)}
+								</tbody>
+							</table>
+						</div>
+					)}
 				</div>
 			</div>
 

@@ -7,11 +7,7 @@ export default function Modal({ title, onClose, children }) {
 				onClick={onClose}
 				className="modal-backdrop"
 			/>
-			<div
-				className="modal"
-				role="dialog"
-				aria-modal="true"
-			>
+			<div className="modal" role="dialog" aria-modal="true">
 				<div className="modal-header">
 					<h3>{title}</h3>
 					<button
