@@ -12,11 +12,22 @@ export function useAuth() {
 	return useContext(AuthContext);
 }
 
+function getStoredUser() {
+	const saved = localStorage.getItem("acme_user");
+	if (!saved) {
+		return null;
+	}
+
+	try {
+		return JSON.parse(saved);
+	} catch {
+		localStorage.removeItem("acme_user");
+		return null;
+	}
+}
+
 export default function App() {
-	const [user, setUser] = useState(() => {
-		const saved = localStorage.getItem("acme_user");
-		return saved ? JSON.parse(saved) : null;
-	});
+	const [user, setUser] = useState(getStoredUser);
 
 	const handleLogin = (userData) => {
 		setUser(userData);
