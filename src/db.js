@@ -1,3 +1,4 @@
+// In-memory database layer with simulated async operations for users and teams
 const users = [
 	{
 		id: "1",
