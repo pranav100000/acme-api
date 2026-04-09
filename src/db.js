@@ -1,3 +1,4 @@
+// In-memory database module — stores users and teams data with async CRUD operations.
 const users = [
 	{
 		id: "1",
