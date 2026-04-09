@@ -21,6 +21,7 @@ app.use(logger);
 // Serve static frontend files in production
 app.use(express.static(path.join(__dirname, "..", "public")));
 
+// NOTE: temporary comment
 // Routes
 app.get("/health", (_req, res) => {
 	res.json({ status: "ok" });
@@ -30,6 +31,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/auth", authRoutes);
 
+// NOTE: temporary comment
 // Sentry test route
 app.get("/debug-sentry", function mainHandler(_req, _res) {
 	throw new Error("My first Sentry error!");
