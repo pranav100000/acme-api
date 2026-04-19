@@ -9,6 +9,7 @@ const logger = require("./middleware/logger");
 const userRoutes = require("./routes/users");
 const teamRoutes = require("./routes/teams");
 const authRoutes = require("./routes/auth");
+const notificationRoutes = require("./routes/notifications");
 
 const path = require("node:path");
 const fs = require("node:fs");
@@ -29,6 +30,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Sentry test route
 app.get("/debug-sentry", function mainHandler(_req, _res) {

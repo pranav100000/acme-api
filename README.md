@@ -53,6 +53,7 @@ The frontend is a React SPA (built with Vite) located in the `frontend/` directo
 - **Dashboard** — overview stats for users, teams, and API health
 - **Users page** — list, create, edit, and deactivate users with status filtering
 - **Teams page** — view teams as cards, create teams, add/remove members
+- **Unified notifications** — sidebar bell with unread counts, quick actions, and mark-read controls
 
 ### Tech Stack
 - React 19 + React Router
@@ -83,6 +84,14 @@ The frontend is a React SPA (built with Vite) located in the `frontend/` directo
 ### Auth
 - `POST /api/auth/login` - Login with email
 - `POST /api/auth/logout` - Logout
+
+### Notifications
+- `GET /api/notifications/users/:userId` - List notifications for a user
+- `GET /api/notifications/users/:userId?unread=true` - List unread notifications
+- `GET /api/notifications/users/:userId/unread-count` - Get unread notification count
+- `POST /api/notifications/users/:userId` - Create a notification
+- `PATCH /api/notifications/users/:userId/:notificationId/read` - Mark a notification read
+- `PATCH /api/notifications/users/:userId/read-all` - Mark all user notifications read
 
 ## Testing
 

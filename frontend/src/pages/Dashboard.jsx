@@ -6,19 +6,28 @@ export default function Dashboard() {
 	const [users, setUsers] = useState([]);
 	const [teams, setTeams] = useState([]);
 	const [health, setHealth] = useState(null);
+	const [notifications, setNotifications] = useState([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		async function fetchData() {
 			try {
-				const [usersData, teamsData, healthData] = await Promise.all([
-					api.getUsers(),
-					api.getTeams(),
-					api.healthCheck(),
-				]);
+				const savedUser = JSON.parse(
+					localStorage.getItem("acme_user") || "null",
+				);
+				const [usersData, teamsData, healthData, notificationData] =
+					await Promise.all([
+						api.getUsers(),
+						api.getTeams(),
+						api.healthCheck(),
+						savedUser?.id
+							? api.getNotifications(savedUser.id)
+							: Promise.resolve([]),
+					]);
 				setUsers(usersData);
 				setTeams(teamsData);
 				setHealth(healthData);
+				setNotifications(notificationData);
 			} catch (err) {
 				console.error("Failed to load dashboard data:", err);
 			} finally {
@@ -48,6 +57,9 @@ export default function Dashboard() {
 	const recentUsers = [...users]
 		.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 		.slice(0, 5);
+	const unreadNotifications = notifications.filter(
+		(notification) => !notification.read,
+	).length;
 
 	return (
 		<>
@@ -93,17 +105,10 @@ export default function Dashboard() {
 						<div className="stat-detail">Unique roles across users</div>
 					</div>
 					<div className="stat-card">
-						<div className="stat-label">API Status</div>
-						<div
-							className="stat-value"
-							style={{ color: health?.status === "ok" ? "#16a34a" : "#dc2626" }}
-						>
-							{health?.status === "ok" ? "✓" : "✗"}
-						</div>
+						<div className="stat-label">Unread Notifications</div>
+						<div className="stat-value">{unreadNotifications}</div>
 						<div className="stat-detail">
-							{health?.status === "ok"
-								? "All systems operational"
-								: "Issues detected"}
+							{notifications.length} total notification updates
 						</div>
 					</div>
 				</div>
