@@ -104,8 +104,79 @@ const teams = [
 	},
 ];
 
+const notifications = [
+	{
+		id: "1",
+		userId: "1",
+		type: "team",
+		priority: "high",
+		title: "Engineering standup moved",
+		message:
+			"Today's Engineering standup is now at 10:30 AM in the Atlas room.",
+		read: false,
+		actionUrl: "/teams",
+		createdAt: "2024-03-22T09:15:00Z",
+		updatedAt: "2024-03-22T09:15:00Z",
+	},
+	{
+		id: "2",
+		userId: "1",
+		type: "user",
+		priority: "normal",
+		title: "New pending user",
+		message: "Henry Taylor is waiting for account approval.",
+		read: false,
+		actionUrl: "/users",
+		createdAt: "2024-03-21T15:40:00Z",
+		updatedAt: "2024-03-21T15:40:00Z",
+	},
+	{
+		id: "3",
+		userId: "1",
+		type: "system",
+		priority: "low",
+		title: "Weekly report ready",
+		message: "Your weekly user and team activity report is available.",
+		read: true,
+		actionUrl: "/",
+		createdAt: "2024-03-18T08:00:00Z",
+		updatedAt: "2024-03-19T08:30:00Z",
+	},
+	{
+		id: "4",
+		userId: "2",
+		type: "team",
+		priority: "normal",
+		title: "Added to Infrastructure",
+		message: "You were added to the Infrastructure team by Alice Chen.",
+		read: false,
+		actionUrl: "/teams",
+		createdAt: "2024-03-20T12:20:00Z",
+		updatedAt: "2024-03-20T12:20:00Z",
+	},
+	{
+		id: "5",
+		userId: "6",
+		type: "system",
+		priority: "high",
+		title: "Product review reminder",
+		message: "The Q2 product access review is due this Friday.",
+		read: false,
+		actionUrl: "/users",
+		createdAt: "2024-03-23T11:00:00Z",
+		updatedAt: "2024-03-23T11:00:00Z",
+	},
+];
+
 const initialUsers = users.map((u) => ({ ...u }));
 const initialTeams = teams.map((t) => ({ ...t, members: [...t.members] }));
+const initialNotifications = notifications.map((n) => ({ ...n }));
+
+function sortNewestFirst(items) {
+	return [...items].sort(
+		(a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+	);
+}
 
 const db = {
 	async findUser(id) {
@@ -125,7 +196,9 @@ const db = {
 
 	async createUser({ email, name, role }) {
 		await new Promise((resolve) => setTimeout(resolve, 10));
-		const id = String(Math.max(...users.map((u) => Number.parseInt(u.id, 10))) + 1);
+		const id = String(
+			Math.max(...users.map((u) => Number.parseInt(u.id, 10))) + 1,
+		);
 		const now = new Date().toISOString();
 		const user = {
 			id,
@@ -182,7 +255,9 @@ const db = {
 
 	async createTeam({ name }) {
 		await new Promise((resolve) => setTimeout(resolve, 10));
-		const id = String(Math.max(...teams.map((t) => Number.parseInt(t.id, 10))) + 1);
+		const id = String(
+			Math.max(...teams.map((t) => Number.parseInt(t.id, 10))) + 1,
+		);
 		const now = new Date().toISOString();
 		const team = { id, name, members: [], createdAt: now, updatedAt: now };
 		teams.push(team);
@@ -210,6 +285,76 @@ const db = {
 		return team;
 	},
 
+	async getNotificationsForUser(userId, { unreadOnly = false } = {}) {
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		const userNotifications = notifications.filter((notification) => {
+			if (notification.userId !== userId) return false;
+			if (unreadOnly && notification.read) return false;
+			return true;
+		});
+		return sortNewestFirst(userNotifications);
+	},
+
+	async getUnreadNotificationCount(userId) {
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		return notifications.filter(
+			(notification) => notification.userId === userId && !notification.read,
+		).length;
+	},
+
+	async createNotification({
+		userId,
+		type = "system",
+		priority = "normal",
+		title,
+		message,
+		actionUrl = null,
+	}) {
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		const user = users.find((u) => u.id === userId);
+		if (!user) return null;
+		const id = String(
+			Math.max(...notifications.map((n) => Number.parseInt(n.id, 10))) + 1,
+		);
+		const now = new Date().toISOString();
+		const notification = {
+			id,
+			userId,
+			type,
+			priority,
+			title,
+			message,
+			read: false,
+			actionUrl,
+			createdAt: now,
+			updatedAt: now,
+		};
+		notifications.push(notification);
+		return notification;
+	},
+
+	async markNotificationRead(userId, notificationId) {
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		const notification = notifications.find(
+			(n) => n.id === notificationId && n.userId === userId,
+		);
+		if (!notification) return null;
+		notification.read = true;
+		notification.updatedAt = new Date().toISOString();
+		return notification;
+	},
+
+	async markAllNotificationsRead(userId) {
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		const now = new Date().toISOString();
+		const userNotifications = notifications.filter((n) => n.userId === userId);
+		for (const notification of userNotifications) {
+			notification.read = true;
+			notification.updatedAt = now;
+		}
+		return sortNewestFirst(userNotifications);
+	},
+
 	/**
 	 * Resets database to initial state (for testing)
 	 */
@@ -218,6 +363,8 @@ const db = {
 		users.push(...initialUsers.map((u) => ({ ...u })));
 		teams.length = 0;
 		teams.push(...initialTeams.map((t) => ({ ...t, members: [...t.members] })));
+		notifications.length = 0;
+		notifications.push(...initialNotifications.map((n) => ({ ...n })));
 	},
 };
 
