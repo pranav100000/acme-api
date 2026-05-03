@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../App";
+import NotificationCenter from "./NotificationCenter";
 
 export default function Layout({ children }) {
 	const { user, logout } = useAuth();
@@ -26,6 +27,9 @@ export default function Layout({ children }) {
 					</NavLink>
 				</nav>
 				<div style={{ padding: "16px 12px", borderTop: "1px solid #374151" }}>
+					<div style={{ padding: "0 12px 12px" }}>
+						<NotificationCenter />
+					</div>
 					<div
 						style={{
 							display: "flex",
