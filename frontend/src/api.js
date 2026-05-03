@@ -51,5 +51,26 @@ export const login = (email) =>
 	request("/auth/login", { method: "POST", body: JSON.stringify({ email }) });
 export const logout = () => request("/auth/logout", { method: "POST" });
 
+// Notifications
+export const getNotifications = (userId, options = {}) => {
+	const params = new URLSearchParams({ userId });
+	if (options.unreadOnly) params.set("unreadOnly", "true");
+	return request(`/notifications?${params.toString()}`);
+};
+export const getUnreadNotificationCount = (userId) =>
+	request("/notifications/unread-count", { headers: { "x-user-id": userId } });
+export const createNotification = (data) =>
+	request("/notifications", { method: "POST", body: JSON.stringify(data) });
+export const markNotificationRead = (id, userId) =>
+	request(`/notifications/${id}/read`, {
+		method: "PATCH",
+		headers: { "x-user-id": userId },
+	});
+export const markAllNotificationsRead = (userId) =>
+	request("/notifications/read-all", {
+		method: "PATCH",
+		body: JSON.stringify({ userId }),
+	});
+
 // Health
 export const healthCheck = () => fetch("/health").then((r) => r.json());

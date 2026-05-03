@@ -73,6 +73,54 @@ const users = [
 	},
 ];
 
+const notifications = [
+	{
+		id: "1",
+		userId: "1",
+		type: "info",
+		title: "Welcome to unified notifications",
+		message:
+			"Your user, team, and system alerts now appear in one notification center.",
+		read: false,
+		actionUrl: "/users",
+		createdAt: "2024-03-28T09:00:00Z",
+		updatedAt: "2024-03-28T09:00:00Z",
+	},
+	{
+		id: "2",
+		userId: "1",
+		type: "warning",
+		title: "Pending user approvals",
+		message: "Henry Taylor is waiting for account approval.",
+		read: false,
+		actionUrl: "/users",
+		createdAt: "2024-03-29T12:30:00Z",
+		updatedAt: "2024-03-29T12:30:00Z",
+	},
+	{
+		id: "3",
+		userId: "1",
+		type: "success",
+		title: "Engineering roster updated",
+		message: "Eve Martinez was added to Engineering.",
+		read: true,
+		actionUrl: "/teams",
+		createdAt: "2024-03-25T16:15:00Z",
+		updatedAt: "2024-03-26T08:00:00Z",
+	},
+	{
+		id: "4",
+		userId: "2",
+		type: "info",
+		title: "Infrastructure team update",
+		message: "You are assigned to the Infrastructure team.",
+		read: false,
+		actionUrl: "/teams",
+		createdAt: "2024-03-27T10:00:00Z",
+		updatedAt: "2024-03-27T10:00:00Z",
+	},
+];
+
 const teams = [
 	{
 		id: "1",
@@ -106,6 +154,7 @@ const teams = [
 
 const initialUsers = users.map((u) => ({ ...u }));
 const initialTeams = teams.map((t) => ({ ...t, members: [...t.members] }));
+const initialNotifications = notifications.map((n) => ({ ...n }));
 
 const db = {
 	async findUser(id) {
@@ -125,7 +174,9 @@ const db = {
 
 	async createUser({ email, name, role }) {
 		await new Promise((resolve) => setTimeout(resolve, 10));
-		const id = String(Math.max(...users.map((u) => Number.parseInt(u.id, 10))) + 1);
+		const id = String(
+			Math.max(...users.map((u) => Number.parseInt(u.id, 10))) + 1,
+		);
 		const now = new Date().toISOString();
 		const user = {
 			id,
@@ -180,9 +231,83 @@ const db = {
 		return team.members.map((memberId) => users.find((u) => u.id === memberId));
 	},
 
+	async getNotificationsForUser(userId, filters = {}) {
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		return notifications
+			.filter((notification) => notification.userId === userId)
+			.filter((notification) => {
+				if (filters.unreadOnly) {
+					return !notification.read;
+				}
+				return true;
+			})
+			.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+	},
+
+	async getUnreadNotificationCount(userId) {
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		return notifications.filter(
+			(notification) => notification.userId === userId && !notification.read,
+		).length;
+	},
+
+	async createNotification({
+		userId,
+		type = "info",
+		title,
+		message,
+		actionUrl,
+	}) {
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		const id = String(
+			Math.max(...notifications.map((n) => Number.parseInt(n.id, 10)), 0) + 1,
+		);
+		const now = new Date().toISOString();
+		const notification = {
+			id,
+			userId,
+			type,
+			title,
+			message,
+			read: false,
+			actionUrl: actionUrl || null,
+			createdAt: now,
+			updatedAt: now,
+		};
+		notifications.push(notification);
+		return notification;
+	},
+
+	async markNotificationRead(userId, notificationId) {
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		const notification = notifications.find(
+			(n) => n.id === notificationId && n.userId === userId,
+		);
+		if (!notification) return null;
+		notification.read = true;
+		notification.updatedAt = new Date().toISOString();
+		return notification;
+	},
+
+	async markAllNotificationsRead(userId) {
+		await new Promise((resolve) => setTimeout(resolve, 10));
+		const now = new Date().toISOString();
+		let updated = 0;
+		for (const notification of notifications) {
+			if (notification.userId === userId && !notification.read) {
+				notification.read = true;
+				notification.updatedAt = now;
+				updated += 1;
+			}
+		}
+		return { updated };
+	},
+
 	async createTeam({ name }) {
 		await new Promise((resolve) => setTimeout(resolve, 10));
-		const id = String(Math.max(...teams.map((t) => Number.parseInt(t.id, 10))) + 1);
+		const id = String(
+			Math.max(...teams.map((t) => Number.parseInt(t.id, 10))) + 1,
+		);
 		const now = new Date().toISOString();
 		const team = { id, name, members: [], createdAt: now, updatedAt: now };
 		teams.push(team);
@@ -218,6 +343,8 @@ const db = {
 		users.push(...initialUsers.map((u) => ({ ...u })));
 		teams.length = 0;
 		teams.push(...initialTeams.map((t) => ({ ...t, members: [...t.members] })));
+		notifications.length = 0;
+		notifications.push(...initialNotifications.map((n) => ({ ...n })));
 	},
 };
 

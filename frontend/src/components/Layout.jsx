@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../App";
+import NotificationBell from "./NotificationBell";
 
 export default function Layout({ children }) {
 	const { user, logout } = useAuth();
@@ -24,7 +25,14 @@ export default function Layout({ children }) {
 						<span className="nav-icon">🏷️</span>
 						Teams
 					</NavLink>
+					<NavLink to="/notifications">
+						<span className="nav-icon">🔔</span>
+						Notifications
+					</NavLink>
 				</nav>
+				<div className="sidebar-notifications">
+					<NotificationBell />
+				</div>
 				<div style={{ padding: "16px 12px", borderTop: "1px solid #374151" }}>
 					<div
 						style={{

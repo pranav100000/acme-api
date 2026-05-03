@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import LoginPage from "./pages/LoginPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import TeamsPage from "./pages/TeamsPage";
 import UsersPage from "./pages/UsersPage";
 
@@ -47,6 +48,7 @@ export default function App() {
 					<Route path="/" element={<Dashboard />} />
 					<Route path="/users" element={<UsersPage />} />
 					<Route path="/teams" element={<TeamsPage />} />
+					<Route path="/notifications" element={<NotificationsPage />} />
 					<Route path="*" element={<Navigate to="/" replace />} />
 				</Routes>
 			</Layout>
