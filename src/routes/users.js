@@ -1,6 +1,11 @@
 const express = require("express");
 const db = require("../db");
-const { validateEmail, validateRequired } = require("../middleware/validate");
+const {
+	validateAllowedValues,
+	validateEmail,
+	validateOptionalEmail,
+	validateRequired,
+} = require("../middleware/validate");
 
 const router = express.Router();
 
@@ -60,14 +65,30 @@ router.post(
 	},
 );
 
+const allowedRoles = ["developer", "designer", "admin", "product_manager"];
+const allowedStatuses = ["active", "inactive", "pending"];
+
 // PATCH /api/users/:id - Update user
-router.patch("/:id", async (req, res) => {
-	const user = await db.updateUser(req.params.id, req.body);
-	if (!user) {
-		return res.status(404).json({ error: "User not found" });
-	}
-	res.json(user);
-});
+router.patch(
+	"/:id",
+	validateOptionalEmail,
+	validateAllowedValues("role", allowedRoles),
+	validateAllowedValues("status", allowedStatuses),
+	async (req, res) => {
+		if (req.body.email) {
+			const existing = await db.findUserByEmail(req.body.email);
+			if (existing && existing.id !== req.params.id) {
+				return res.status(409).json({ error: "Email already exists" });
+			}
+		}
+
+		const user = await db.updateUser(req.params.id, req.body);
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
+		res.json(user);
+	},
+);
 
 // DELETE /api/users/:id - Soft delete (set status to inactive)
 router.delete("/:id", async (req, res) => {

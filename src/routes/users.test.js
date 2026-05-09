@@ -131,6 +131,39 @@ describe("User Routes", () => {
 		assert.ok(body.error.includes("name"));
 	});
 
+	test("PATCH /api/users/:id returns 400 for invalid email", async () => {
+		const res = await fetch(`${baseUrl}/api/users/2`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ email: "not-an-email" }),
+		});
+		assert.strictEqual(res.status, 400);
+		const body = await res.json();
+		assert.strictEqual(body.error, "Invalid email format");
+	});
+
+	test("PATCH /api/users/:id returns 409 for duplicate email", async () => {
+		const res = await fetch(`${baseUrl}/api/users/2`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ email: "alice@acme.com" }),
+		});
+		assert.strictEqual(res.status, 409);
+		const body = await res.json();
+		assert.strictEqual(body.error, "Email already exists");
+	});
+
+	test("PATCH /api/users/:id returns 400 for invalid status", async () => {
+		const res = await fetch(`${baseUrl}/api/users/2`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ status: "archived" }),
+		});
+		assert.strictEqual(res.status, 400);
+		const body = await res.json();
+		assert.ok(body.error.includes("Invalid status"));
+	});
+
 	test("PATCH /api/users/:id updates a user", async () => {
 		const res = await fetch(`${baseUrl}/api/users/2`, {
 			method: "PATCH",
