@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import * as api from "../api";
-import Modal from "../components/Modal";
+import AddMemberModal from "../components/AddMemberModal";
+import CreateTeamModal from "../components/CreateTeamModal";
+import { useFlash } from "../hooks/useFlash";
 
 export default function TeamsPage() {
 	const [teams, setTeams] = useState([]);
 	const [users, setUsers] = useState([]);
 	const [teamMembers, setTeamMembers] = useState({});
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
-	const [success, setSuccess] = useState("");
+	const [loadError, setLoadError] = useState("");
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [addMemberTeam, setAddMemberTeam] = useState(null);
+	const [flashError, showFlashError] = useFlash();
+	const [success, showSuccess] = useFlash();
 
 	const loadData = useCallback(async () => {
 		try {
@@ -21,7 +24,6 @@ export default function TeamsPage() {
 			setTeams(teamsData);
 			setUsers(usersData);
 
-			// Load members for each team
 			const membersMap = {};
 			await Promise.all(
 				teamsData.map(async (team) => {
@@ -35,7 +37,7 @@ export default function TeamsPage() {
 			);
 			setTeamMembers(membersMap);
 		} catch {
-			setError("Failed to load teams");
+			setLoadError("Failed to load teams");
 		} finally {
 			setLoading(false);
 		}
@@ -49,12 +51,10 @@ export default function TeamsPage() {
 		if (!window.confirm(`Remove ${userName} from this team?`)) return;
 		try {
 			await api.removeTeamMember(teamId, userId);
-			setSuccess(`${userName} removed from team`);
+			showSuccess(`${userName} removed from team`);
 			loadData();
-			setTimeout(() => setSuccess(""), 3000);
 		} catch (err) {
-			setError(err.message);
-			setTimeout(() => setError(""), 3000);
+			showFlashError(err.message);
 		}
 	};
 
@@ -86,7 +86,8 @@ export default function TeamsPage() {
 				</button>
 			</div>
 			<div className="page-body">
-				{error && <div className="alert alert-error">{error}</div>}
+				{loadError && <div className="alert alert-error">{loadError}</div>}
+				{flashError && <div className="alert alert-error">{flashError}</div>}
 				{success && <div className="alert alert-success">{success}</div>}
 
 				{teams.length === 0 ? (
@@ -200,8 +201,7 @@ export default function TeamsPage() {
 					onCreated={() => {
 						setShowCreateModal(false);
 						loadData();
-						setSuccess("Team created successfully");
-						setTimeout(() => setSuccess(""), 3000);
+						showSuccess("Team created successfully");
 					}}
 				/>
 			)}
@@ -215,140 +215,10 @@ export default function TeamsPage() {
 					onAdded={() => {
 						setAddMemberTeam(null);
 						loadData();
-						setSuccess("Member added successfully");
-						setTimeout(() => setSuccess(""), 3000);
+						showSuccess("Member added successfully");
 					}}
 				/>
 			)}
 		</>
-	);
-}
-
-function CreateTeamModal({ onClose, onCreated }) {
-	const [name, setName] = useState("");
-	const [error, setError] = useState("");
-	const [loading, setLoading] = useState(false);
-
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setError("");
-		setLoading(true);
-		try {
-			await api.createTeam({ name });
-			onCreated();
-		} catch (err) {
-			setError(err.message);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	return (
-		<Modal title="Create Team" onClose={onClose}>
-			{error && <div className="alert alert-error">{error}</div>}
-			<form onSubmit={handleSubmit}>
-				<div className="form-group">
-					<label htmlFor="team-name">Team Name</label>
-					<input
-						id="team-name"
-						className="form-control"
-						value={name}
-						onChange={(e) => setName(e.target.value)}
-						required
-						placeholder="e.g. Marketing"
-					/>
-				</div>
-				<div className="form-actions">
-					<button type="button" className="btn btn-secondary" onClick={onClose}>
-						Cancel
-					</button>
-					<button type="submit" className="btn btn-primary" disabled={loading}>
-						{loading ? "Creating..." : "Create Team"}
-					</button>
-				</div>
-			</form>
-		</Modal>
-	);
-}
-
-function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
-	const [selectedUserId, setSelectedUserId] = useState("");
-	const [error, setError] = useState("");
-	const [loading, setLoading] = useState(false);
-
-	const currentMemberIds = currentMembers.filter(Boolean).map((m) => m.id);
-	const availableUsers = users.filter(
-		(u) => !currentMemberIds.includes(u.id) && u.status === "active",
-	);
-
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		if (!selectedUserId) return;
-		setError("");
-		setLoading(true);
-		try {
-			await api.addTeamMember(team.id, selectedUserId);
-			onAdded();
-		} catch (err) {
-			setError(err.message);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	return (
-		<Modal title={`Add Member to ${team.name}`} onClose={onClose}>
-			{error && <div className="alert alert-error">{error}</div>}
-			{availableUsers.length === 0 ? (
-				<div style={{ textAlign: "center", padding: "24px", color: "#6b7280" }}>
-					<p>All active users are already members of this team.</p>
-					<div className="form-actions" style={{ justifyContent: "center" }}>
-						<button
-							type="button"
-							className="btn btn-secondary"
-							onClick={onClose}
-						>
-							Close
-						</button>
-					</div>
-				</div>
-			) : (
-				<form onSubmit={handleSubmit}>
-					<div className="form-group">
-						<label htmlFor="team-member-user">Select User</label>
-						<select
-							id="team-member-user"
-							className="form-control"
-							value={selectedUserId}
-							onChange={(e) => setSelectedUserId(e.target.value)}
-							required
-						>
-							<option value="">Choose a user...</option>
-							{availableUsers.map((user) => (
-								<option key={user.id} value={user.id}>
-									{user.name} ({user.email}) - {user.role.replace("_", " ")}
-								</option>
-							))}
-						</select>
-					</div>
-					<div className="form-actions">
-						<button
-							type="button"
-							className="btn btn-secondary"
-							onClick={onClose}
-						>
-							Cancel
-						</button>
-						<button
-							type="submit"
-							className="btn btn-primary"
-							disabled={loading || !selectedUserId}
-						>
-							{loading ? "Adding..." : "Add Member"}
-						</button>
-					</div>
-				</form>
-			)}
-		</Modal>
 	);
 }

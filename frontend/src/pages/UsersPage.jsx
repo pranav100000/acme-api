@@ -1,22 +1,25 @@
 import { useCallback, useEffect, useState } from "react";
 import * as api from "../api";
-import Modal from "../components/Modal";
+import CreateUserModal from "../components/CreateUserModal";
+import EditUserModal from "../components/EditUserModal";
+import { useFlash } from "../hooks/useFlash";
 
 export default function UsersPage() {
 	const [users, setUsers] = useState([]);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
-	const [success, setSuccess] = useState("");
+	const [loadError, setLoadError] = useState("");
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [editingUser, setEditingUser] = useState(null);
 	const [filter, setFilter] = useState("all");
+	const [flashError, showFlashError] = useFlash();
+	const [success, showSuccess] = useFlash();
 
 	const loadUsers = useCallback(async () => {
 		try {
 			const data = await api.getUsers();
 			setUsers(data);
 		} catch {
-			setError("Failed to load users");
+			setLoadError("Failed to load users");
 		} finally {
 			setLoading(false);
 		}
@@ -35,12 +38,10 @@ export default function UsersPage() {
 			return;
 		try {
 			await api.deleteUser(user.id);
-			setSuccess(`${user.name} has been deactivated`);
+			showSuccess(`${user.name} has been deactivated`);
 			loadUsers();
-			setTimeout(() => setSuccess(""), 3000);
 		} catch (err) {
-			setError(err.message);
-			setTimeout(() => setError(""), 3000);
+			showFlashError(err.message);
 		}
 	};
 
@@ -75,7 +76,8 @@ export default function UsersPage() {
 				</button>
 			</div>
 			<div className="page-body">
-				{error && <div className="alert alert-error">{error}</div>}
+				{loadError && <div className="alert alert-error">{loadError}</div>}
+				{flashError && <div className="alert alert-error">{flashError}</div>}
 				{success && <div className="alert alert-success">{success}</div>}
 
 				<div style={{ marginBottom: "16px", display: "flex", gap: "8px" }}>
@@ -201,8 +203,7 @@ export default function UsersPage() {
 					onCreated={() => {
 						setShowCreateModal(false);
 						loadUsers();
-						setSuccess("User created successfully");
-						setTimeout(() => setSuccess(""), 3000);
+						showSuccess("User created successfully");
 					}}
 				/>
 			)}
@@ -214,173 +215,10 @@ export default function UsersPage() {
 					onUpdated={() => {
 						setEditingUser(null);
 						loadUsers();
-						setSuccess("User updated successfully");
-						setTimeout(() => setSuccess(""), 3000);
+						showSuccess("User updated successfully");
 					}}
 				/>
 			)}
 		</>
-	);
-}
-
-function CreateUserModal({ onClose, onCreated }) {
-	const [form, setForm] = useState({ name: "", email: "", role: "developer" });
-	const [error, setError] = useState("");
-	const [loading, setLoading] = useState(false);
-
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setError("");
-		setLoading(true);
-		try {
-			await api.createUser(form);
-			onCreated();
-		} catch (err) {
-			setError(err.message);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	return (
-		<Modal title="Create User" onClose={onClose}>
-			{error && <div className="alert alert-error">{error}</div>}
-			<form onSubmit={handleSubmit}>
-				<div className="form-group">
-					<label htmlFor="create-user-name">Name</label>
-					<input
-						id="create-user-name"
-						className="form-control"
-						value={form.name}
-						onChange={(e) => setForm({ ...form, name: e.target.value })}
-						required
-						placeholder="John Doe"
-					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="create-user-email">Email</label>
-					<input
-						id="create-user-email"
-						className="form-control"
-						type="email"
-						value={form.email}
-						onChange={(e) => setForm({ ...form, email: e.target.value })}
-						required
-						placeholder="john@acme.com"
-					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="create-user-role">Role</label>
-					<select
-						id="create-user-role"
-						className="form-control"
-						value={form.role}
-						onChange={(e) => setForm({ ...form, role: e.target.value })}
-					>
-						<option value="developer">Developer</option>
-						<option value="designer">Designer</option>
-						<option value="admin">Admin</option>
-						<option value="product_manager">Product Manager</option>
-					</select>
-				</div>
-				<div className="form-actions">
-					<button type="button" className="btn btn-secondary" onClick={onClose}>
-						Cancel
-					</button>
-					<button type="submit" className="btn btn-primary" disabled={loading}>
-						{loading ? "Creating..." : "Create User"}
-					</button>
-				</div>
-			</form>
-		</Modal>
-	);
-}
-
-function EditUserModal({ user, onClose, onUpdated }) {
-	const [form, setForm] = useState({
-		name: user.name,
-		email: user.email,
-		role: user.role,
-		status: user.status,
-	});
-	const [error, setError] = useState("");
-	const [loading, setLoading] = useState(false);
-
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setError("");
-		setLoading(true);
-		try {
-			await api.updateUser(user.id, form);
-			onUpdated();
-		} catch (err) {
-			setError(err.message);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	return (
-		<Modal title={`Edit ${user.name}`} onClose={onClose}>
-			{error && <div className="alert alert-error">{error}</div>}
-			<form onSubmit={handleSubmit}>
-				<div className="form-group">
-					<label htmlFor="edit-user-name">Name</label>
-					<input
-						id="edit-user-name"
-						className="form-control"
-						value={form.name}
-						onChange={(e) => setForm({ ...form, name: e.target.value })}
-						required
-					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="edit-user-email">Email</label>
-					<input
-						id="edit-user-email"
-						className="form-control"
-						type="email"
-						value={form.email}
-						onChange={(e) => setForm({ ...form, email: e.target.value })}
-						required
-					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="edit-user-role">Role</label>
-					<select
-						id="edit-user-role"
-						className="form-control"
-						value={form.role}
-						onChange={(e) => setForm({ ...form, role: e.target.value })}
-					>
-						<option value="developer">Developer</option>
-						<option value="designer">Designer</option>
-						<option value="admin">Admin</option>
-						<option value="product_manager">Product Manager</option>
-					</select>
-				</div>
-				<div className="form-group">
-					<label htmlFor="edit-user-status">Status</label>
-					<select
-						id="edit-user-status"
-						className="form-control"
-						value={form.status}
-						onChange={(e) => setForm({ ...form, status: e.target.value })}
-					>
-						<option value="active">Active</option>
-						<option value="inactive">Inactive</option>
-						<option value="pending">Pending</option>
-					</select>
-				</div>
-				<div className="form-actions">
-					<button type="button" className="btn btn-secondary" onClick={onClose}>
-						Cancel
-					</button>
-					<button type="submit" className="btn btn-primary" disabled={loading}>
-						{loading ? "Saving..." : "Save Changes"}
-					</button>
-				</div>
-			</form>
-		</Modal>
 	);
 }

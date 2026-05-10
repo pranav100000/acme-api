@@ -52,4 +52,7 @@ export const login = (email) =>
 export const logout = () => request("/auth/logout", { method: "POST" });
 
 // Health
-export const healthCheck = () => fetch("/health").then((r) => r.json());
+export const healthCheck = () =>
+	fetch("/health")
+		.then((r) => r.json())
+		.catch(() => ({ status: "error" }));
