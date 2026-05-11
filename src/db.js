@@ -1,3 +1,6 @@
+const DELAY_MS = 10;
+const USER_UPDATABLE_FIELDS = ["email", "name", "role", "status"];
+
 const users = [
 	{
 		id: "1",
@@ -104,120 +107,135 @@ const teams = [
 	},
 ];
 
-const initialUsers = users.map((u) => ({ ...u }));
-const initialTeams = teams.map((t) => ({ ...t, members: [...t.members] }));
+const cloneUser = (user) => ({ ...user });
+const cloneTeam = (team) => ({ ...team, members: [...team.members] });
+const now = () => new Date().toISOString();
+const waitForLatency = () =>
+	new Promise((resolve) => setTimeout(resolve, DELAY_MS));
+const nextId = (records) =>
+	String(
+		Math.max(...records.map((record) => Number.parseInt(record.id, 10))) + 1,
+	);
+const applyUpdates = (target, updates, allowedFields) => {
+	for (const field of allowedFields) {
+		if (updates[field] !== undefined) {
+			target[field] = updates[field];
+		}
+	}
+};
+
+const initialUsers = users.map(cloneUser);
+const initialTeams = teams.map(cloneTeam);
 
 const db = {
 	async findUser(id) {
-		await new Promise((resolve) => setTimeout(resolve, 10));
-		return users.find((u) => u.id === id) || null;
+		await waitForLatency();
+		return users.find((user) => user.id === id) || null;
 	},
 
 	async findUserByEmail(email) {
-		await new Promise((resolve) => setTimeout(resolve, 10));
-		return users.find((u) => u.email === email) || null;
+		await waitForLatency();
+		return users.find((user) => user.email === email) || null;
 	},
 
 	async getAllUsers() {
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForLatency();
 		return users;
 	},
 
 	async createUser({ email, name, role }) {
-		await new Promise((resolve) => setTimeout(resolve, 10));
-		const id = String(Math.max(...users.map((u) => Number.parseInt(u.id, 10))) + 1);
-		const now = new Date().toISOString();
+		await waitForLatency();
+		const timestamp = now();
 		const user = {
-			id,
+			id: nextId(users),
 			email,
 			name,
 			role: role || "developer",
 			status: "active",
-			createdAt: now,
-			updatedAt: now,
+			createdAt: timestamp,
+			updatedAt: timestamp,
 		};
 		users.push(user);
 		return user;
 	},
 
 	async updateUser(id, updates) {
-		await new Promise((resolve) => setTimeout(resolve, 10));
-		const user = users.find((u) => u.id === id);
+		await waitForLatency();
+		const user = users.find((candidate) => candidate.id === id);
 		if (!user) return null;
-		const allowed = ["email", "name", "role", "status"];
-		for (const key of allowed) {
-			if (updates[key] !== undefined) {
-				user[key] = updates[key];
-			}
-		}
-		user.updatedAt = new Date().toISOString();
+		applyUpdates(user, updates, USER_UPDATABLE_FIELDS);
+		user.updatedAt = now();
 		return user;
 	},
 
 	async deleteUser(id) {
-		await new Promise((resolve) => setTimeout(resolve, 10));
-		const user = users.find((u) => u.id === id);
+		await waitForLatency();
+		const user = users.find((candidate) => candidate.id === id);
 		if (!user) return null;
 		user.status = "inactive";
-		user.updatedAt = new Date().toISOString();
+		user.updatedAt = now();
 		return user;
 	},
 
 	async findTeam(id) {
-		await new Promise((resolve) => setTimeout(resolve, 10));
-		return teams.find((t) => t.id === id) || null;
+		await waitForLatency();
+		return teams.find((team) => team.id === id) || null;
 	},
 
 	async getAllTeams() {
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await waitForLatency();
 		return teams;
 	},
 
 	async getTeamMembers(teamId) {
-		await new Promise((resolve) => setTimeout(resolve, 10));
-		const team = teams.find((t) => t.id === teamId);
+		await waitForLatency();
+		const team = teams.find((candidate) => candidate.id === teamId);
 		if (!team) return null;
-		return team.members.map((memberId) => users.find((u) => u.id === memberId));
+		return team.members.map((memberId) =>
+			users.find((user) => user.id === memberId),
+		);
 	},
 
 	async createTeam({ name }) {
-		await new Promise((resolve) => setTimeout(resolve, 10));
-		const id = String(Math.max(...teams.map((t) => Number.parseInt(t.id, 10))) + 1);
-		const now = new Date().toISOString();
-		const team = { id, name, members: [], createdAt: now, updatedAt: now };
+		await waitForLatency();
+		const timestamp = now();
+		const team = {
+			id: nextId(teams),
+			name,
+			members: [],
+			createdAt: timestamp,
+			updatedAt: timestamp,
+		};
 		teams.push(team);
 		return team;
 	},
 
 	async addTeamMember(teamId, userId) {
-		await new Promise((resolve) => setTimeout(resolve, 10));
-		const team = teams.find((t) => t.id === teamId);
-		const user = users.find((u) => u.id === userId);
+		await waitForLatency();
+		const team = teams.find((candidate) => candidate.id === teamId);
+		const user = users.find((candidate) => candidate.id === userId);
 		if (!team || !user) return null;
 		if (!team.members.includes(userId)) {
 			team.members.push(userId);
-			team.updatedAt = new Date().toISOString();
+			team.updatedAt = now();
 		}
 		return team;
 	},
 
 	async removeTeamMember(teamId, userId) {
-		await new Promise((resolve) => setTimeout(resolve, 10));
-		const team = teams.find((t) => t.id === teamId);
+		await waitForLatency();
+		const team = teams.find((candidate) => candidate.id === teamId);
 		if (!team) return null;
-		team.members = team.members.filter((id) => id !== userId);
-		team.updatedAt = new Date().toISOString();
+		team.members = team.members.filter((memberId) => memberId !== userId);
+		team.updatedAt = now();
 		return team;
 	},
 
-	/**
-	 * Resets database to initial state (for testing)
-	 */
 	_reset() {
 		users.length = 0;
-		users.push(...initialUsers.map((u) => ({ ...u })));
+		users.push(...initialUsers.map(cloneUser));
 		teams.length = 0;
-		teams.push(...initialTeams.map((t) => ({ ...t, members: [...t.members] })));
+		teams.push(...initialTeams.map(cloneTeam));
 	},
 };
 

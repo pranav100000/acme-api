@@ -1,6 +1,12 @@
 import { useState } from "react";
-import { useAuth } from "../App";
 import * as api from "../api";
+import { useAuth } from "../context/AuthContext";
+
+const demoAccounts = [
+	{ email: "alice@acme.com", role: "admin" },
+	{ email: "bob@acme.com", role: "developer" },
+	{ email: "frank@acme.com", role: "product manager" },
+];
 
 export default function LoginPage() {
 	const { login } = useAuth();
@@ -8,8 +14,8 @@ export default function LoginPage() {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
+	const handleSubmit = async (event) => {
+		event.preventDefault();
 		setError("");
 		setLoading(true);
 		try {
@@ -39,46 +45,27 @@ export default function LoginPage() {
 							className="form-control"
 							placeholder="alice@acme.com"
 							value={email}
-							onChange={(e) => setEmail(e.target.value)}
+							onChange={(event) => setEmail(event.target.value)}
 							required
 						/>
 					</div>
 					<button
 						type="submit"
-						className="btn btn-primary"
-						style={{
-							width: "100%",
-							justifyContent: "center",
-							padding: "10px 16px",
-						}}
+						className="btn btn-primary btn-block"
 						disabled={loading}
 					>
 						{loading ? "Signing in..." : "Sign in"}
 					</button>
 				</form>
 
-				<div
-					style={{
-						marginTop: "24px",
-						padding: "16px",
-						background: "#f9fafb",
-						borderRadius: "8px",
-						fontSize: "13px",
-						color: "#6b7280",
-					}}
-				>
-					<strong style={{ color: "#374151" }}>Demo accounts:</strong>
-					<div
-						style={{
-							marginTop: "8px",
-							display: "flex",
-							flexDirection: "column",
-							gap: "4px",
-						}}
-					>
-						<code>alice@acme.com</code> (admin)
-						<code>bob@acme.com</code> (developer)
-						<code>frank@acme.com</code> (product manager)
+				<div className="demo-accounts">
+					<strong className="demo-accounts-title">Demo accounts:</strong>
+					<div className="demo-accounts-list">
+						{demoAccounts.map((account) => (
+							<div key={account.email}>
+								<code>{account.email}</code> ({account.role})
+							</div>
+						))}
 					</div>
 				</div>
 			</div>
