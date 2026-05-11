@@ -1,93 +1,91 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import * as api from "../api";
+import AlertStack from "../components/AlertStack";
+import LoadingState from "../components/LoadingState";
 import Modal from "../components/Modal";
+import PageHeader from "../components/PageHeader";
+import UserAvatar from "../components/UserAvatar";
+import { useAsyncData } from "../hooks/useAsyncData";
+import { useFlashMessage } from "../hooks/useFlashMessage";
+import { formatDate, formatRole } from "../utils/formatters";
+
+async function loadTeamsData() {
+	const [teams, users] = await Promise.all([api.getTeams(), api.getUsers()]);
+	const memberEntries = await Promise.all(
+		teams.map(async (team) => {
+			try {
+				return [team.id, await api.getTeamMembers(team.id)];
+			} catch {
+				return [team.id, []];
+			}
+		}),
+	);
+
+	return {
+		teamMembers: Object.fromEntries(memberEntries),
+		teams,
+		users,
+	};
+}
 
 export default function TeamsPage() {
-	const [teams, setTeams] = useState([]);
-	const [users, setUsers] = useState([]);
-	const [teamMembers, setTeamMembers] = useState({});
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
-	const [success, setSuccess] = useState("");
+	const { data, loading, reload } = useAsyncData(
+		loadTeamsData,
+		{
+			teamMembers: {},
+			teams: [],
+			users: [],
+		},
+		"Failed to load teams",
+	);
+	const error = useFlashMessage();
+	const success = useFlashMessage();
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [addMemberTeam, setAddMemberTeam] = useState(null);
 
-	const loadData = useCallback(async () => {
-		try {
-			const [teamsData, usersData] = await Promise.all([
-				api.getTeams(),
-				api.getUsers(),
-			]);
-			setTeams(teamsData);
-			setUsers(usersData);
-
-			// Load members for each team
-			const membersMap = {};
-			await Promise.all(
-				teamsData.map(async (team) => {
-					try {
-						const members = await api.getTeamMembers(team.id);
-						membersMap[team.id] = members;
-					} catch {
-						membersMap[team.id] = [];
-					}
-				}),
-			);
-			setTeamMembers(membersMap);
-		} catch {
-			setError("Failed to load teams");
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	useEffect(() => {
-		loadData();
-	}, [loadData]);
+	const refreshWithSuccess = useCallback(
+		async (message, onComplete) => {
+			await reload();
+			onComplete();
+			success.showMessage(message);
+		},
+		[reload, success],
+	);
 
 	const handleRemoveMember = async (teamId, userId, userName) => {
-		if (!window.confirm(`Remove ${userName} from this team?`)) return;
+		if (!window.confirm(`Remove ${userName} from this team?`)) {
+			return;
+		}
 		try {
 			await api.removeTeamMember(teamId, userId);
-			setSuccess(`${userName} removed from team`);
-			loadData();
-			setTimeout(() => setSuccess(""), 3000);
+			await refreshWithSuccess(`${userName} removed from team`, () => {});
 		} catch (err) {
-			setError(err.message);
-			setTimeout(() => setError(""), 3000);
+			error.showMessage(err.message);
 		}
 	};
 
 	if (loading) {
-		return (
-			<>
-				<div className="page-header">
-					<h2>Teams</h2>
-				</div>
-				<div className="page-body">
-					<div className="loading">
-						<div className="spinner"></div>
-					</div>
-				</div>
-			</>
-		);
+		return <LoadingState title="Teams" />;
 	}
+
+	const { teamMembers, teams, users } = data;
 
 	return (
 		<>
-			<div className="page-header">
-				<h2>Teams</h2>
-				<button
-					type="button"
-					className="btn btn-primary"
-					onClick={() => setShowCreateModal(true)}
-				>
-					+ Create Team
-				</button>
-			</div>
+			<PageHeader
+				title="Teams"
+				actions={
+					<button
+						type="button"
+						className="btn btn-primary"
+						onClick={() => setShowCreateModal(true)}
+					>
+						+ Create Team
+					</button>
+				}
+			/>
 			<div className="page-body">
-				{error && <div className="alert alert-error">{error}</div>}
-				{success && <div className="alert alert-success">{success}</div>}
+				<AlertStack error={error.message} success={success.message} />
 
 				{teams.length === 0 ? (
 					<div className="empty-state">
@@ -102,27 +100,18 @@ export default function TeamsPage() {
 								<div key={team.id} className="team-card">
 									<div className="team-card-header">
 										<h3>{team.name}</h3>
-										<span style={{ fontSize: "13px", color: "#6b7280" }}>
+										<span className="table-secondary">
 											{members.length} member{members.length !== 1 ? "s" : ""}
 										</span>
 									</div>
 									<div className="team-card-body">
 										<div className="team-meta">
-											Created {new Date(team.createdAt).toLocaleDateString()} ·
-											Updated {new Date(team.updatedAt).toLocaleDateString()}
+											Created {formatDate(team.createdAt)} · Updated{" "}
+											{formatDate(team.updatedAt)}
 										</div>
 
 										{members.length === 0 ? (
-											<div
-												style={{
-													padding: "16px",
-													textAlign: "center",
-													color: "#9ca3af",
-													fontSize: "14px",
-												}}
-											>
-												No members yet
-											</div>
+											<div className="empty-copy">No members yet</div>
 										) : (
 											<div className="member-list">
 												{members.map(
@@ -130,34 +119,19 @@ export default function TeamsPage() {
 														member && (
 															<div key={member.id} className="member-item">
 																<div className="member-info">
-																	<div className="member-avatar">
-																		{member.name
-																			.split(" ")
-																			.map((n) => n[0])
-																			.join("")}
-																	</div>
+																	<UserAvatar name={member.name} size="sm" />
 																	<div>
-																		<div
-																			style={{
-																				fontWeight: 500,
-																				fontSize: "14px",
-																			}}
-																		>
+																		<div className="table-primary">
 																			{member.name}
 																		</div>
-																		<div
-																			style={{
-																				fontSize: "12px",
-																				color: "#6b7280",
-																			}}
-																		>
-																			{member.role.replace("_", " ")}
+																		<div className="table-secondary">
+																			{formatRole(member.role)}
 																		</div>
 																	</div>
 																</div>
 																<button
 																	type="button"
-																	className="btn-icon"
+																	className="icon-button"
 																	title="Remove member"
 																	onClick={() =>
 																		handleRemoveMember(
@@ -166,7 +140,6 @@ export default function TeamsPage() {
 																			member.name,
 																		)
 																	}
-																	style={{ fontSize: "16px" }}
 																>
 																	✕
 																</button>
@@ -176,11 +149,10 @@ export default function TeamsPage() {
 											</div>
 										)}
 
-										<div style={{ marginTop: "16px" }}>
+										<div className="team-actions">
 											<button
 												type="button"
-												className="btn btn-secondary btn-sm"
-												style={{ width: "100%", justifyContent: "center" }}
+												className="btn btn-secondary btn-sm btn-full"
 												onClick={() => setAddMemberTeam(team)}
 											>
 												+ Add Member
@@ -197,12 +169,11 @@ export default function TeamsPage() {
 			{showCreateModal && (
 				<CreateTeamModal
 					onClose={() => setShowCreateModal(false)}
-					onCreated={() => {
-						setShowCreateModal(false);
-						loadData();
-						setSuccess("Team created successfully");
-						setTimeout(() => setSuccess(""), 3000);
-					}}
+					onCreated={() =>
+						refreshWithSuccess("Team created successfully", () =>
+							setShowCreateModal(false),
+						)
+					}
 				/>
 			)}
 
@@ -212,12 +183,11 @@ export default function TeamsPage() {
 					users={users}
 					currentMembers={teamMembers[addMemberTeam.id] || []}
 					onClose={() => setAddMemberTeam(null)}
-					onAdded={() => {
-						setAddMemberTeam(null);
-						loadData();
-						setSuccess("Member added successfully");
-						setTimeout(() => setSuccess(""), 3000);
-					}}
+					onAdded={() =>
+						refreshWithSuccess("Member added successfully", () =>
+							setAddMemberTeam(null),
+						)
+					}
 				/>
 			)}
 		</>
@@ -229,13 +199,13 @@ function CreateTeamModal({ onClose, onCreated }) {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
+	const handleSubmit = async (event) => {
+		event.preventDefault();
 		setError("");
 		setLoading(true);
 		try {
 			await api.createTeam({ name });
-			onCreated();
+			await onCreated();
 		} catch (err) {
 			setError(err.message);
 		} finally {
@@ -253,7 +223,7 @@ function CreateTeamModal({ onClose, onCreated }) {
 						id="team-name"
 						className="form-control"
 						value={name}
-						onChange={(e) => setName(e.target.value)}
+						onChange={(event) => setName(event.target.value)}
 						required
 						placeholder="e.g. Marketing"
 					/>
@@ -276,19 +246,21 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	const currentMemberIds = currentMembers.filter(Boolean).map((m) => m.id);
+	const currentMemberIds = currentMembers
+		.filter(Boolean)
+		.map((member) => member.id);
 	const availableUsers = users.filter(
-		(u) => !currentMemberIds.includes(u.id) && u.status === "active",
+		(user) => !currentMemberIds.includes(user.id) && user.status === "active",
 	);
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
+	const handleSubmit = async (event) => {
+		event.preventDefault();
 		if (!selectedUserId) return;
 		setError("");
 		setLoading(true);
 		try {
 			await api.addTeamMember(team.id, selectedUserId);
-			onAdded();
+			await onAdded();
 		} catch (err) {
 			setError(err.message);
 		} finally {
@@ -300,9 +272,9 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
 		<Modal title={`Add Member to ${team.name}`} onClose={onClose}>
 			{error && <div className="alert alert-error">{error}</div>}
 			{availableUsers.length === 0 ? (
-				<div style={{ textAlign: "center", padding: "24px", color: "#6b7280" }}>
+				<div className="empty-state compact-empty-state">
 					<p>All active users are already members of this team.</p>
-					<div className="form-actions" style={{ justifyContent: "center" }}>
+					<div className="form-actions centered-actions">
 						<button
 							type="button"
 							className="btn btn-secondary"
@@ -320,13 +292,13 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
 							id="team-member-user"
 							className="form-control"
 							value={selectedUserId}
-							onChange={(e) => setSelectedUserId(e.target.value)}
+							onChange={(event) => setSelectedUserId(event.target.value)}
 							required
 						>
 							<option value="">Choose a user...</option>
 							{availableUsers.map((user) => (
 								<option key={user.id} value={user.id}>
-									{user.name} ({user.email}) - {user.role.replace("_", " ")}
+									{user.name} ({user.email}) - {formatRole(user.role)}
 								</option>
 							))}
 						</select>

@@ -1,94 +1,95 @@
-import { useCallback, useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import * as api from "../api";
+import AlertStack from "../components/AlertStack";
+import LoadingState from "../components/LoadingState";
 import Modal from "../components/Modal";
+import PageHeader from "../components/PageHeader";
+import UserAvatar from "../components/UserAvatar";
+import { useAsyncData } from "../hooks/useAsyncData";
+import { useFlashMessage } from "../hooks/useFlashMessage";
+import { formatDate, formatRole } from "../utils/formatters";
+
+const ROLE_OPTIONS = [
+	{ value: "developer", label: "Developer" },
+	{ value: "designer", label: "Designer" },
+	{ value: "admin", label: "Admin" },
+	{ value: "product_manager", label: "Product Manager" },
+];
+
+const STATUS_OPTIONS = [
+	{ value: "active", label: "Active" },
+	{ value: "inactive", label: "Inactive" },
+	{ value: "pending", label: "Pending" },
+];
 
 export default function UsersPage() {
-	const [users, setUsers] = useState([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
-	const [success, setSuccess] = useState("");
+	const {
+		data: users,
+		loading,
+		reload,
+	} = useAsyncData(api.getUsers, [], "Failed to load users");
+	const error = useFlashMessage();
+	const success = useFlashMessage();
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [editingUser, setEditingUser] = useState(null);
 	const [filter, setFilter] = useState("all");
 
-	const loadUsers = useCallback(async () => {
-		try {
-			const data = await api.getUsers();
-			setUsers(data);
-		} catch {
-			setError("Failed to load users");
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	useEffect(() => {
-		loadUsers();
-	}, [loadUsers]);
+	const filteredUsers = useMemo(
+		() =>
+			filter === "all" ? users : users.filter((user) => user.status === filter),
+		[filter, users],
+	);
 
 	const handleDelete = async (user) => {
 		if (
 			!window.confirm(
 				`Deactivate ${user.name}? This will set their status to inactive.`,
 			)
-		)
+		) {
 			return;
+		}
+
 		try {
 			await api.deleteUser(user.id);
-			setSuccess(`${user.name} has been deactivated`);
-			loadUsers();
-			setTimeout(() => setSuccess(""), 3000);
+			success.showMessage(`${user.name} has been deactivated`);
+			await reload();
 		} catch (err) {
-			setError(err.message);
-			setTimeout(() => setError(""), 3000);
+			error.showMessage(err.message);
 		}
 	};
 
-	const filteredUsers =
-		filter === "all" ? users : users.filter((u) => u.status === filter);
-
 	if (loading) {
-		return (
-			<>
-				<div className="page-header">
-					<h2>Users</h2>
-				</div>
-				<div className="page-body">
-					<div className="loading">
-						<div className="spinner"></div>
-					</div>
-				</div>
-			</>
-		);
+		return <LoadingState title="Users" />;
 	}
 
 	return (
 		<>
-			<div className="page-header">
-				<h2>Users</h2>
-				<button
-					type="button"
-					className="btn btn-primary"
-					onClick={() => setShowCreateModal(true)}
-				>
-					+ Add User
-				</button>
-			</div>
+			<PageHeader
+				title="Users"
+				actions={
+					<button
+						type="button"
+						className="btn btn-primary"
+						onClick={() => setShowCreateModal(true)}
+					>
+						+ Add User
+					</button>
+				}
+			/>
 			<div className="page-body">
-				{error && <div className="alert alert-error">{error}</div>}
-				{success && <div className="alert alert-success">{success}</div>}
+				<AlertStack error={error.message} success={success.message} />
 
-				<div style={{ marginBottom: "16px", display: "flex", gap: "8px" }}>
-					{["all", "active", "inactive", "pending"].map((f) => (
+				<div className="filter-row">
+					{["all", "active", "inactive", "pending"].map((value) => (
 						<button
 							type="button"
-							key={f}
-							className={`btn btn-sm ${filter === f ? "btn-primary" : "btn-secondary"}`}
-							onClick={() => setFilter(f)}
+							key={value}
+							className={`btn btn-sm ${filter === value ? "btn-primary" : "btn-secondary"}`}
+							onClick={() => setFilter(value)}
 						>
-							{f.charAt(0).toUpperCase() + f.slice(1)}
-							{f !== "all" &&
-								` (${users.filter((u) => u.status === f).length})`}
+							{value.charAt(0).toUpperCase() + value.slice(1)}
+							{value !== "all" &&
+								` (${users.filter((user) => user.status === value).length})`}
 						</button>
 					))}
 				</div>
@@ -118,44 +119,17 @@ export default function UsersPage() {
 									filteredUsers.map((user) => (
 										<tr key={user.id}>
 											<td>
-												<div
-													style={{
-														display: "flex",
-														alignItems: "center",
-														gap: "12px",
-													}}
-												>
-													<div
-														style={{
-															width: "36px",
-															height: "36px",
-															borderRadius: "50%",
-															background: "#4f46e5",
-															color: "white",
-															display: "flex",
-															alignItems: "center",
-															justifyContent: "center",
-															fontSize: "13px",
-															fontWeight: "600",
-															flexShrink: 0,
-														}}
-													>
-														{user.name
-															.split(" ")
-															.map((n) => n[0])
-															.join("")}
-													</div>
+												<div className="entity-summary">
+													<UserAvatar name={user.name} />
 													<div>
-														<div style={{ fontWeight: 500 }}>{user.name}</div>
-														<div style={{ fontSize: "12px", color: "#6b7280" }}>
-															{user.email}
-														</div>
+														<div className="table-primary">{user.name}</div>
+														<div className="table-secondary">{user.email}</div>
 													</div>
 												</div>
 											</td>
 											<td>
 												<span className={`badge badge-${user.role}`}>
-													{user.role.replace("_", " ")}
+													{formatRole(user.role)}
 												</span>
 											</td>
 											<td>
@@ -163,11 +137,11 @@ export default function UsersPage() {
 													{user.status}
 												</span>
 											</td>
-											<td style={{ fontSize: "13px", color: "#6b7280" }}>
-												{new Date(user.createdAt).toLocaleDateString()}
+											<td className="table-secondary">
+												{formatDate(user.createdAt)}
 											</td>
 											<td>
-												<div style={{ display: "flex", gap: "4px" }}>
+												<div className="action-row">
 													<button
 														type="button"
 														className="btn btn-secondary btn-sm"
@@ -196,26 +170,37 @@ export default function UsersPage() {
 			</div>
 
 			{showCreateModal && (
-				<CreateUserModal
+				<UserModal
+					title="Create User"
+					initialForm={{ name: "", email: "", role: "developer" }}
+					submitLabel="Create User"
 					onClose={() => setShowCreateModal(false)}
-					onCreated={() => {
+					onSubmit={api.createUser}
+					onSuccess={async () => {
 						setShowCreateModal(false);
-						loadUsers();
-						setSuccess("User created successfully");
-						setTimeout(() => setSuccess(""), 3000);
+						await reload();
+						success.showMessage("User created successfully");
 					}}
 				/>
 			)}
 
 			{editingUser && (
-				<EditUserModal
-					user={editingUser}
+				<UserModal
+					title={`Edit ${editingUser.name}`}
+					initialForm={{
+						name: editingUser.name,
+						email: editingUser.email,
+						role: editingUser.role,
+						status: editingUser.status,
+					}}
+					submitLabel="Save Changes"
+					showStatus
 					onClose={() => setEditingUser(null)}
-					onUpdated={() => {
+					onSubmit={(form) => api.updateUser(editingUser.id, form)}
+					onSuccess={async () => {
 						setEditingUser(null);
-						loadUsers();
-						setSuccess("User updated successfully");
-						setTimeout(() => setSuccess(""), 3000);
+						await reload();
+						success.showMessage("User updated successfully");
 					}}
 				/>
 			)}
@@ -223,18 +208,30 @@ export default function UsersPage() {
 	);
 }
 
-function CreateUserModal({ onClose, onCreated }) {
-	const [form, setForm] = useState({ name: "", email: "", role: "developer" });
+function UserModal({
+	title,
+	initialForm,
+	submitLabel,
+	showStatus = false,
+	onClose,
+	onSubmit,
+	onSuccess,
+}) {
+	const [form, setForm] = useState(initialForm);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
+	const handleChange = (field) => (event) => {
+		setForm((current) => ({ ...current, [field]: event.target.value }));
+	};
+
+	const handleSubmit = async (event) => {
+		event.preventDefault();
 		setError("");
 		setLoading(true);
 		try {
-			await api.createUser(form);
-			onCreated();
+			await onSubmit(form);
+			await onSuccess();
 		} catch (err) {
 			setError(err.message);
 		} finally {
@@ -243,52 +240,64 @@ function CreateUserModal({ onClose, onCreated }) {
 	};
 
 	return (
-		<Modal title="Create User" onClose={onClose}>
+		<Modal title={title} onClose={onClose}>
 			{error && <div className="alert alert-error">{error}</div>}
 			<form onSubmit={handleSubmit}>
-				<div className="form-group">
-					<label htmlFor="create-user-name">Name</label>
+				<FormField label="Name" id="user-name">
 					<input
-						id="create-user-name"
+						id="user-name"
 						className="form-control"
 						value={form.name}
-						onChange={(e) => setForm({ ...form, name: e.target.value })}
+						onChange={handleChange("name")}
 						required
-						placeholder="John Doe"
 					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="create-user-email">Email</label>
+				</FormField>
+				<FormField label="Email" id="user-email">
 					<input
-						id="create-user-email"
+						id="user-email"
 						className="form-control"
 						type="email"
 						value={form.email}
-						onChange={(e) => setForm({ ...form, email: e.target.value })}
+						onChange={handleChange("email")}
 						required
-						placeholder="john@acme.com"
 					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="create-user-role">Role</label>
+				</FormField>
+				<FormField label="Role" id="user-role">
 					<select
-						id="create-user-role"
+						id="user-role"
 						className="form-control"
 						value={form.role}
-						onChange={(e) => setForm({ ...form, role: e.target.value })}
+						onChange={handleChange("role")}
 					>
-						<option value="developer">Developer</option>
-						<option value="designer">Designer</option>
-						<option value="admin">Admin</option>
-						<option value="product_manager">Product Manager</option>
+						{ROLE_OPTIONS.map((option) => (
+							<option key={option.value} value={option.value}>
+								{option.label}
+							</option>
+						))}
 					</select>
-				</div>
+				</FormField>
+				{showStatus && (
+					<FormField label="Status" id="user-status">
+						<select
+							id="user-status"
+							className="form-control"
+							value={form.status}
+							onChange={handleChange("status")}
+						>
+							{STATUS_OPTIONS.map((option) => (
+								<option key={option.value} value={option.value}>
+									{option.label}
+								</option>
+							))}
+						</select>
+					</FormField>
+				)}
 				<div className="form-actions">
 					<button type="button" className="btn btn-secondary" onClick={onClose}>
 						Cancel
 					</button>
 					<button type="submit" className="btn btn-primary" disabled={loading}>
-						{loading ? "Creating..." : "Create User"}
+						{loading ? "Saving..." : submitLabel}
 					</button>
 				</div>
 			</form>
@@ -296,91 +305,11 @@ function CreateUserModal({ onClose, onCreated }) {
 	);
 }
 
-function EditUserModal({ user, onClose, onUpdated }) {
-	const [form, setForm] = useState({
-		name: user.name,
-		email: user.email,
-		role: user.role,
-		status: user.status,
-	});
-	const [error, setError] = useState("");
-	const [loading, setLoading] = useState(false);
-
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setError("");
-		setLoading(true);
-		try {
-			await api.updateUser(user.id, form);
-			onUpdated();
-		} catch (err) {
-			setError(err.message);
-		} finally {
-			setLoading(false);
-		}
-	};
-
+function FormField({ id, label, children }) {
 	return (
-		<Modal title={`Edit ${user.name}`} onClose={onClose}>
-			{error && <div className="alert alert-error">{error}</div>}
-			<form onSubmit={handleSubmit}>
-				<div className="form-group">
-					<label htmlFor="edit-user-name">Name</label>
-					<input
-						id="edit-user-name"
-						className="form-control"
-						value={form.name}
-						onChange={(e) => setForm({ ...form, name: e.target.value })}
-						required
-					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="edit-user-email">Email</label>
-					<input
-						id="edit-user-email"
-						className="form-control"
-						type="email"
-						value={form.email}
-						onChange={(e) => setForm({ ...form, email: e.target.value })}
-						required
-					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="edit-user-role">Role</label>
-					<select
-						id="edit-user-role"
-						className="form-control"
-						value={form.role}
-						onChange={(e) => setForm({ ...form, role: e.target.value })}
-					>
-						<option value="developer">Developer</option>
-						<option value="designer">Designer</option>
-						<option value="admin">Admin</option>
-						<option value="product_manager">Product Manager</option>
-					</select>
-				</div>
-				<div className="form-group">
-					<label htmlFor="edit-user-status">Status</label>
-					<select
-						id="edit-user-status"
-						className="form-control"
-						value={form.status}
-						onChange={(e) => setForm({ ...form, status: e.target.value })}
-					>
-						<option value="active">Active</option>
-						<option value="inactive">Inactive</option>
-						<option value="pending">Pending</option>
-					</select>
-				</div>
-				<div className="form-actions">
-					<button type="button" className="btn btn-secondary" onClick={onClose}>
-						Cancel
-					</button>
-					<button type="submit" className="btn btn-primary" disabled={loading}>
-						{loading ? "Saving..." : "Save Changes"}
-					</button>
-				</div>
-			</form>
-		</Modal>
+		<div className="form-group">
+			<label htmlFor={id}>{label}</label>
+			{children}
+		</div>
 	);
 }

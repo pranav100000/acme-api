@@ -1,5 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { useAuth } from "../App";
+import { useAuth } from "../context/AuthContext";
+import UserAvatar from "./UserAvatar";
+
+const navigation = [
+	{ to: "/", label: "Dashboard", icon: "📊", end: true },
+	{ to: "/users", label: "Users", icon: "👥" },
+	{ to: "/teams", label: "Teams", icon: "🏷️" },
+];
 
 export default function Layout({ children }) {
 	const { user, logout } = useAuth();
@@ -12,84 +19,25 @@ export default function Layout({ children }) {
 					<span>Admin Dashboard</span>
 				</div>
 				<nav className="sidebar-nav">
-					<NavLink to="/" end>
-						<span className="nav-icon">📊</span>
-						Dashboard
-					</NavLink>
-					<NavLink to="/users">
-						<span className="nav-icon">👥</span>
-						Users
-					</NavLink>
-					<NavLink to="/teams">
-						<span className="nav-icon">🏷️</span>
-						Teams
-					</NavLink>
+					{navigation.map((item) => (
+						<NavLink key={item.to} to={item.to} end={item.end}>
+							<span className="nav-icon">{item.icon}</span>
+							{item.label}
+						</NavLink>
+					))}
 				</nav>
-				<div style={{ padding: "16px 12px", borderTop: "1px solid #374151" }}>
-					<div
-						style={{
-							display: "flex",
-							alignItems: "center",
-							gap: "12px",
-							padding: "8px 12px",
-						}}
-					>
-						<div
-							style={{
-								width: "32px",
-								height: "32px",
-								borderRadius: "50%",
-								background: "#4f46e5",
-								color: "white",
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "center",
-								fontSize: "13px",
-								fontWeight: "600",
-							}}
-						>
-							{user?.name
-								?.split(" ")
-								.map((n) => n[0])
-								.join("") || "?"}
-						</div>
-						<div style={{ flex: 1, minWidth: 0 }}>
-							<div
-								style={{
-									fontSize: "14px",
-									fontWeight: "500",
-									color: "white",
-									overflow: "hidden",
-									textOverflow: "ellipsis",
-									whiteSpace: "nowrap",
-								}}
-							>
-								{user?.name}
-							</div>
-							<div
-								style={{
-									fontSize: "12px",
-									color: "#9ca3af",
-									overflow: "hidden",
-									textOverflow: "ellipsis",
-									whiteSpace: "nowrap",
-								}}
-							>
-								{user?.email}
-							</div>
+				<div className="sidebar-user-panel">
+					<div className="sidebar-user-card">
+						<UserAvatar name={user?.name} size="sm" />
+						<div className="sidebar-user-copy">
+							<div className="sidebar-user-name">{user?.name}</div>
+							<div className="sidebar-user-email">{user?.email}</div>
 						</div>
 						<button
 							type="button"
 							onClick={logout}
 							title="Logout"
-							style={{
-								background: "transparent",
-								border: "none",
-								color: "#9ca3af",
-								cursor: "pointer",
-								fontSize: "18px",
-								padding: "4px",
-							}}
+							className="icon-button sidebar-logout"
 						>
 							🚪
 						</button>
