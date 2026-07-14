@@ -1,3 +1,4 @@
+// Main entry point for the Express backend server
 // IMPORTANT: Import instrument.js before all other imports
 require("./instrument.js");
 
