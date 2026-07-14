@@ -13,6 +13,7 @@ const authRoutes = require("./routes/auth");
 const path = require("node:path");
 const fs = require("node:fs");
 
+// Initialize the Express application and configure middleware, routes, and error handling
 const app = express();
 
 app.use(express.json());
