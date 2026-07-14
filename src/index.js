@@ -60,6 +60,7 @@ app.use((err, _req, res, _next) => {
 	res.status(status).json({ error: err.message || "Internal server error" });
 });
 
+// Start the server on the configured port
 const PORT = config.port;
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
