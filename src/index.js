@@ -1,3 +1,6 @@
+// Main entry point for the Express API server.
+// Sets up middleware, routes, error handling, and static file serving.
+
 // IMPORTANT: Import instrument.js before all other imports
 require("./instrument.js");
 
