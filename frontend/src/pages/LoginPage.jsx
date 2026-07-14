@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useAuth } from "../App";
 import * as api from "../api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
 
 export default function LoginPage() {
 	const { login } = useAuth();
@@ -23,65 +28,55 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className="login-page">
-			<div className="login-card">
-				<h1>🏢 Acme Corp</h1>
-				<p className="login-subtitle">Sign in to the admin dashboard</p>
-
-				{error && <div className="alert alert-error">{error}</div>}
-
-				<form onSubmit={handleSubmit}>
-					<div className="form-group">
-						<label htmlFor="email">Email address</label>
-						<input
-							id="email"
-							type="email"
-							className="form-control"
-							placeholder="alice@acme.com"
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
-							required
-						/>
-					</div>
-					<button
-						type="submit"
-						className="btn btn-primary"
-						style={{
-							width: "100%",
-							justifyContent: "center",
-							padding: "10px 16px",
-						}}
-						disabled={loading}
-					>
-						{loading ? "Signing in..." : "Sign in"}
-					</button>
-				</form>
-
-				<div
-					style={{
-						marginTop: "24px",
-						padding: "16px",
-						background: "#f9fafb",
-						borderRadius: "8px",
-						fontSize: "13px",
-						color: "#6b7280",
-					}}
-				>
-					<strong style={{ color: "#374151" }}>Demo accounts:</strong>
-					<div
-						style={{
-							marginTop: "8px",
-							display: "flex",
-							flexDirection: "column",
-							gap: "4px",
-						}}
-					>
-						<code>alice@acme.com</code> (admin)
-						<code>bob@acme.com</code> (developer)
-						<code>frank@acme.com</code> (product manager)
-					</div>
-				</div>
+		<div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 relative overflow-hidden">
+			{/* Background decoration */}
+			<div className="absolute inset-0 overflow-hidden">
+				<div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-indigo-500/20 to-transparent rounded-full blur-3xl" />
+				<div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-500/20 to-transparent rounded-full blur-3xl" />
 			</div>
+
+			<Card className="w-full max-w-md shadow-2xl border-gray-200/20 relative z-10 animate-fade-in">
+				<CardHeader className="space-y-1 pb-6 text-center">
+					<div className="mx-auto mb-3 h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30">
+						A
+					</div>
+					<CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+					<CardDescription className="text-gray-500">Sign in to the Acme Corp admin dashboard</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{error && (
+						<Alert variant="destructive" className="mb-4">
+							{error}
+						</Alert>
+					)}
+
+					<form onSubmit={handleSubmit} className="space-y-4">
+						<div className="space-y-2">
+							<Label htmlFor="email">Email address</Label>
+							<Input
+								id="email"
+								type="email"
+								placeholder="alice@acme.com"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								required
+							/>
+						</div>
+						<Button type="submit" className="w-full h-10" disabled={loading}>
+							{loading ? "Signing in..." : "Sign in"}
+						</Button>
+					</form>
+
+					<div className="mt-6 rounded-xl bg-gray-50 border border-gray-100 p-4 text-sm text-gray-500">
+						<p className="font-semibold text-gray-700 mb-2.5">Demo accounts</p>
+						<div className="flex flex-col gap-1.5">
+							<span><code className="text-xs bg-white border border-gray-200 px-1.5 py-0.5 rounded-md font-mono">alice@acme.com</code> <span className="text-gray-400">admin</span></span>
+							<span><code className="text-xs bg-white border border-gray-200 px-1.5 py-0.5 rounded-md font-mono">bob@acme.com</code> <span className="text-gray-400">developer</span></span>
+							<span><code className="text-xs bg-white border border-gray-200 px-1.5 py-0.5 rounded-md font-mono">frank@acme.com</code> <span className="text-gray-400">product manager</span></span>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
 		</div>
 	);
 }
