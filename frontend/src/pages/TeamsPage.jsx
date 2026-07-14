@@ -1,6 +1,17 @@
+import { Plus, UserPlus, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import * as api from "../api";
-import Modal from "../components/Modal";
+import AppDialog from "../components/AppDialog";
+import { EmptyState } from "../components/EmptyState";
+import { LoadingState } from "../components/LoadingState";
+import { PageShell } from "../components/PageShell";
+import { Alert } from "../components/ui/alert";
+import { Avatar } from "../components/ui/avatar";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Input, inputClassName } from "../components/ui/input";
+import { formatRole, getInitials } from "../lib/utils";
 
 export default function TeamsPage() {
 	const [teams, setTeams] = useState([]);
@@ -14,20 +25,14 @@ export default function TeamsPage() {
 
 	const loadData = useCallback(async () => {
 		try {
-			const [teamsData, usersData] = await Promise.all([
-				api.getTeams(),
-				api.getUsers(),
-			]);
+			const [teamsData, usersData] = await Promise.all([api.getTeams(), api.getUsers()]);
 			setTeams(teamsData);
 			setUsers(usersData);
-
-			// Load members for each team
 			const membersMap = {};
 			await Promise.all(
 				teamsData.map(async (team) => {
 					try {
-						const members = await api.getTeamMembers(team.id);
-						membersMap[team.id] = members;
+						membersMap[team.id] = await api.getTeamMembers(team.id);
 					} catch {
 						membersMap[team.id] = [];
 					}
@@ -59,142 +64,80 @@ export default function TeamsPage() {
 	};
 
 	if (loading) {
-		return (
-			<>
-				<div className="page-header">
-					<h2>Teams</h2>
-				</div>
-				<div className="page-body">
-					<div className="loading">
-						<div className="spinner"></div>
-					</div>
-				</div>
-			</>
-		);
+		return <LoadingState label="Loading teams" />;
 	}
 
 	return (
 		<>
-			<div className="page-header">
-				<h2>Teams</h2>
-				<button
-					type="button"
-					className="btn btn-primary"
-					onClick={() => setShowCreateModal(true)}
-				>
-					+ Create Team
-				</button>
-			</div>
-			<div className="page-body">
-				{error && <div className="alert alert-error">{error}</div>}
-				{success && <div className="alert alert-success">{success}</div>}
+			<PageShell
+				title="Teams"
+				description="Track squads, ownership, and membership across the company."
+				action={
+					<Button type="button" onClick={() => setShowCreateModal(true)}>
+						<Plus className="size-4" />
+						Create Team
+					</Button>
+				}
+			>
+				{error ? <Alert variant="destructive">{error}</Alert> : null}
+				{success ? <Alert variant="success">{success}</Alert> : null}
 
 				{teams.length === 0 ? (
-					<div className="empty-state">
-						<div className="empty-icon">🏷️</div>
-						<p>No teams yet. Create your first team!</p>
-					</div>
+					<EmptyState icon="🏷️" title="No teams yet" description="Create your first team to begin organizing members." action={<Button onClick={() => setShowCreateModal(true)}>Create Team</Button>} />
 				) : (
-					<div className="teams-grid">
+					<div className="grid gap-6 xl:grid-cols-2">
 						{teams.map((team) => {
 							const members = teamMembers[team.id] || [];
 							return (
-								<div key={team.id} className="team-card">
-									<div className="team-card-header">
-										<h3>{team.name}</h3>
-										<span style={{ fontSize: "13px", color: "#6b7280" }}>
-											{members.length} member{members.length !== 1 ? "s" : ""}
-										</span>
-									</div>
-									<div className="team-card-body">
-										<div className="team-meta">
-											Created {new Date(team.createdAt).toLocaleDateString()} ·
-											Updated {new Date(team.updatedAt).toLocaleDateString()}
+								<Card key={team.id} className="overflow-hidden">
+									<CardHeader>
+										<div>
+											<CardTitle>{team.name}</CardTitle>
+											<CardDescription>
+												Created {new Date(team.createdAt).toLocaleDateString()} • Updated {new Date(team.updatedAt).toLocaleDateString()}
+											</CardDescription>
 										</div>
-
+										<Badge variant="outline">{members.length} member{members.length !== 1 ? "s" : ""}</Badge>
+									</CardHeader>
+									<CardContent className="space-y-4">
 										{members.length === 0 ? (
-											<div
-												style={{
-													padding: "16px",
-													textAlign: "center",
-													color: "#9ca3af",
-													fontSize: "14px",
-												}}
-											>
-												No members yet
-											</div>
+											<div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">No members yet</div>
 										) : (
-											<div className="member-list">
-												{members.map(
-													(member) =>
-														member && (
-															<div key={member.id} className="member-item">
-																<div className="member-info">
-																	<div className="member-avatar">
-																		{member.name
-																			.split(" ")
-																			.map((n) => n[0])
-																			.join("")}
-																	</div>
-																	<div>
-																		<div
-																			style={{
-																				fontWeight: 500,
-																				fontSize: "14px",
-																			}}
-																		>
-																			{member.name}
-																		</div>
-																		<div
-																			style={{
-																				fontSize: "12px",
-																				color: "#6b7280",
-																			}}
-																		>
-																			{member.role.replace("_", " ")}
-																		</div>
-																	</div>
+											<div className="space-y-3">
+												{members.filter(Boolean).map((member) => (
+													<div key={member.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3">
+														<div className="flex items-center gap-3">
+															<Avatar>{getInitials(member.name)}</Avatar>
+															<div>
+																<div className="font-medium text-slate-900">{member.name}</div>
+																<div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+																	<span>{member.email}</span>
+																	<Badge variant={roleBadgeVariant(member.role)}>{formatRole(member.role)}</Badge>
 																</div>
-																<button
-																	type="button"
-																	className="btn-icon"
-																	title="Remove member"
-																	onClick={() =>
-																		handleRemoveMember(
-																			team.id,
-																			member.id,
-																			member.name,
-																		)
-																	}
-																	style={{ fontSize: "16px" }}
-																>
-																	✕
-																</button>
 															</div>
-														),
-												)}
+														</div>
+														<Button type="button" variant="ghost" size="icon" title="Remove member" onClick={() => handleRemoveMember(team.id, member.id, member.name)}>
+															<X className="size-4" />
+															<span className="sr-only">Remove {member.name}</span>
+														</Button>
+													</div>
+												))}
 											</div>
 										)}
 
-										<div style={{ marginTop: "16px" }}>
-											<button
-												type="button"
-												className="btn btn-secondary btn-sm"
-												style={{ width: "100%", justifyContent: "center" }}
-												onClick={() => setAddMemberTeam(team)}
-											>
-												+ Add Member
-											</button>
-										</div>
-									</div>
-								</div>
+										<Button type="button" variant="secondary" className="w-full" onClick={() => setAddMemberTeam(team)}>
+											<UserPlus className="size-4" />
+											Add Member
+										</Button>
+									</CardContent>
+								</Card>
 							);
 						})}
 					</div>
 				)}
-			</div>
+			</PageShell>
 
-			{showCreateModal && (
+			{showCreateModal ? (
 				<CreateTeamModal
 					onClose={() => setShowCreateModal(false)}
 					onCreated={() => {
@@ -204,9 +147,9 @@ export default function TeamsPage() {
 						setTimeout(() => setSuccess(""), 3000);
 					}}
 				/>
-			)}
+			) : null}
 
-			{addMemberTeam && (
+			{addMemberTeam ? (
 				<AddMemberModal
 					team={addMemberTeam}
 					users={users}
@@ -219,7 +162,7 @@ export default function TeamsPage() {
 						setTimeout(() => setSuccess(""), 3000);
 					}}
 				/>
-			)}
+			) : null}
 		</>
 	);
 }
@@ -229,8 +172,8 @@ function CreateTeamModal({ onClose, onCreated }) {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
+	const handleSubmit = async (event) => {
+		event.preventDefault();
 		setError("");
 		setLoading(true);
 		try {
@@ -244,30 +187,19 @@ function CreateTeamModal({ onClose, onCreated }) {
 	};
 
 	return (
-		<Modal title="Create Team" onClose={onClose}>
-			{error && <div className="alert alert-error">{error}</div>}
-			<form onSubmit={handleSubmit}>
-				<div className="form-group">
-					<label htmlFor="team-name">Team Name</label>
-					<input
-						id="team-name"
-						className="form-control"
-						value={name}
-						onChange={(e) => setName(e.target.value)}
-						required
-						placeholder="e.g. Marketing"
-					/>
+		<AppDialog open onOpenChange={(open) => (open ? null : onClose())} title="Create team" description="Add a new team so you can manage membership and ownership.">
+			{error ? <Alert variant="destructive">{error}</Alert> : null}
+			<form className="space-y-4" onSubmit={handleSubmit}>
+				<div className="space-y-2">
+					<label className="text-sm font-medium text-slate-700" htmlFor="team-name">Team Name</label>
+					<Input id="team-name" value={name} onChange={(event) => setName(event.target.value)} required placeholder="e.g. Marketing" />
 				</div>
-				<div className="form-actions">
-					<button type="button" className="btn btn-secondary" onClick={onClose}>
-						Cancel
-					</button>
-					<button type="submit" className="btn btn-primary" disabled={loading}>
-						{loading ? "Creating..." : "Create Team"}
-					</button>
+				<div className="flex justify-end gap-3 pt-2">
+					<Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+					<Button type="submit" disabled={loading}>{loading ? "Creating..." : "Create Team"}</Button>
 				</div>
 			</form>
-		</Modal>
+		</AppDialog>
 	);
 }
 
@@ -276,13 +208,11 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	const currentMemberIds = currentMembers.filter(Boolean).map((m) => m.id);
-	const availableUsers = users.filter(
-		(u) => !currentMemberIds.includes(u.id) && u.status === "active",
-	);
+	const currentMemberIds = currentMembers.filter(Boolean).map((member) => member.id);
+	const availableUsers = users.filter((user) => !currentMemberIds.includes(user.id) && user.status === "active");
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
+	const handleSubmit = async (event) => {
+		event.preventDefault();
 		if (!selectedUserId) return;
 		setError("");
 		setLoading(true);
@@ -297,58 +227,40 @@ function AddMemberModal({ team, users, currentMembers, onClose, onAdded }) {
 	};
 
 	return (
-		<Modal title={`Add Member to ${team.name}`} onClose={onClose}>
-			{error && <div className="alert alert-error">{error}</div>}
+		<AppDialog open onOpenChange={(open) => (open ? null : onClose())} title={`Add member to ${team.name}`} description="Choose an active teammate to join this team.">
+			{error ? <Alert variant="destructive">{error}</Alert> : null}
 			{availableUsers.length === 0 ? (
-				<div style={{ textAlign: "center", padding: "24px", color: "#6b7280" }}>
-					<p>All active users are already members of this team.</p>
-					<div className="form-actions" style={{ justifyContent: "center" }}>
-						<button
-							type="button"
-							className="btn btn-secondary"
-							onClick={onClose}
-						>
-							Close
-						</button>
+				<div className="space-y-4 text-center">
+					<div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-slate-500">All active users are already members of this team.</div>
+					<div className="flex justify-center">
+						<Button type="button" variant="secondary" onClick={onClose}>Close</Button>
 					</div>
 				</div>
 			) : (
-				<form onSubmit={handleSubmit}>
-					<div className="form-group">
-						<label htmlFor="team-member-user">Select User</label>
-						<select
-							id="team-member-user"
-							className="form-control"
-							value={selectedUserId}
-							onChange={(e) => setSelectedUserId(e.target.value)}
-							required
-						>
+				<form className="space-y-4" onSubmit={handleSubmit}>
+					<div className="space-y-2">
+						<label className="text-sm font-medium text-slate-700" htmlFor="team-member-user">Select User</label>
+						<select id="team-member-user" className={inputClassName} value={selectedUserId} onChange={(event) => setSelectedUserId(event.target.value)} required>
 							<option value="">Choose a user...</option>
 							{availableUsers.map((user) => (
-								<option key={user.id} value={user.id}>
-									{user.name} ({user.email}) - {user.role.replace("_", " ")}
-								</option>
+								<option key={user.id} value={user.id}>{user.name} ({user.email}) - {formatRole(user.role)}</option>
 							))}
 						</select>
 					</div>
-					<div className="form-actions">
-						<button
-							type="button"
-							className="btn btn-secondary"
-							onClick={onClose}
-						>
-							Cancel
-						</button>
-						<button
-							type="submit"
-							className="btn btn-primary"
-							disabled={loading || !selectedUserId}
-						>
-							{loading ? "Adding..." : "Add Member"}
-						</button>
+					<div className="flex justify-end gap-3 pt-2">
+						<Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+						<Button type="submit" disabled={loading || !selectedUserId}>{loading ? "Adding..." : "Add Member"}</Button>
 					</div>
 				</form>
 			)}
-		</Modal>
+		</AppDialog>
 	);
+}
+
+function roleBadgeVariant(role) {
+	if (role === "admin") return "purple";
+	if (role === "developer") return "info";
+	if (role === "designer") return "pink";
+	if (role === "product_manager") return "orange";
+	return "outline";
 }

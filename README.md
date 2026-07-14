@@ -57,7 +57,8 @@ The frontend is a React SPA (built with Vite) located in the `frontend/` directo
 ### Tech Stack
 - React 19 + React Router
 - Vite for bundling
-- Pure CSS (no UI framework) — clean, modern admin dashboard design
+- Tailwind CSS v4 + shadcn-style reusable UI components
+- Radix Dialog primitives + Lucide icons
 
 ## API Endpoints
 
