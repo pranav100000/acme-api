@@ -1,3 +1,4 @@
+// In-memory data store for users
 const users = [
 	{
 		id: "1",
